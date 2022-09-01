@@ -19,5 +19,8 @@ void set_GLOBAL_STOP(const wchar_t *str);
 
 void wtf(const wchar_t *str);
 
+
+void memsetzero(unsigned char *destination, int n);
+
 #endif /* TOOLS_H */
 

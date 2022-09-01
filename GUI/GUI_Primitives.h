@@ -15,6 +15,19 @@
 
 #include "font.h"
 
+class TEXTURA {
+public:
+    unsigned int *buf = nullptr;
+    unsigned int w = 0, h = 0;
+    void set_size(unsigned int ww, unsigned int hh) {
+        if(ww == w && hh == h) { return; }
+        w = ww;
+        h = hh;
+        if(buf != nullptr) delete[] buf;
+        buf = new unsigned int[w * h];
+    }
+};
+
 class SCREEN_BUFFER {
 public:
     FONTS fonts{this};
@@ -37,6 +50,13 @@ public:
             *q = color;
             q += w;
         };
+    }
+    void rectangle(unsigned int x, unsigned int y, unsigned int ww, unsigned int hh, unsigned int color) {
+        line_h(x, y, ww, color);
+        line_h(x, y+hh-1, ww, color);
+        line_v(x, y, hh, color);
+        line_v(x+ww-1, y, hh, color);
+        
     }
     void set_size(unsigned int w_, unsigned int h_) {
         if(w_ == w && h_ == h) return;

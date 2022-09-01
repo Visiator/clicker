@@ -23,13 +23,13 @@ WEBCAMS webcams;
 
 int main(int argc, char** argv) {
 
-    webcams.init();
+    
     
     gui.create_elements();
     
     if(gui.low_level_init()==false) return -1;
     
-    
+    webcams.init(&(gui.Memo1->string_list));
     
     
     
@@ -38,6 +38,7 @@ int main(int argc, char** argv) {
     set_GLOBAL_STOP(L"main");
        
     gui.wait_execute_close();
+    webcams.wait_execute_close();
     
     gui.finish();
     

@@ -4,8 +4,17 @@
 
 #include <string>
 #include <vector>
+#include <thread>
 
 #include <linux/videodev2.h>
+
+#define IMAGE_WIDTH     640
+#define IMAGE_HEIGHT    480
+
+struct buffer {
+        void   *start;
+        size_t  length;
+};
 
 class WEBCAM {
 public:
@@ -23,19 +32,44 @@ public:
         };
         return *this;
     }
-    WEBCAM(std::string& s);
     WEBCAM(const WEBCAM& src) {
         this->name  = src.name;
     }
     WEBCAM(WEBCAM&& src) {
         *this = std::move(src);
     }
+    WEBCAM(std::string& name, std::string& driver, std::string& card, std::string& bus_info) : name(name)
+    {
+        
+    }
+
 };
 
 class WEBCAMS {
 public:
-    std::vector<WEBCAM> webcam;
-    void init();
+    
+    buffer* devbuffer = nullptr;
+    
+    std::vector<WEBCAM> item;
+    void init(std::vector<std::string> *list);
+    
+    bool execute_is_run = false;
+    std::thread* execute_thread = nullptr;
+    void execute();
+    void wait_execute_close();
+    
+    void startCapturing(int fd);
+    void closeDevice(int& fd);
+    void getFrame(int fd, std::string file_name);
+    int  readFrame(int fd, std::string file_name);
+    int  xioctl(int fd, int request, void *arg);
+    void initMMAP(int fd);
+    void stopCapturing(int fd);
+    void freeMMAP();
+    int  openDevice(std::string dev_name);
+    void setFormatcam(int fd);
+    void enumfmtCamera(int fd);    
+    int  setfmtCamera(int fd);
     
     WEBCAMS(){};
     ~WEBCAMS(){};

@@ -24,11 +24,15 @@ public:
     
     enum Type 
     {
-        Edit, Memo, Field
+        Undefine, Edit, Memo, Field, Panel
     };
-    Type type;
+    unsigned int id = 0;
+    unsigned int parent_id = 0;
+    ELEMENT* parent = nullptr;
+    Type type = Type::Undefine;
     std::string caption;
-    
+    std::vector<std::string> string_list;
+    void get_parent_xy(int *px, int *py);
     void paint(SCREEN_BUFFER *screen);
     
     ELEMENT& operator=(const ELEMENT& src) {
@@ -41,6 +45,8 @@ public:
             //this->h  = std::move(src.h);
             //this->buf = src.buf;
             //src.buf = nullptr;
+            id = src.id;
+            parent_id = src.parent_id;
             type = src.type;
             x = src.x;
             y = src.y;
@@ -51,11 +57,14 @@ public:
             border_color = src.border_color;
             
             caption = src.caption;
+            
+            string_list = src.string_list;
         };
         return *this;
     }
-    ELEMENT(ELEMENT *parent, Type type, unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int bg_color, unsigned int border_color,std::string caption) 
-    : type(type) , RECTANGLE(x, y, w, h, bg_color, border_color), caption(caption)
+    
+    ELEMENT(unsigned int id, unsigned int parent_id, Type type, unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int bg_color, unsigned int border_color,std::string caption) 
+    : type(type) , RECTANGLE(x, y, w, h, bg_color, border_color), caption(caption), id(id), parent_id(parent_id)
     {
         
     }
@@ -63,7 +72,22 @@ public:
         *this = std::move(src);
     }
     ELEMENT(const ELEMENT& src) {
-        
+        if (this != &src) {
+            id = src.id;
+            parent_id = src.parent_id;
+            type = src.type;
+            x = src.x;
+            y = src.y;
+            w = src.w;
+            h = src.h;
+            
+            bg_color = src.bg_color;
+            border_color = src.border_color;
+            
+            caption = src.caption;
+            
+            string_list = src.string_list;
+        }
     }
 };
 
@@ -71,10 +95,24 @@ class ELEMENTS {
 public:
     std::vector<ELEMENT> item;
     
-    ELEMENT* add(ELEMENT* parent, ELEMENT::Type type, unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int bg_color, unsigned int border_color, std::string caption);
+    unsigned int generate_new_id() {
+        unsigned int old;
+        old = 0;
+        for(const auto& a : item) {
+            if(a.id > old) old = a.id;
+        }
+        return old+1;
+    }
+    
+    void recalc_parent_id();
+    ELEMENT* get_element_by_id(unsigned int element_id);
+    
+    ELEMENT* add(unsigned int parent_id, ELEMENT::Type type, unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int bg_color, unsigned int border_color, std::string caption);
     
     void paint(SCREEN_BUFFER *screen) {
-        item[0].paint(screen);
+        for(auto& a : item) {
+            a.paint(screen);
+        };
     }
     
     ELEMENTS(){};

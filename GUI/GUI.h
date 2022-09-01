@@ -45,6 +45,11 @@ private:
     LINUX_PARAM linux;
     #endif    
 public:
+    
+    unsigned int Memo1_id = 0;
+    
+    ELEMENT *Memo1 = nullptr;
+    
     GUI();
     SCREEN_BUFFER screen;
     

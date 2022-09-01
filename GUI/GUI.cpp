@@ -41,7 +41,16 @@ void GUI::wait_run() {
 void GUI::create_elements() {
 
     ELEMENT *q;
+
+    q = elements.add(0, ELEMENT::Type::Panel,  30, 30, 640, 480, 0xccaacc, 0xff0000, "");
     
-    q = elements.add((ELEMENT *)nullptr, ELEMENT::Type::Memo,  10, 30, 150, 25, 0xaaffaa, 0xff0000, "caption1");
-    q->x = 200;
+    q = elements.add(q->id, ELEMENT::Type::Memo,  5, 490, 50, 25, 0xaaffaa, 0xff0000, "");
+    Memo1_id = q->id;
+    
+    elements.recalc_parent_id();
+    Memo1 = elements.get_element_by_id(Memo1_id);
+    
+    //Memo1->string_list.push_back("str1");
+    //Memo1->string_list.push_back("str2");
+    //Memo1->string_list.push_back("str3");
 }

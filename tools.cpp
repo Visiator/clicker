@@ -35,3 +35,12 @@ void set_GLOBAL_STOP(const wchar_t *str) {
 void wtf(const wchar_t *str) {
     
 }
+
+void memsetzero(unsigned char *destination, int n) {
+    int i;
+    i = 0;
+    while(i < n) {
+        destination[i] = 0;
+        i++;
+    }
+}

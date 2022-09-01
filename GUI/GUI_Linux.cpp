@@ -41,13 +41,12 @@ extern bool GLOBAL_STOP;
                     cnt++;
                     
                     str = "tik=" + std::to_string(cnt);
+                    screen.fonts.print(5, 5, "arial",12,str, 0xff);
                     
-                    screen.fonts.print(200, 100, "arial",12,str, 0xff);
                     XPutImage(linux.display, linux.window, linux.graph_ctx, linux.image, 0, 0, 0, 0, screen.w, screen.h);//DISPLAY_WIDTH, DISPLAY_HEIGHT);
 
-                    
                     XSetForeground (linux.display, linux.graph_ctx, 0x337700);
-                    XDrawString (linux.display, linux.window, linux.graph_ctx, 50, 50, msg, strlen (msg));
+                    //XDrawString (linux.display, linux.window, linux.graph_ctx, 50, 50, msg, strlen (msg));
                 
                     
                     
@@ -72,7 +71,7 @@ extern bool GLOBAL_STOP;
 
     bool GUI::low_level_init() {
         
-        start_position.set_xywh(50, 50, 600, 950);
+        start_position.set_xywh(50, 50, 750, 750);
         
         if ((linux.display = XOpenDisplay(getenv("DISPLAY"))) == NULL)
         {
