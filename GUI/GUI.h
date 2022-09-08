@@ -43,6 +43,7 @@ class GUI {
 private:
     #ifdef __linux__
     LINUX_PARAM linux;
+    Atom  atom1, atom2;
     #endif    
 public:
     

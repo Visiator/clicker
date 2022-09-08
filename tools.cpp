@@ -6,6 +6,7 @@
 #include <thread>
 #include "tools.h"
 
+extern bool GLOBAL_STOP;
 
 void usleep(int milliseconds) {
     if(milliseconds == 1) {
@@ -28,7 +29,7 @@ void usleep(int milliseconds) {
 }
 
 void set_GLOBAL_STOP(const wchar_t *str) {
-    
+    GLOBAL_STOP = true;
 }
 
 

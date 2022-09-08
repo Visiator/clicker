@@ -127,7 +127,7 @@ void WEBCAMS::execute() {
     
     getFrame(fd, "111");
 
-    //closeDevice(fd);
+    
     
     /*
     initMMAP(fd);
@@ -152,9 +152,10 @@ void WEBCAMS::execute() {
     */
     
     while(GLOBAL_STOP == false) {
-        
+        getFrame(fd, "111");
         usleep(100);
     }
+    closeDevice(fd);
     execute_is_run = false;
 }
 
@@ -220,24 +221,69 @@ int WEBCAMS::readFrame(int fd, std::string file_name)
     };
     buffer *temp = devbuffer;
 
-    FILE *out_file = fopen(file_name.c_str(),"w");
-
+    /*FILE *out_file = fopen(file_name.c_str(),"w");
     fwrite(temp->start,temp->length,1,out_file);
-
-    fclose(out_file);
+    fclose(out_file);*/
 
     int i=0, j=0;
+    
+    int r, g, b;
+    float y1, y2, u, v;
     
     if(buf.length == 614400) {
         tt.set_size(640, 480);
         unsigned int *q;
-        unsigned char *v;
-        v = (unsigned char *)temp->start;
+        unsigned char *w;
+        w = (unsigned char *)temp->start;
         q = tt.buf;
         
         while(i<614400) {
-            tt.buf[j++] = v[i] & 0xff;
-            i += 2;
+            y1 = w[i];
+            u =  w[i+1];
+            y2 = w[i+2];
+            v =  w[i+3];
+            
+            //r = y1 + 1.4065 * (v - 128);			     //r0
+            //g = y1 - 0.3455 * (u - 128) - 0.7169 * (v - 128); //g0
+            //b = y1 + 1.1790 * (u - 128);			     //b0
+            
+            r = y1 + 1.402 * (v-128);
+            g = y1 - 0.714 * (v-128) - 0.344 * (u-128);
+            b = y1 + 1.772 * (u-128);
+
+            if(r < 0) r = 0;            if(r > 255) r = 255;
+            if(g < 0) g = 0;            if(g > 255) g = 255;
+            if(b < 0) b = 0;            if(b > 255) b = 255;
+            
+            
+            
+            g = g << 8;
+            r = r << 16;
+            
+            tt.buf[j++] = r | g | b;
+            
+            //r = y2 + 1.4065 * (v - 128);			     //r0
+            //g = y2 - 0.3455 * (u - 128) - 0.7169 * (v - 128); //g0
+            //b = y2 + 1.1790 * (u - 128);			     //b0
+            
+            r = y2 + 1.402 * (v-128);
+            g = y2 - 0.714 * (v-128) - 0.344 * (u-128);
+            b = y2 + 1.772 * (u-128);
+            
+            //R = Y + 1.402V
+            //G = Y - 0.344U - 0.714V
+            //B = Y + 1.772U
+            
+            if(r < 0) r = 0;            if(r > 255) r = 255;
+            if(g < 0) g = 0;            if(g > 255) g = 255;
+            if(b < 0) b = 0;            if(b > 255) b = 255;
+            
+            
+            g = g << 8;
+            r = r << 16;
+            
+            tt.buf[j++] = r | g | b;
+            i += 4;
         }
     }
     

@@ -32,6 +32,7 @@ extern bool GLOBAL_STOP;
                 } catch(...) {
                     printf("catch 1\n");
                 }
+                
                 if (event.type == Expose) // Перерисовываем окно
                 {
                     screen.fill_all(0xffffff);
@@ -52,11 +53,44 @@ extern bool GLOBAL_STOP;
                     
                     
                     
+                } else {
+                    if (event.type == ConfigureNotify) {
+                        
+                    } else {
+                        if (event.type == ReparentNotify) {
+                            
+                        } else {
+                            
+                            if (event.type == MapNotify) {
+                            
+                            } else {
+                                if (event.type == MotionNotify) {
+                                    
+                                } else {
+                                    if (event.type == ClientMessage) {
+                                        printf("ClientMessage\n");
+                                        if( event.xclient.message_type == atom1 &&
+                                            event.xclient.data.l[0] == atom2)
+                                         {
+                                             XDestroyWindow(linux.display, linux.window);
+                                         }
+                                    } else {
+                                        if (event.type == DestroyNotify) 
+                                        {
+                                            //printf("Window has been destroyed\n");
+                                            set_GLOBAL_STOP(L"DestroyNotify");
+                                            //XCloseDisplay (linux.display);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
             else
             {
-                if(screen.need_update) {
+                if(screen.need_update && GLOBAL_STOP == false) {
                     screen.need_update = false;
                     memset(&exppp, 0, sizeof(exppp));
                     exppp.type = Expose;
@@ -85,7 +119,16 @@ extern bool GLOBAL_STOP;
  
         linux.graph_ctx=XCreateGC(linux.display, linux.window, 0, linux.gc_values);
  
-        XSelectInput(linux.display, linux.window, ExposureMask | KeyPressMask | PointerMotionMask | ButtonPressMask );
+        
+        
+        atom1 = XInternAtom(linux.display, "WM_PROTOCOLS", 0);
+        
+        atom2 = XInternAtom(linux.display, "WM_DELETE_WINDOW", 0);
+        XSetWMProtocols(linux.display, linux.window, &atom2, 1);
+
+        // StructureNotify 
+        
+        XSelectInput(linux.display, linux.window, ExposureMask | StructureNotifyMask | KeyPressMask | PointerMotionMask | ButtonPressMask );
  
         //Показываем окно на экране
         XMapWindow(linux.display, linux.window);
@@ -103,6 +146,7 @@ extern bool GLOBAL_STOP;
     
     void GUI::finish() {
         XCloseDisplay(linux.display);
+        
     }
     
 #endif
