@@ -55,17 +55,16 @@ extern bool GLOBAL_STOP;
                     
                 } else {
                     if (event.type == ConfigureNotify) {
-                        
+                        printf("ConfigureNotify\n");
                     } else {
                         if (event.type == ReparentNotify) {
-                            
+                            printf("ReparentNotify\n");
                         } else {
-                            
                             if (event.type == MapNotify) {
-                            
+                                printf("MapNotify\n");
                             } else {
                                 if (event.type == MotionNotify) {
-                                    
+                                    //printf("MotionNotify\n");
                                 } else {
                                     if (event.type == ClientMessage) {
                                         printf("ClientMessage\n");
@@ -80,6 +79,13 @@ extern bool GLOBAL_STOP;
                                             //printf("Window has been destroyed\n");
                                             set_GLOBAL_STOP(L"DestroyNotify");
                                             //XCloseDisplay (linux.display);
+                                        } else {
+                                            if(event.type == ButtonPress) {
+                                                MouseButtonEvent(linux.DetectButtonTypeLinux(event.xbutton.button), event.xbutton.x,event.xbutton.y );
+                                                printf("ButtonPress %d:%d %d\n", event.xbutton.x,event.xbutton.y, event.xbutton.button);
+                                            } else {
+                                                printf("else\n");
+                                            }
                                         }
                                     }
                                 }

@@ -24,8 +24,25 @@
 #endif
 
 #include "font.h"
+
+
+
+#include "GUI_Primitives.h"
 #include "GUI_Element.h"
 
+class ELEMENT;
+
+enum COLOR {
+    black = 0,
+    PanelBG = 0xcccccc,
+    PanelBorder = 0x777777,
+    MemoBG = 0xeecccc,
+    MemoBorder = 0xee0000,
+    ListBG = 0xcceecc,
+    ListBorder = 0x00ee00,
+    
+            
+};
 
 #ifdef __linux__
 class LINUX_PARAM {
@@ -36,6 +53,12 @@ public:
     GC          graph_ctx = 0;
     XGCValues   *gc_values = nullptr;
     XImage      *image;
+    MOUSE_BUTTON_TYPE DetectButtonTypeLinux(unsigned int v) {
+        if(v == 1) return MOUSE_BUTTON_TYPE::left;
+        if(v == 2) return MOUSE_BUTTON_TYPE::muddle;
+        if(v == 3) return MOUSE_BUTTON_TYPE::right;
+        return MOUSE_BUTTON_TYPE::left;
+    }
 };
 #endif
 
@@ -47,9 +70,11 @@ private:
     #endif    
 public:
     
-    unsigned int Memo1_id = 0;
     
-    ELEMENT *Memo1 = nullptr;
+    
+    unsigned int Panel1_id = 0, Memo1_id = 0, ProgramList_id = 0;
+    
+    ELEMENT *Memo1 = nullptr, *ProgramList = nullptr;
     
     GUI();
     SCREEN_BUFFER screen;
@@ -57,6 +82,8 @@ public:
     FRAME start_position;
     
     ELEMENTS elements;
+    
+    void MouseButtonEvent(MOUSE_BUTTON_TYPE MouseButtonType, int mouse_x,int mouse_y );
     
     void create_elements();
     

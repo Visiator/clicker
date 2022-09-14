@@ -15,6 +15,8 @@
 
 #include "font.h"
 
+enum class MOUSE_BUTTON_TYPE : short { left, muddle, right };
+
 class TEXTURA {
 public:
     unsigned int *buf = nullptr;
@@ -105,6 +107,17 @@ public:
         this->w = w;
         this->h = h;
     }
+    void copy_from_src(const FRAME &src) {
+        x = src.x;
+        y = src.y;
+        w = src.w;
+        h = src.h;        
+    }
+    bool its_me(int xx, int yy) {
+        if(xx >= x && xx <=x+w-1 &&
+           yy >= y && yy <=y+h-1) return true;
+        return false;
+    }
     FRAME(unsigned int x, unsigned int y, unsigned int w, unsigned int h) : x(x), y(y), w(w), h(h) {};
     FRAME() {};
     ~FRAME() {};
@@ -112,7 +125,13 @@ public:
 
 class RECTANGLE : public FRAME {
 public:
-    unsigned int bg_color = 0, border_color = 0x006600;
+    unsigned int bg_color = 0, border_color = 0x006600, bg_color_pressed = 0x00aa00;
+    void copy_from_src(const RECTANGLE &src) {
+        bg_color = src.bg_color;
+        border_color = src.border_color;
+        bg_color_pressed = src.bg_color_pressed;
+        FRAME::copy_from_src(src);
+    }
     void paint(SCREEN_BUFFER *screen);
     RECTANGLE(unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int bg_color, unsigned int border_color) : FRAME(x, y, w, h), bg_color(bg_color), border_color(border_color) {};
     RECTANGLE() {};
