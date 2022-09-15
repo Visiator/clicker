@@ -19,6 +19,7 @@
 //#include "GUI.h"
 #include "GUI_Primitives.h"
 
+class GUI;
 class ELEMENT;
 
 class ELEMENT_item : public RECTANGLE {
@@ -31,6 +32,7 @@ public:
     bool is_pressed = false;
     Type type;
     ELEMENT* parent = nullptr;
+    GUI *gui = nullptr;
     std::string text;
     void get_parent_xy(int *px, int *py);
     void paint(SCREEN_BUFFER *screen);
@@ -38,6 +40,7 @@ public:
     bool MouseButtonEvent(MOUSE_BUTTON_TYPE MouseButtonType, int mouse_x,int mouse_y );
     
     void copy_from_src(const ELEMENT_item& src) {
+        gui = src.gui;
         parent = src.parent;
         type = src.type;
         text = src.text;
@@ -59,7 +62,7 @@ public:
         }
     }
    
-    ELEMENT_item(Type type, std::string text) : type(type), text(text) {
+    ELEMENT_item(GUI *gui, Type type, std::string text) : gui(gui), type(type), text(text) {
         init();
     }
     

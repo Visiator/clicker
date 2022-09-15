@@ -50,19 +50,23 @@ void GUI::create_elements() {
     
     q = elements.add(Panel1_id, ELEMENT::Type::List,  160, 25, 150, 125, COLOR::ListBG, COLOR::ListBorder, "List1");
     ProgramList_id = q->id;
+
+    q = elements.add(Panel1_id, ELEMENT::Type::List,  315, 25, 150, 125, COLOR::ListBG, COLOR::ListBorder, "List2");
+    IfList_id = q->id;
     
     elements.recalc_parent_id();
     Memo1 = elements.get_element_by_id(Memo1_id);
     ProgramList = elements.get_element_by_id(ProgramList_id);
+    IfList = elements.get_element_by_id(IfList_id);
     
-    Memo1->item.push_back({ELEMENT_item::String, "str1"});
-    Memo1->item.push_back({ELEMENT_item::String, "str2"});
-    Memo1->item.push_back({ELEMENT_item::String, "str3"});
+    Memo1->item.push_back({this, ELEMENT_item::String, "str1"});
+    Memo1->item.push_back({this, ELEMENT_item::String, "str2"});
+    Memo1->item.push_back({this, ELEMENT_item::String, "str3"});
     
     
-    ProgramList->item.push_back({ELEMENT_item::ListItem, "str1"});
-    ProgramList->item.push_back({ELEMENT_item::ListItem, "str2"});
-    ProgramList->item.push_back({ELEMENT_item::ListItem, "str3"});
+    ProgramList->item.push_back({this, ELEMENT_item::ListItem, "str1"});
+    ProgramList->item.push_back({this, ELEMENT_item::ListItem, "str2"});
+    ProgramList->item.push_back({this, ELEMENT_item::ListItem, "str3"});
 }
 
 void GUI::MouseButtonEvent(MOUSE_BUTTON_TYPE MouseButtonType, int mouse_x,int mouse_y ) {

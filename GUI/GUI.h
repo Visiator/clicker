@@ -70,11 +70,11 @@ private:
     #endif    
 public:
     
+    std::string ui_user_action;
     
+    unsigned int Panel1_id = 0, Memo1_id = 0, ProgramList_id = 0, IfList_id = 0;
     
-    unsigned int Panel1_id = 0, Memo1_id = 0, ProgramList_id = 0;
-    
-    ELEMENT *Memo1 = nullptr, *ProgramList = nullptr;
+    ELEMENT *Memo1 = nullptr, *ProgramList = nullptr, *IfList = nullptr;
     
     GUI();
     SCREEN_BUFFER screen;

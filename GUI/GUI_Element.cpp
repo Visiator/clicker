@@ -161,10 +161,13 @@ void ELEMENT::MouseButtonEvent(MOUSE_BUTTON_TYPE MouseButtonType, int mouse_x,in
         bool r = false;
         for(auto& a : item) {           
             if(a.MouseButtonEvent(MouseButtonType, mouse_x, mouse_y)) {
-                for(auto& b : item) {
-                    b.is_pressed = false;
-                }
-                a.is_pressed = true;
+                if(a.is_pressed == false) {
+                    for(auto& b : item) {
+                        b.is_pressed = false;
+                    }
+                    a.is_pressed = true;
+                    gui->set_ui_action(a.id, "select");
+                };
             }
         }
     }
