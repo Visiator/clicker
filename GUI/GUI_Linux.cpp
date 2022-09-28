@@ -16,6 +16,7 @@ extern bool GLOBAL_STOP;
 
     void GUI::execute() {
     
+        unsigned long last_find_window = 0;
         int cnt = 0;
         
         std::string str;
@@ -25,10 +26,16 @@ extern bool GLOBAL_STOP;
         XEvent      event;
         while(GLOBAL_STOP == false) {
             
-            if (XPending(linux.display)) 
+            if(last_find_window + 1000 < GetTickCount()) {
+                
+                find_window(linux.display_, WindowList);
+                last_find_window = GetTickCount();
+            };
+            
+            if (XPending(linux.display_)) 
             {
                 try {
-                    XNextEvent(linux.display, &event);
+                    XNextEvent(linux.display_, &event);
                 } catch(...) {
                     printf("catch 1\n");
                 }
@@ -42,11 +49,11 @@ extern bool GLOBAL_STOP;
                     cnt++;
                     
                     str = "tik=" + std::to_string(cnt);
-                    screen.fonts.print(5, 5, "arial",12,str, 0xff);
+                    //screen.fonts.print(5, 5, "arial",12,str.c_str(), 0xff);
                     
-                    XPutImage(linux.display, linux.window, linux.graph_ctx, linux.image, 0, 0, 0, 0, screen.w, screen.h);//DISPLAY_WIDTH, DISPLAY_HEIGHT);
+                    XPutImage(linux.display_, linux.window, linux.graph_ctx, linux.image, 0, 0, 0, 0, screen.w, screen.h);//DISPLAY_WIDTH, DISPLAY_HEIGHT);
 
-                    XSetForeground (linux.display, linux.graph_ctx, 0x337700);
+                    XSetForeground (linux.display_, linux.graph_ctx, 0x337700);
                     //XDrawString (linux.display, linux.window, linux.graph_ctx, 50, 50, msg, strlen (msg));
                 
                     
@@ -71,7 +78,7 @@ extern bool GLOBAL_STOP;
                                         if( event.xclient.message_type == atom1 &&
                                             event.xclient.data.l[0] == atom2)
                                          {
-                                             XDestroyWindow(linux.display, linux.window);
+                                             XDestroyWindow(linux.display_, linux.window);
                                          }
                                     } else {
                                         if (event.type == DestroyNotify) 
@@ -84,7 +91,12 @@ extern bool GLOBAL_STOP;
                                                 MouseButtonEvent(linux.DetectButtonTypeLinux(event.xbutton.button), event.xbutton.x,event.xbutton.y );
                                                 printf("ButtonPress %d:%d %d\n", event.xbutton.x,event.xbutton.y, event.xbutton.button);
                                             } else {
-                                                printf("else\n");
+                                                if(event.type == KeyPress) {
+                                                    KeyPressEvent(linux.DetectKeyTypeLinux(event.xkey.keycode));
+                                                    printf("KeyPress\n");
+                                                } else {
+                                                    printf("else\n");
+                                                }
                                             }
                                         }
                                     }
@@ -101,7 +113,7 @@ extern bool GLOBAL_STOP;
                     memset(&exppp, 0, sizeof(exppp));
                     exppp.type = Expose;
                     exppp.xexpose.window = linux.window;
-                    XSendEvent(linux.display, linux.window,False,ExposureMask,&exppp);
+                    XSendEvent(linux.display_, linux.window,False,ExposureMask,&exppp);
                 }
                 usleep(10);
             }
@@ -113,35 +125,35 @@ extern bool GLOBAL_STOP;
         
         start_position.set_xywh(50, 50, 750, 750);
         
-        if ((linux.display = XOpenDisplay(getenv("DISPLAY"))) == NULL)
+        if ((linux.display_ = XOpenDisplay(getenv("DISPLAY"))) == NULL)
         {
-            wtf(L"Can't connect X server");//, strerror(errno));
+            wtf("Can't connect X server");//, strerror(errno));
             return false;
         }
         
-        linux.screen_id = XDefaultScreen(linux.display);
+        linux.screen_id = XDefaultScreen(linux.display_);
         
-        linux.window = XCreateSimpleWindow(linux.display, RootWindow(linux.display, linux.screen_id), start_position.x, start_position.y, start_position.w, start_position.h, 10, XBlackPixel(linux.display, linux.screen_id), XWhitePixel(linux.display, linux.screen_id));
+        linux.window = XCreateSimpleWindow(linux.display_, RootWindow(linux.display_, linux.screen_id), start_position.getx(), start_position.gety(), start_position.getw(), start_position.geth(), 10, XBlackPixel(linux.display_, linux.screen_id), XWhitePixel(linux.display_, linux.screen_id));
  
-        linux.graph_ctx=XCreateGC(linux.display, linux.window, 0, linux.gc_values);
+        linux.graph_ctx=XCreateGC(linux.display_, linux.window, 0, linux.gc_values);
  
         
         
-        atom1 = XInternAtom(linux.display, "WM_PROTOCOLS", 0);
+        atom1 = XInternAtom(linux.display_, "WM_PROTOCOLS", 0);
         
-        atom2 = XInternAtom(linux.display, "WM_DELETE_WINDOW", 0);
-        XSetWMProtocols(linux.display, linux.window, &atom2, 1);
+        atom2 = XInternAtom(linux.display_, "WM_DELETE_WINDOW", 0);
+        XSetWMProtocols(linux.display_, linux.window, &atom2, 1);
 
         // StructureNotify 
         
-        XSelectInput(linux.display, linux.window, ExposureMask | StructureNotifyMask | KeyPressMask | PointerMotionMask | ButtonPressMask );
+        XSelectInput(linux.display_, linux.window, ExposureMask | StructureNotifyMask | KeyPressMask | PointerMotionMask | ButtonPressMask );
  
         //Показываем окно на экране
-        XMapWindow(linux.display, linux.window);
+        XMapWindow(linux.display_, linux.window);
         
-        screen.set_size(start_position.w, start_position.h);
+        screen.set_size(start_position.getw(), start_position.geth());
         
-        linux.image = XCreateImage(linux.display,DefaultVisual(linux.display,DefaultScreen(linux.display)),24,ZPixmap,0,(char*) screen.buffer,start_position.w, start_position.h,32,(start_position.w)*4);
+        linux.image = XCreateImage(linux.display_,DefaultVisual(linux.display_,DefaultScreen(linux.display_)),24,ZPixmap,0,(char*) screen.buffer,start_position.getw(), start_position.geth(),32,(start_position.getw())*4);
     
         
         execute_is_run = true;
@@ -151,7 +163,7 @@ extern bool GLOBAL_STOP;
     };
     
     void GUI::finish() {
-        XCloseDisplay(linux.display);
+        XCloseDisplay(linux.display_);
         
     }
     

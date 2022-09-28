@@ -143,7 +143,8 @@ public:
     SCREEN_BUFFER *screen = nullptr;
     std::vector<FONT> list;
     
-    void print(int x, int y, const char *font_name, int font_size, std::string& txt, unsigned int color);
+    void print(int x, int y, const char *font_name, int font_size, const char* txt, unsigned int color);
+    void print_w(int x, int y, int max_w, const char *font_name, int font_size, const char* txt, unsigned int color);
     int  text_width(const char *font_name, int font_size, std::string& txt);
     int  text_height(const char *font_name, int font_size);
 

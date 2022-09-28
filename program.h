@@ -14,6 +14,16 @@
 #define PROGRAM_H
 
 #include <vector>
+#include <string>
+#include <thread>
+
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/Xos.h>
+#include <X11/Xatom.h>
+
+
+#include "GUI/GUI_Primitives.h"
 
 class PROGRAM_line {
 public:
@@ -31,16 +41,31 @@ public:
 
 class PROGRAM {
 public:
+    
+    void init();
+    
     std::vector<PROGRAM_line> line;
     PROGRAM(){};
     ~PROGRAM(){};
 };
 
-class PROGRAMMS {
+class PROGRAMS {
 public:
     std::vector<PROGRAM> item;
-    PROGRAMMS(){};
-    ~PROGRAMMS(){};
+    SCREEN grab_screen_buffer;
+    
+    void init();
+    
+    bool execute_is_run = false;
+    std::thread* execute_thread = nullptr;
+    void execute();    
+    
+    void wait_execute_close();
+    
+    void Grab_Sprites(Window w);
+    
+    PROGRAMS(){};
+    ~PROGRAMS(){};
 };
 
 #endif /* PROGRAM_H */

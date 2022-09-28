@@ -10,10 +10,13 @@
  * Created on August 30, 2022, 3:05 PM
  */
 
+#include <thread>
+#include <queue>
+
 #ifndef GUI_H
 #define GUI_H
 
-#include <thread>
+
 
 #ifdef __linux__
 #include <X11/Xlib.h>
@@ -44,10 +47,62 @@ enum COLOR {
             
 };
 
+enum UI_Action_Type {
+    Undefine,
+    Select,
+    DoubleClick,
+    Deselect,
+    KeyEvent,
+};
+
+class UI_ACTION {
+public:
+    
+    UI_Action_Type type;
+    int id;
+    std::string value;
+    unsigned int _data_;
+    
+    void copy_from_src(const UI_ACTION& src) {
+        _data_ = src._data_;
+        type = src.type;
+        id = src.id;
+        value = src.value;
+    }
+    
+    UI_ACTION& operator=(UI_ACTION&& src) {
+        if (this != &src) {           
+            copy_from_src(src);
+        };
+        return *this;
+    }
+    UI_ACTION& operator=(const UI_ACTION& src) {
+        if (this != &src) {
+            copy_from_src(src);
+        }
+        return *this;
+    }
+    UI_ACTION(UI_Action_Type type, int id, std::string value, unsigned int _data_) : type(type), id(id), value(value), _data_(_data_) {
+        
+    }
+    UI_ACTION() : type(UI_Action_Type::Undefine), id(-1), value(""), _data_(0) {};
+    UI_ACTION(UI_ACTION&& src){
+        if (this != &src) {
+            copy_from_src(src);
+        }
+    }
+    UI_ACTION(const UI_ACTION& src) {
+        if (this != &src) {
+            copy_from_src(src);
+        }
+    }
+    
+};
+
 #ifdef __linux__
 class LINUX_PARAM {
 public:
-    Display     *display = nullptr;
+    Display     *display_ = nullptr;
     Window      window = 0;
     int         screen_id = 0;
     GC          graph_ctx = 0;
@@ -58,6 +113,9 @@ public:
         if(v == 2) return MOUSE_BUTTON_TYPE::muddle;
         if(v == 3) return MOUSE_BUTTON_TYPE::right;
         return MOUSE_BUTTON_TYPE::left;
+    }
+    unsigned int DetectKeyTypeLinux(unsigned int v) {
+        return v;
     }
 };
 #endif
@@ -70,20 +128,34 @@ private:
     #endif    
 public:
     
-    std::string ui_user_action;
+    #ifdef __linux__
+    Display* get_display() { return linux.display_; };
+    #endif
     
-    unsigned int Panel1_id = 0, Memo1_id = 0, ProgramList_id = 0, IfList_id = 0;
+    std::queue<UI_ACTION> ui_action;
     
-    ELEMENT *Memo1 = nullptr, *ProgramList = nullptr, *IfList = nullptr;
+    unsigned int TabIf_id = 0, TabPcap_id = 0, TabClicker_id = 0, PanelPcap_id = 0, PanelClicker_id = 0, View_id = 0;
+    ELEMENT *TabIf = nullptr, *TabPcap = nullptr, *TabClicker = nullptr
+            , *PanelIf = nullptr, *PanelPcap = nullptr, *PanelClicker = nullptr, *View = nullptr;
+    
+    unsigned int WindowList_id = 0, WindowListBtn_id = 0, PanelIf_id = 0, Memo1_id = 0, ProgramList_id = 0, IfList_id = 0, FoldersList_id = 0, FilesList_id = 0, PCAPinfo_id = 0, SnifRun_id = 0;
+    unsigned int WindowListBtnStart_id = 0;
+    
+    ELEMENT *WindowListBtnStart = nullptr;
+            
+    ELEMENT *WindowList = nullptr, *WindowListBtn = nullptr, *Memo1 = nullptr, *ProgramList = nullptr, *IfList = nullptr, *FoldersList = nullptr, *FilesList = nullptr, *PCAPinfo = nullptr, *SnifRun = nullptr;
+    
+    ELEMENT* focus = nullptr;
     
     GUI();
     SCREEN_BUFFER screen;
     
-    FRAME start_position;
+    _FRAME start_position;
     
     ELEMENTS elements;
     
     void MouseButtonEvent(MOUSE_BUTTON_TYPE MouseButtonType, int mouse_x,int mouse_y );
+    void KeyPressEvent(unsigned int key);
     
     void create_elements();
     
@@ -92,9 +164,13 @@ public:
     void wait_run();
     void wait_execute_close();
     
+    void set_ui_action(UI_Action_Type type, int id, std::string val, unsigned int window_id);
+    
     bool execute_is_run = false;
     std::thread* execute_thread = nullptr;
     void execute();
+    
+    unsigned int find_window(Display *display, ELEMENT *_WindowList);
     
     GUI(const GUI& orig);
     virtual ~GUI();

@@ -13,15 +13,35 @@
 
 #include <cstdlib>
 #include <dirent.h>
+#include <algorithm> 
 
 #include "GUI/GUI.h"
+#include "pcap.h"
+#include "global.h"
 #include "webcam.h"
 #include "tools.h"
+#include "sniffer.h"
+#include "clicker.h"
+#include "program.h"
+#include "mikrotik.h"
 
 bool GLOBAL_STOP = false;
 
+GLOBAL global;
 GUI gui;
+PCAP pcap;
+SNIFFER sniffer;
+CLICKER clicker;
+PROGRAMS programs;
+MIKROTIK mikrotik;
 //WEBCAMS webcams;
+
+void Load_Folders(ELEMENT* list) {
+    list->item.push_back({&gui, ELEMENT_item::ListItem, "Downloads"});
+    list->item.push_back({&gui, ELEMENT_item::ListItem, "Pictures"});
+    list->item.push_back({&gui, ELEMENT_item::ListItem, "Music"});
+    list->item.push_back({&gui, ELEMENT_item::ListItem, "tmp"});
+}
 
 void Load_NetIfList(ELEMENT* list){
     std::string s;
@@ -32,7 +52,7 @@ void Load_NetIfList(ELEMENT* list){
     struct dirent *entry;
     
     while ( (entry = readdir(dir)) != NULL) {
-        printf("{%d} - (%s) [%d] %d\n", entry->d_ino, entry->d_name, entry->d_type, entry->d_reclen);
+        //printf("{%d} - (%s) [%d] %d\n", entry->d_ino, entry->d_name, entry->d_type, entry->d_reclen);
         sprintf(c, "/sys/class/net/%s/ifindex", entry->d_name);
         FILE *f;
         f = fopen(c, "rb");
@@ -45,31 +65,41 @@ void Load_NetIfList(ELEMENT* list){
             
             list->item.push_back({&gui, ELEMENT_item::ListItem, c});
         }
-    };
-    
-   (void)closedir(dir);
+    };    
+   closedir(dir);
+   
+   std::sort( list->item.begin(), list->item.end() );
 }
 
 int main(int argc, char** argv) {
+    std::vector<std::string> list;
 
+    mikrotik.set_ip_login_pass("192.168.5.5", "admin", "Qq1233!!");
+    //mikrotik.set_firewall_ip("54.55.66.77");
     
+    //mikrotik.set_firewall_ip(0x11223344);
     
     gui.create_elements();
+    global.set_gui(&gui);
+    global.init();
     
     if(gui.low_level_init()==false) return -1;
     
     Load_NetIfList(gui.IfList);
+    Load_Folders(gui.FoldersList);
     //->item.push_back({ELEMENT_item::ListItem, "If1"});
     
     //webcams.init(&(gui.Memo1->string_list));
     
-    
+    clicker.init();
+    programs.init();
     
     gui.wait_run();
     
     set_GLOBAL_STOP(L"main");
-       
+    programs.wait_execute_close();   
     gui.wait_execute_close();
+    global.wait_execute_close();
     //webcams.wait_execute_close();
     
     gui.finish();
