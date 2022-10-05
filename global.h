@@ -82,6 +82,8 @@ public:
         WindowListBtnStart = v;
     }
     
+    
+    
     GLOBAL() {
         
     }

@@ -170,6 +170,14 @@ char *decode_to_char_tcp_flag(unsigned char f, char *c) {
 void detect_ip(FRAME *frame) {
     unsigned char ip_proto_;
     int ip0_, port0_, ip1_, port1_, frame_size_;
+    
+    if( !is_ip(frame->ipv4_dst_ip, 192, 168, 1, 86) &&
+        !is_ip(frame->ipv4_src_ip, 192, 168, 1, 86) ) {
+        
+        // return;
+        
+    }
+    
     if(frame->direction == egress) {
         ip1_ = frame->ipv4_dst_ip;
         port1_ = frame->ipv4_dst_port;
@@ -202,6 +210,12 @@ void detect_ip(FRAME *frame) {
     char ss[500], ip0__[100], ip1__[100];
     ipv4_to_char(ip1_, ip1__);
     ipv4_to_char(ip0_, ip0__);
+    
+    if(port1_ == 53 || port0_ == 53) {
+        if(ip1_ == 0xad20962 || ip0_ == 0xad20962) { // 10.210.9.98
+            return;
+        }
+    }
     
     sprintf(ss, "/var/www/html/sniffer_web/ip3/%s:%d_%s:%d", ip1__, port1_, ip0__, port0_);
     

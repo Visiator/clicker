@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <mutex>
 
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -26,7 +27,7 @@
 class ELEMENT;
 
 class MIKROTIK {
-public:
+private:
     ELEMENT *mikrotik_info = nullptr;
     std::set<unsigned int> ip_in_mikrotik;
     
@@ -35,11 +36,16 @@ public:
 
     std::string _ip, _login, _pass;
 
-    bool login();
+    std::mutex mutex;
+    
+    void lock();
+    void unlock();
+    
+    bool login_();
 
-    bool set_firewall_ip(unsigned int ip);
-    void set_ip_login_pass(const char *ip, const char *login, const char *pass);
-    bool get_firewall_ip_list();
+    
+    
+    
     bool send_login();
     bool send_command(const char *command);
     bool send_command(const char *command, const char *p1, const char *p2, const char *p3);
@@ -49,6 +55,19 @@ public:
 
     bool buf_is(char *buf, char *v);
 
+public:
+    void set_ip_login_pass(const char *ip, const char *login, const char *pass);
+    bool ip_is_exists_in_list(unsigned int ip);
+    void set_mikrotik_info(ELEMENT *v);
+    bool set_firewall_ip(unsigned int ip);
+    
+    bool set_firewall_ip_raw(unsigned int ip);
+    
+    bool get_firewall_ip_list();
+    
+    void ip_list_to_txt(char *file_name);
+    void ip_list_from_txt(char *file_name);
+    
     MIKROTIK();
 };
 

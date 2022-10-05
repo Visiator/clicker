@@ -36,7 +36,7 @@ void custom_analiz_udp(int frame_no, unsigned char *buf, int buf_size, FRAME *fr
         if(frame->session_packet_count == 0) {
             if(frame->payload_size > 4) {
                 if(frame->payload[0] == 0x01) {
-                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_src_ip);
+                //global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_src_ip);
 
                 printf("ddd\n");
                 };
@@ -48,18 +48,18 @@ void custom_analiz_udp(int frame_no, unsigned char *buf, int buf_size, FRAME *fr
         if(frame->session_packet_count == 0) {
             if(frame->payload_size > 4) {
                 if(frame->payload[0] == 0x01 && frame->payload[1] == 0x00 && frame->payload[2] == 0x00 && frame->payload[3] == 0x00) {
-                    global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+                    //global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
                 }
             }
             if(frame->payload_size == 86 && frame->frame_size == 128) {
-                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+                //global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
             }        
         }
     }
     
     if(frame->ipv4_dst_port == 4500) {
             
-            global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+            //global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
         
     } else {
         //global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
@@ -184,16 +184,181 @@ void pprint8(unsigned char *p) {
     printf("%02x %02x %02x %02x %02x %02x %02x %02x\n", (unsigned int)p[0], (unsigned int)p[1], (unsigned int)p[2], (unsigned int)p[3], (unsigned int)p[4], (unsigned int)p[5], (unsigned int)p[6], (unsigned int)p[7]);
 }
 
+void decode_sni_20(char *v) 
+{
+    unsigned int a, *q, i1, i2, i3;
+    i1 = 0;
+    i2 = 0;
+    i3 = 0;
+    a = strlen(v);
+    if(a == 51) {
+        q = (unsigned int *)v;
+        if(*q == 0x65737361) { // "asse"
+            printf("api.\n");
+            q = (unsigned int *)&(v[a-4]);
+            if(*q == 0x6d6f632e) // 
+            {
+                printf(".com\n");
+                for(int i=7;i<47;i++)
+                {
+                    if(v[i] >= '0' && v[i] <= '9') {
+                        i1++;
+                    } else if(v[i] >= 'a' && v[i] <= 'f') {
+                        i2++;
+                    } else {
+                        i3++;
+                    }
+                    v[i] = '+';
+                }
+                if(i1 >= 7 && i2 >= 5 && i3 == 0 && i1 + i2 == 40) {
+                    printf("+++\n");
+                }
+            }
+        }
+    }
+}
+
 void custom_analiz(SESSION *s, FRAME *frame) {
     
-    if(frame->ipv4_dst_port == 443) {
-        if(frame->payload[0] == 0x16 &&
-                frame->payload[1] == 0x03 &&
-                frame->payload[2] == 0x03 
-          ) 
+
+    
+    if(frame->ipv4_dst_port == 65142 && s->packet_count == 1 ) {
+        printf("65142\n");
+    };
+    
+    return;
+    
+    /*
+    if(frame->ipv4_dst_port == 4500 && s->packet_count == 1 ) {
+        if(frame->payload_size > 100) {
+            unsigned int *v;
+            v = (unsigned int *)frame->payload;
+            if(*v == 0) {
+                v += 5;
+                if(*v == 0x08232035) {
+                    v++;
+                    if(*v == 0x01000000) {
+                        printf("1111111\n");
+                        global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+                    }
+                }
+            }
+        }
+    }
+    
+    if(frame->ip_proto == 17 && frame->ipv4_dst_port == 65142 && s->packet_count == 1 ) { // udp
+        if(frame->payload[0] == 1 && frame->payload[1] == 0 && frame->payload[2] == 0 && frame->payload[3] == 0) {        
+                printf("wg\n");
+                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+            }
+        
+    }
+    
+    if(frame->ip_proto == 17 && frame->ipv4_dst_port == 443 && s->packet_count == 1 ) { // udp
+        if(frame->payload_size == 86) {
+            if(frame->payload[0] == 0x38) {
+                printf("38\n");
+            }
+            if(frame->frame_size >= 94 && 
+               frame->payload_size == 86 &&
+               frame->payload[0] == 0x38     
+                    ) {
+                printf("62\n");
+                
+                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+                
+            }        
+        }
+    }
+    
+    return;
+    
+    char ss[100];
+    
+    if(frame->ip_proto == 6 && frame->ipv4_dst_port == 443 && s->packet_with_payload_count == 1) {
+        if(frame->SNI.size() > 0) {
+            ipv4_to_char(frame->ipv4_dst_ip, ss);
+            if(frame->SNI[0] == ss) {
+                printf("pppp\n");
+                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+            }
+        };
+        
+    }
+    
+    if(frame->ipv4_dst_port == 4500 && s->packet_count == 1 ) {
+        if(frame->payload_size > 100) {
+            if(frame->payload[0] == 0 && frame->payload[1] == 0 && frame->payload[2] == 0 && frame->payload[3] == 0) {        
+                printf("4500\n");
+                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+            }
+        }
+    }
+  
+    if(frame->ip_proto == 17 && frame->ipv4_dst_port == 443 && s->packet_count == 1 ) { // udp
+        if(frame->payload_size == 148) {
+            
+            if(frame->payload[0] == 1 && frame->payload[1] == 0 && frame->payload[2] == 0 && frame->payload[3] == 0) {        
+                printf("wg\n");
+                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+            }
+        }
+        
+    }
+    
+    if(frame->ip_proto == 17 && frame->ipv4_dst_port == 443 && s->packet_count == 1 ) { // udp
+        if(frame->payload_size == 86) {
+            if(frame->payload[0] == 0x38) {
+                printf("38\n");
+            }
+            if(frame->frame_size >= 94 && 
+               frame->payload_size == 86 &&
+               frame->payload[0] == 0x38     
+                    ) {
+                printf("62\n");
+                
+                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+                
+            }        
+        }
+    }
+    */
+    
+    /*
+    if(frame->dns_responce) {
+        printf("%s\n", frame->dns_responce_name.c_str());
+    }
+    
+    if(frame->ip_proto == 17) { // udp
+        if(frame->payload_size > 20) {
+            if(frame->payload[0] == 0x38) {
+                printf("38\n");
+            }
+            if(frame->frame_size == 96 && 
+               frame->payload_size == 54 &&
+               frame->payload[0] == 0x38     
+                    ) {
+                printf("62\n");
+                
+                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+                
+            }        
+        }
+    }
+    
+    return;
+    */
+    /*
+    
+    if(frame->ipv4_dst_port == 443) 
+    {
+        unsigned int *s;
+        s = (unsigned int *)frame->payload;
+        if(*s == 0x01030316) 
         {
+        
             unsigned short sz1, ver1, sz3, sz4;
-            unsigned int sz2, ofset;
+            unsigned int sz2, ofset, *v2;
             
             sz1 = get_i16(frame->payload[4], frame->payload[3]);
             if(sz1 + 5 == frame->payload_size) {
@@ -205,8 +370,8 @@ void custom_analiz(SESSION *s, FRAME *frame) {
                             if(frame->payload[43] == 0 ) {
                                 sz3 = get_i16(frame->payload[45], frame->payload[44]);
                                 if(sz3 == 50) {
-                                    unsigned long *d;
-                                    d = (unsigned long *)(frame->payload + 46);
+                                    unsigned long long *d;
+                                    d = (unsigned long long *)(frame->payload + 46);
                                     if(*d == 0x2cc0031302130113) {
                                         d++;
                                         if(*d == 0xa9cc2fc030c02bc0) {
@@ -238,6 +403,36 @@ void custom_analiz(SESSION *s, FRAME *frame) {
                                                                                 }
                                                                             }
                                                                         }
+                                                                        if(type == 0x000a) {
+                                                                            v2 = (unsigned int *)(frame->payload + ofset);
+                                                                            if(*v2 == 0x19000a00) {
+                                                                                v2++;
+                                                                                if(*v2 == 0x17001800) {
+                                                                                    v2++;
+                                                                                    if(*v2 == 0x00011500) {
+                                                                                        printf("aaa\n");
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                        unsigned long *x;
+                                                                        if(type == 0x000d) {
+                                                                            if(sz == 32) {
+                                                                                x = (unsigned long *)(frame->payload + ofset);
+                                                                                if(*x == 0x304030503061e00) {
+                                                                                    x++;
+                                                                                    if(*x == 0x5080b0806080302) {
+                                                                                        x++;
+                                                                                        if(*x == 0x106090804080a08) {
+                                                                                            x++;
+                                                                                            if(*x == 0x102010301040105) {
+                                                                                                x++;
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
                                                                         sz4 -= 4;                                                                        
                                                                         ofset += sz;
                                                                         sz4 -= sz;
@@ -253,13 +448,7 @@ void custom_analiz(SESSION *s, FRAME *frame) {
                                         }                                        
                                     }
                                     printf("160303\n"); 
-                                    /*130113021303c02c 
-                                      c02bc030c02fcca9
-                                      cca8ccaac027c023
-                                      c028c024c00ac009
-                                      c014c013cc14cc13
-                                      cc15ccabccacccad
-                                      c037*/
+
                                 }
                             }
                         }
@@ -269,6 +458,9 @@ void custom_analiz(SESSION *s, FRAME *frame) {
             }
             
         }
+        
+    
+        
     }
     
     if(frame->ipv4_dst_port == 80) {
@@ -400,5 +592,5 @@ void custom_analiz(SESSION *s, FRAME *frame) {
     
     char cc[100];
     
-    
+    */
 }

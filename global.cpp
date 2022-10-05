@@ -180,7 +180,9 @@ void GLOBAL::add_ip_to_queue_to_send_mikrotik(unsigned int ip) {
     if(ip_to_add_s.find(ip) != ip_to_add_s.end()) {
         return;
     }
-    if(mikrotik.ip_in_mikrotik.find(ip) != mikrotik.ip_in_mikrotik.end()) {
+
+    if(mikrotik.ip_is_exists_in_list(ip))
+    {
         return;
     }
     
@@ -207,3 +209,4 @@ unsigned int GLOBAL::get_ip_to_queue_to_send_mikrotik() {
     }
     return u;
 }
+

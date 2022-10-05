@@ -27,6 +27,9 @@ void SESSIONS::save() {
 
 
 void SESSIONS::add_to_session__(FRAME *frame) {
+    
+    
+    
     if(frame->stored_to_session_ == true) return;
     if(frame->is_ipv4_fragment == true) return;
     
@@ -41,13 +44,13 @@ void SESSIONS::add_to_session__(FRAME *frame) {
         return;
     }
     
-    std::string cc;
+    /*std::string cc;
     
     for(auto const& it: frame->cert_list) {
         cc += it.commonName;
-    }
+    }*/
     
-    std::pair<std::string, SESSION> p;
+    //std::pair<std::string, SESSION> p;
     
     
     
@@ -67,5 +70,8 @@ void SESSIONS::add_to_session__(FRAME *frame) {
         printf("fin\n");
         items.erase(frame->session_id);
     }
-    custom_analiz(&(it->second), frame);
+    
+    SESSION *s = &(it->second);
+    
+    custom_analiz(s, frame);
 }

@@ -188,6 +188,16 @@ void GUI::wait_run() {
                         }
                     }
                 }
+                if(a.id == Mikrotik_to_txt_id) {
+                    printf("Mikrotik_to_txt_id\n");
+                    mikrotik.ip_list_to_txt("from_mikrotik.txt");
+                    Mikrotik_to_txt->is_pressed = false;
+                }
+                if(a.id == Mikrotik_from_txt_id) {
+                    printf("Mikrotik_from_txt_id\n");
+                    mikrotik.ip_list_from_txt("to_mikrotik.txt");
+                    Mikrotik_from_txt->is_pressed = false;
+                }
             }
         }
         this->screen.need_update = true;
@@ -228,10 +238,16 @@ void GUI::create_elements() {
     q = elements.add(this, PanelIf_id, ELEMENT::Type::MikrotikInfo ,  5, 370, 180, 25, COLOR::ListBG, COLOR::MemoBorder, "Info");
     Memo1_id = q->id;
     
+    q = elements.add(this, PanelIf_id, ELEMENT::Type::Button ,  5, 400, 250, 25, COLOR::ListBG, COLOR::MemoBorder, "Mikrotik -> from_mikrotik.txt");
+    Mikrotik_to_txt_id = q->id;
+    
+    q = elements.add(this, PanelIf_id, ELEMENT::Type::Button ,  5, 430, 250, 25, COLOR::ListBG, COLOR::MemoBorder, "Mikrotik <- to_mikrotik.txt");
+    Mikrotik_from_txt_id = q->id;
+    
     q = elements.add(this, PanelPcap_id, ELEMENT::Type::List,  5, 25, 150, 100, COLOR::ListBG, COLOR::ListBorder, "Folders");
     FoldersList_id = q->id;
 
-    q = elements.add(this, PanelPcap_id, ELEMENT::Type::List,  5, 150, 250, 350, COLOR::ListBG, COLOR::ListBorder, "Files");
+    q = elements.add(this, PanelPcap_id, ELEMENT::Type::List,  165, 25, 450, 640, COLOR::ListBG, COLOR::ListBorder, "Files");
     FilesList_id = q->id;
 
     q = elements.add(this, PanelPcap_id, ELEMENT::Type::PCAPinfo,  5, 380, 180, 150, COLOR::ListBG, COLOR::ListBorder, "PCAPinfo");
@@ -288,6 +304,9 @@ void GUI::create_elements() {
     
     TabIf->is_pressed = true;
     
+    Mikrotik_to_txt = elements.get_element_by_id(Mikrotik_to_txt_id);
+    Mikrotik_from_txt = elements.get_element_by_id(Mikrotik_from_txt_id);
+    
     Memo1->item.push_back({this, ELEMENT_item::String, "str1"});
     Memo1->item.push_back({this, ELEMENT_item::String, "str2"});
     Memo1->item.push_back({this, ELEMENT_item::String, "str3"});
@@ -298,7 +317,7 @@ void GUI::create_elements() {
     ProgramList->item.push_back({this, ELEMENT_item::ListItem, "prg3"});
     
     global.mikrotik_info = Memo1;
-    mikrotik.mikrotik_info = Memo1;
+    mikrotik.set_mikrotik_info(Memo1);
 }
 
 void GUI::KeyPressEvent(unsigned int key) {

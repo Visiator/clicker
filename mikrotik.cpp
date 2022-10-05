@@ -124,7 +124,7 @@ bool MIKROTIK::read_responce(std::vector<std::string> &v) {
     return false;
 }
 
-bool MIKROTIK::login() {
+bool MIKROTIK::login_() {
     if(!send_login()) {
         return false;
     }
@@ -140,7 +140,9 @@ bool MIKROTIK::login() {
 }
 
 bool MIKROTIK::get_firewall_ip_list() {
-   
+
+    lock();
+    
     ip_in_mikrotik.clear();
     
     unsigned long t0, t1, t2, t3;
@@ -148,13 +150,16 @@ bool MIKROTIK::get_firewall_ip_list() {
     t0 = GetTickCount();
 
     if(!_connect()) {
+        unlock();
         return false;
     }
     t1 = GetTickCount() - t0;
-    if(!login()) {
+    if(!login_()) {
+        unlock();
         return false;
     }
     if(!send_command("/ip/firewall/filter/print")) {
+        unlock();
         return false;
     }
     unsigned int iip;
@@ -182,6 +187,8 @@ bool MIKROTIK::get_firewall_ip_list() {
     if(mikrotik_info != nullptr) {
         mikrotik_info->info2 = ip_in_mikrotik.size();
     }
+    
+    unlock();
     return true;
 }
 
@@ -235,14 +242,23 @@ bool MIKROTIK::send_command(const char *command, const char *p1, const char *p2,
 
 bool MIKROTIK::set_firewall_ip(unsigned int _ip) {
     
+    lock();
+    
     if(ip_in_mikrotik.find(_ip) != ip_in_mikrotik.end()) {
+        unlock();
         return true;
     }
+    unlock();
     get_firewall_ip_list();
+    lock();
     if(ip_in_mikrotik.find(_ip) != ip_in_mikrotik.end()) {
+        unlock();
         return true;
     }
     
+    
+    //////////////////////////////////
+    //
     unsigned long t0, t1, t2, t3;
     char ip[50];
     ipv4_to_char(_ip, ip);
@@ -250,10 +266,12 @@ bool MIKROTIK::set_firewall_ip(unsigned int _ip) {
     t0 = GetTickCount();
 
     if(!_connect()) {
+        unlock();
         return -1;
     }
     t1 = GetTickCount() - t0;
-    if(!login()) {
+    if(!login_()) {
+        unlock();
         return false;
     }
     std::string s;
@@ -264,6 +282,7 @@ bool MIKROTIK::set_firewall_ip(unsigned int _ip) {
             , "=action=drop"
             , s.c_str()
             )) {
+        unlock();
         return false;
     }
 
@@ -282,6 +301,128 @@ bool MIKROTIK::set_firewall_ip(unsigned int _ip) {
     }
 
     _disconnect();
+    
+    //
+    //////////////////////////////////////////////////////////
+    
+    unlock();
     return ret;
    
+}
+
+void MIKROTIK::lock() {
+    mutex.lock();
+}
+    
+void MIKROTIK::unlock() {
+    mutex.unlock();
+}
+
+void MIKROTIK::set_mikrotik_info(ELEMENT *v) {
+    mikrotik_info = v;
+}
+
+bool MIKROTIK::ip_is_exists_in_list(unsigned int ip) {
+    if(ip_in_mikrotik.find(ip) != ip_in_mikrotik.end()) {
+        return true;
+    }
+    return false;
+}
+
+void MIKROTIK::ip_list_to_txt(char *file_name) {
+    get_firewall_ip_list();
+    char s[100];
+    FILE *f;
+    f = fopen(file_name, "wb");
+    if(f == NULL) {
+        printf("open file error!\n");
+        return;
+    }
+    for(auto& a : ip_in_mikrotik) {
+        ipv4_to_char(a, s);
+        fprintf(f, "%s\n", s);
+    }
+    fclose(f);
+}
+    
+void MIKROTIK::ip_list_from_txt(char *file_name) {
+    FILE *f;
+    f = fopen(file_name, "rb");
+    if(f == NULL) {
+        printf("open file error!\n");
+        return;
+    }
+    
+    _connect();
+
+    login_();
+    
+    char cc[100];
+    unsigned int ii;
+    int i, j;
+    i = fgetc(f);
+    j = 0;
+    while(i != EOF)
+    {
+        if(i == 13 || i == 10) {
+            
+            printf("%s\n", cc);
+
+            ii = char_to_ipv4(cc);
+            
+            //set_firewall_ip(ii);
+            //////////////////////////////////////////////////////////
+            //
+            
+            std::string s;
+            s = "=dst-address=";
+            s += cc;
+            if(!send_command("/ip/firewall/filter/add"
+                    , "=chain=forward"
+                    , "=action=drop"
+                    , s.c_str()
+                    )) {
+                unlock();
+                return ;
+            }
+
+
+            std::vector<std::string> v;
+            v.clear();
+            bool r, ret;
+            r = read_responce(v);
+
+            ret = false;
+            
+            for(const auto& s : v) {
+                if(s == "!done") {
+                    ret = true;
+                }
+                printf("%s\n", s.c_str());
+            }
+            if(ret == false) {
+                
+                return;
+            }
+            //
+            //////////////////////////////////////////////////////////
+            
+            
+            
+            j = 0;
+            cc[0];
+        } else {
+            if( i != 10 && i != 13) {
+                cc[j] = (char)i;
+                if(j < 100-5) j++;
+                cc[j] = 0;
+            }
+        }
+                
+        i = fgetc(f);
+    }
+
+    fclose(f);
+    
+    _disconnect();
 }
