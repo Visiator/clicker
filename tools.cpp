@@ -171,10 +171,10 @@ void detect_ip(FRAME *frame) {
     unsigned char ip_proto_;
     int ip0_, port0_, ip1_, port1_, frame_size_;
     
-    if( !is_ip(frame->ipv4_dst_ip, 192, 168, 1, 86) &&
-        !is_ip(frame->ipv4_src_ip, 192, 168, 1, 86) ) {
+    if( !is_ip(frame->ipv4_dst_ip, 10, 212, 65, 20) &&
+        !is_ip(frame->ipv4_src_ip, 10, 212, 65, 20) ) {
         
-        // return;
+        return;
         
     }
     

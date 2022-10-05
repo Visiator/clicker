@@ -203,10 +203,10 @@ class FRAGMENTS_QUEUE
 public:
     int current_ipv4_items_count;
     
-    IPV4_QUEUE_ITEM ipv4_item[2000]; 
+    IPV4_QUEUE_ITEM ipv4_item[20000]; 
     int ipv4_item_max_count;
     
-    TCP_QUEUE_ITEM tcp_item[2000]; 
+    TCP_QUEUE_ITEM tcp_item[20000]; 
     int tcp_item_max_count;
     
     
@@ -224,8 +224,8 @@ public:
     }
     FRAGMENTS_QUEUE() {
         current_ipv4_items_count = 0;
-        ipv4_item_max_count = 2000;
-        tcp_item_max_count = 2000;
+        ipv4_item_max_count = 20000;
+        tcp_item_max_count = 20000;
         clean();
     }
 };

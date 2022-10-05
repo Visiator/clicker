@@ -7,20 +7,8 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/prj/clicker/pcap.h</file>
-            <file>file:/prj/clicker/global.cpp</file>
-            <file>file:/prj/clicker/mikrotik.h</file>
-            <file>file:/prj/clicker/GUI/GUI.cpp</file>
             <file>file:/prj/clicker/main.cpp</file>
-            <file>file:/prj/clicker/mikrotik.cpp</file>
-            <file>file:/prj/clicker/frame.cpp</file>
-            <file>file:/prj/clicker/GUI/GUI.h</file>
-            <file>file:/prj/clicker/tools.h</file>
-            <file>file:/prj/clicker/sessions.h</file>
-            <file>file:/prj/clicker/tools.cpp</file>
             <file>file:/prj/clicker/analiz.cpp</file>
-            <file>file:/prj/clicker/sessions.cpp</file>
-            <file>file:/prj/clicker/pcap.cpp</file>
         </group>
     </open-files>
 </project-private>

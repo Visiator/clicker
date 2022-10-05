@@ -103,6 +103,26 @@ bool it_is_log(char *v) {
     return false;
 }
 
+bool it_is_pcapng(char *v) {
+    if(v == nullptr) return false;
+    int i;
+    i = strlen(v);
+    if(i > 7) {
+        if( v[i-1] == 'g' && 
+            v[i-2] == 'n' && 
+            v[i-3] == 'p' && 
+            v[i-4] == 'a' && 
+            v[i-5] == 'c' && 
+            v[i-6] == 'p' && 
+            v[i-7] == '.' 
+                )
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void GLOBAL::set_FoldersSelect(std::string val) {
 
     
@@ -131,7 +151,9 @@ void GLOBAL::set_FoldersSelect(std::string val) {
             )
           )
         {
-            gui->FilesList->item.push_back({gui, ELEMENT_item::ListItem, entry->d_name});
+            if(it_is_pcapng(entry->d_name)) {
+                gui->FilesList->item.push_back({gui, ELEMENT_item::ListItem, entry->d_name});
+            }
         }
         
     };

@@ -220,7 +220,47 @@ void decode_sni_20(char *v)
 
 void custom_analiz(SESSION *s, FRAME *frame) {
     
-
+    if(frame->ipv4_dst_port == 443 && frame->payload_size > 0 && s->packet_count == 4) {
+        unsigned int *v, l;
+        unsigned short *s;
+        unsigned long *q;
+        v = (unsigned int *)frame->payload;
+        if((*v & 0x00ffffff) == 0x00010316) {
+            if(frame->payload[5] == 0x01) {
+                l = get_i16(frame->payload[8], frame->payload[7]);
+                if(l == frame->payload_size - 9) {
+                    s = (unsigned short *)(frame->payload+9);
+                    if(*s == 0x0303) {
+                        q = (unsigned long *)(frame->payload+76);
+                        if(*q == 0x113031302133e00) {
+                            q++;
+                            if(*q == 0xa9cc9f0030c02cc0) {
+                                q++;
+                                if(*q == 0x2fc02bc0aacca8cc) {
+                                    q++;
+                                    if(*q == 0x6b0028c024c09e00) {
+                                        q++;
+                                        if(*q == 0xac0670027c023c0) {
+                                            q++;
+                                            if(*q == 0x13c009c0390014c0) {
+                                                q++;    
+                                                if(*q == 0x3d009c009d003300) {
+                                                    q++;
+                                                    if(*q == 0xff002f0035003c00) {
+                                                        printf("443 %x\n", *q);
+                                                    }
+                                                }
+                                            }
+                                        };
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     
     if(frame->ipv4_dst_port == 65142 && s->packet_count == 1 ) {
         printf("65142\n");
