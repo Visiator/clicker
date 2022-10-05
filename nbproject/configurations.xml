@@ -7,7 +7,16 @@
       <itemPath>GUI/GUI.h</itemPath>
       <itemPath>GUI/GUI_Element.h</itemPath>
       <itemPath>GUI/GUI_Primitives.h</itemPath>
+      <itemPath>clicker.h</itemPath>
       <itemPath>GUI/font.h</itemPath>
+      <itemPath>/prj/clicker/fragments_queue.h</itemPath>
+      <itemPath>/prj/clicker/frame.h</itemPath>
+      <itemPath>global.h</itemPath>
+      <itemPath>mikrotik.h</itemPath>
+      <itemPath>/prj/clicker/pcap.h</itemPath>
+      <itemPath>/prj/clicker/program.h</itemPath>
+      <itemPath>/prj/clicker/sessions.h</itemPath>
+      <itemPath>sniffer.h</itemPath>
       <itemPath>tools.h</itemPath>
       <itemPath>webcam.h</itemPath>
     </logicalFolder>
@@ -22,8 +31,18 @@
       <itemPath>GUI/GUI_Element.cpp</itemPath>
       <itemPath>GUI/GUI_Linux.cpp</itemPath>
       <itemPath>GUI/GUI_Primitives.cpp</itemPath>
+      <itemPath>/prj/clicker/analiz.cpp</itemPath>
+      <itemPath>clicker.cpp</itemPath>
       <itemPath>GUI/font.cpp</itemPath>
+      <itemPath>/prj/clicker/fragments_queue.cpp</itemPath>
+      <itemPath>/prj/clicker/frame.cpp</itemPath>
+      <itemPath>global.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
+      <itemPath>mikrotik.cpp</itemPath>
+      <itemPath>/prj/clicker/pcap.cpp</itemPath>
+      <itemPath>/prj/clicker/program.cpp</itemPath>
+      <itemPath>/prj/clicker/sessions.cpp</itemPath>
+      <itemPath>sniffer.cpp</itemPath>
       <itemPath>tools.cpp</itemPath>
       <itemPath>webcam.cpp</itemPath>
     </logicalFolder>
@@ -39,6 +58,9 @@
       <itemPath>Makefile</itemPath>
     </logicalFolder>
   </logicalFolder>
+  <sourceRootList>
+    <Elem>/prj/clicker</Elem>
+  </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="Debug" type="1">
@@ -57,6 +79,28 @@
           <commandLine>-pthread -lX11 -lXtst</commandLine>
         </linkerTool>
       </compileType>
+      <item path="/prj/clicker/analiz.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="/prj/clicker/fragments_queue.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="/prj/clicker/fragments_queue.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="/prj/clicker/frame.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="/prj/clicker/frame.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="/prj/clicker/pcap.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="/prj/clicker/pcap.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="/prj/clicker/program.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="/prj/clicker/program.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="/prj/clicker/sessions.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="/prj/clicker/sessions.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="GUI/GUI.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="GUI/GUI.h" ex="false" tool="3" flavor2="0">
@@ -75,7 +119,23 @@
       </item>
       <item path="GUI/font.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="clicker.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="clicker.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="global.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="global.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="mikrotik.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="mikrotik.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="sniffer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="sniffer.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tools.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -107,6 +167,28 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
+      <item path="/prj/clicker/analiz.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="/prj/clicker/fragments_queue.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="/prj/clicker/fragments_queue.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="/prj/clicker/frame.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="/prj/clicker/frame.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="/prj/clicker/pcap.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="/prj/clicker/pcap.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="/prj/clicker/program.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="/prj/clicker/program.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="/prj/clicker/sessions.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="/prj/clicker/sessions.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="GUI/GUI.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="GUI/GUI.h" ex="false" tool="3" flavor2="0">
@@ -125,7 +207,23 @@
       </item>
       <item path="GUI/font.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="clicker.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="clicker.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="global.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="global.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="mikrotik.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="mikrotik.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="sniffer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="sniffer.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tools.cpp" ex="false" tool="1" flavor2="0">
       </item>

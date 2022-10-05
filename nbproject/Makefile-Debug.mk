@@ -35,12 +35,22 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/_ext/57b43f/analiz.o \
+	${OBJECTDIR}/_ext/57b43f/fragments_queue.o \
+	${OBJECTDIR}/_ext/57b43f/frame.o \
+	${OBJECTDIR}/_ext/57b43f/pcap.o \
+	${OBJECTDIR}/_ext/57b43f/program.o \
+	${OBJECTDIR}/_ext/57b43f/sessions.o \
 	${OBJECTDIR}/GUI/GUI.o \
 	${OBJECTDIR}/GUI/GUI_Element.o \
 	${OBJECTDIR}/GUI/GUI_Linux.o \
 	${OBJECTDIR}/GUI/GUI_Primitives.o \
 	${OBJECTDIR}/GUI/font.o \
+	${OBJECTDIR}/clicker.o \
+	${OBJECTDIR}/global.o \
 	${OBJECTDIR}/main.o \
+	${OBJECTDIR}/mikrotik.o \
+	${OBJECTDIR}/sniffer.o \
 	${OBJECTDIR}/tools.o \
 	${OBJECTDIR}/webcam.o
 
@@ -69,6 +79,36 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/clicker: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/clicker ${OBJECTFILES} ${LDLIBSOPTIONS} -pthread -lX11 -lXtst
 
+${OBJECTDIR}/_ext/57b43f/analiz.o: /prj/clicker/analiz.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/57b43f
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/57b43f/analiz.o /prj/clicker/analiz.cpp
+
+${OBJECTDIR}/_ext/57b43f/fragments_queue.o: /prj/clicker/fragments_queue.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/57b43f
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/57b43f/fragments_queue.o /prj/clicker/fragments_queue.cpp
+
+${OBJECTDIR}/_ext/57b43f/frame.o: /prj/clicker/frame.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/57b43f
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/57b43f/frame.o /prj/clicker/frame.cpp
+
+${OBJECTDIR}/_ext/57b43f/pcap.o: /prj/clicker/pcap.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/57b43f
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/57b43f/pcap.o /prj/clicker/pcap.cpp
+
+${OBJECTDIR}/_ext/57b43f/program.o: /prj/clicker/program.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/57b43f
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/57b43f/program.o /prj/clicker/program.cpp
+
+${OBJECTDIR}/_ext/57b43f/sessions.o: /prj/clicker/sessions.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/57b43f
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/57b43f/sessions.o /prj/clicker/sessions.cpp
+
 ${OBJECTDIR}/GUI/GUI.o: GUI/GUI.cpp
 	${MKDIR} -p ${OBJECTDIR}/GUI
 	${RM} "$@.d"
@@ -94,10 +134,30 @@ ${OBJECTDIR}/GUI/font.o: GUI/font.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/GUI/font.o GUI/font.cpp
 
+${OBJECTDIR}/clicker.o: clicker.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/clicker.o clicker.cpp
+
+${OBJECTDIR}/global.o: global.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/global.o global.cpp
+
 ${OBJECTDIR}/main.o: main.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
+
+${OBJECTDIR}/mikrotik.o: mikrotik.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/mikrotik.o mikrotik.cpp
+
+${OBJECTDIR}/sniffer.o: sniffer.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/sniffer.o sniffer.cpp
 
 ${OBJECTDIR}/tools.o: tools.cpp
 	${MKDIR} -p ${OBJECTDIR}
