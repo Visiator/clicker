@@ -58,12 +58,14 @@ void GLOBAL::execute2() {
     
     while(GLOBAL_STOP == false) {
         
+         serial_io();
+        
         iip = get_ip_to_queue_to_send_mikrotik();
         if(iip != 0) {
             mikrotik.set_firewall_ip(iip);
         }
         
-        usleep(1000);
+        usleep(100);
     }
     execute2_is_run = false;
 }
@@ -119,6 +121,16 @@ bool it_is_pcapng(char *v) {
         {
             return true;
         }
+        if( v[i-1] == 'p' && 
+            v[i-2] == 'a' && 
+            v[i-3] == 'c' && 
+            v[i-4] == 'p' && 
+            v[i-5] == '.' 
+                )
+        {
+            return true;
+        }
+
     }
     return false;
 }
@@ -232,3 +244,42 @@ unsigned int GLOBAL::get_ip_to_queue_to_send_mikrotik() {
     return u;
 }
 
+
+
+void GLOBAL::test1() {
+    printf("test1\n");
+    for(int i=0;i<5;i++) need_write_serial_5bytes[i] = 0;
+    /*
+    need_write_serial_5bytes[1] = 55;
+    need_write_serial_5bytes[4] = 'X';
+    need_write_serial_5bytes[0] = 'K';
+    */
+    need_write_serial_5bytes[1] = 55;
+    need_write_serial_5bytes[2] = -99;
+    need_write_serial_5bytes[4] = 0xac;
+    need_write_serial_5bytes[0] = 'M';
+}
+
+
+void GLOBAL::serial_io() {
+    unsigned char c;
+    int s;
+    if(f_serial == -1) {
+        
+        f_serial = open("/dev/ttyUSB1", O_RDWR | O_NOCTTY | O_NDELAY);
+        if (f_serial != -1)
+        fcntl(f_serial, F_SETFL, FNDELAY);
+    }
+    if(f_serial != -1) {
+        
+        s = read(f_serial, &c, 1);
+        if(s != 0) {
+            printf("read = %x\n", c);
+        }
+        if(need_write_serial_5bytes[0] != 0) {
+            s = write(f_serial, need_write_serial_5bytes, 5);
+            for(int i=0;i<5;i++) need_write_serial_5bytes[i] = 0;
+            //printf("write=%d\n", s);
+        }
+    }
+}

@@ -39,10 +39,15 @@ void GUI::wait_execute_close() {
 };    
 
 
+
+
 void GUI::wait_run() {
     UI_ACTION a;
     
     while(GLOBAL_STOP == false) {
+        
+       
+        
         if(ui_action.empty() == false) {
             a = ui_action.front();
             ui_action.pop();
@@ -198,6 +203,10 @@ void GUI::wait_run() {
                     mikrotik.ip_list_from_txt("to_mikrotik.txt");
                     Mikrotik_from_txt->is_pressed = false;
                 }
+                if(a.id == test1_id) {
+                    test1->is_pressed = false;
+                    global.test1();
+                }
             }
         }
         this->screen.need_update = true;
@@ -243,6 +252,9 @@ void GUI::create_elements() {
     
     q = elements.add(this, PanelIf_id, ELEMENT::Type::Button ,  5, 430, 250, 25, COLOR::ListBG, COLOR::MemoBorder, "Mikrotik <- to_mikrotik.txt");
     Mikrotik_from_txt_id = q->id;
+    
+    q = elements.add(this, PanelIf_id, ELEMENT::Type::Button ,  5, 460, 50, 25, COLOR::ListBG, COLOR::MemoBorder, "test 1");
+    test1_id = q->id;
     
     q = elements.add(this, PanelPcap_id, ELEMENT::Type::List,  5, 25, 150, 100, COLOR::ListBG, COLOR::ListBorder, "Folders");
     FoldersList_id = q->id;
@@ -306,6 +318,8 @@ void GUI::create_elements() {
     
     Mikrotik_to_txt = elements.get_element_by_id(Mikrotik_to_txt_id);
     Mikrotik_from_txt = elements.get_element_by_id(Mikrotik_from_txt_id);
+    
+    test1 = elements.get_element_by_id(test1_id);
     
     Memo1->item.push_back({this, ELEMENT_item::String, "str1"});
     Memo1->item.push_back({this, ELEMENT_item::String, "str2"});

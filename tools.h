@@ -29,6 +29,7 @@ void memsetzero(unsigned char *destination, int n);
 unsigned long GetTickCount();
 bool DirectoryExists( const char* pzPath );
 unsigned short get_i16(unsigned char v1, unsigned char v2);
+unsigned short rte_cpu_to_be_16(unsigned short v);
 unsigned int get_i32(unsigned char v1, unsigned char v2, unsigned char v3, unsigned char v4);
 unsigned int get_i24(unsigned char v1, unsigned char v2, unsigned char v3);
 char *decode_to_char_tcp_flag(unsigned char f, char *c);

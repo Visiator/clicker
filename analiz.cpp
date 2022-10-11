@@ -11,6 +11,12 @@
 extern GLOBAL global;
 extern MIKROTIK mikrotik;
 
+#define data8(p, index)  p[index]
+#define data16(p, index) *(uint16_t*)(&(p)[index])
+#define data32(p, index) *(uint32_t*)(&(p)[index])
+#define data64(p, index) *(uint64_t*)(&(p)[index])
+
+
 void analiz_to_block(SESSION* session) {
 
 }
@@ -36,7 +42,7 @@ void custom_analiz_udp(int frame_no, unsigned char *buf, int buf_size, FRAME *fr
         if(frame->session_packet_count == 0) {
             if(frame->payload_size > 4) {
                 if(frame->payload[0] == 0x01) {
-                //global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_src_ip);
+                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_src_ip);
 
                 printf("ddd\n");
                 };
@@ -65,116 +71,6 @@ void custom_analiz_udp(int frame_no, unsigned char *buf, int buf_size, FRAME *fr
         //global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
     }
     
-    // 0x00:00:65:00:00:01:00:00:66:00:00:20:02:00:00:00
-    
-    /*
-    if(buf_size >= 16) {
-        if(buf[0] == 0 &&
-           buf[1] == 0 &&
-           buf[2] == 0x65 &&
-           buf[3] == 0 &&
-           buf[4] == 0 &&
-           buf[5] == 0x01 &&
-           buf[6] == 0 &&
-           buf[7] == 0 &&
-           buf[8] == 0x66 &&
-           buf[9] == 0 &&
-           buf[10] == 0 &&
-           buf[11] == 0x20 &&
-           buf[12] == 0x02 &&
-           buf[13] == 0x00 &&
-           buf[14] == 0x00 &&
-           buf[15] == 0x00                 
-          )
-        {
-            printf("1\n");
-        }
-    }
-    */
-    
-    /*char username[10];
-    int i, padding;
-    i = 0;
-    unsigned long long *tie;
-    unsigned int mg1, ms_app_id;
-    unsigned short record_type, record_length, block_type, block_length;
-    record_type = get_i16(buf[i+1], buf[i]); i+=2;
-    record_length  = get_i16(buf[i+1], buf[i]); i+=2;
-    if(record_length + 20 == buf_size) {
-        mg1  = get_i32(buf[i+3], buf[i+2], buf[i+1], buf[i]); i+=4;
-        if(mg1 == 0x2112a442) {
-            i += 12;
-            while(i+4 < buf_size) {
-                block_type = get_i16(buf[i+1], buf[i]); i+=2;
-                block_length  = get_i16(buf[i+1], buf[i]); i+=2;
-                if(i + block_length <= buf_size) {
-                    if(block_type == 0x0006) { // USERNAME
-                        if(block_length == 9) {
-                            for(unsigned int j=0;j<9;j++) {
-                                username[j] = buf[i+j];
-                            }
-                        }
-                    }
-                    if(block_type == 0x802a) { // ICE-CONTROLLONG
-                        if(block_length == 8) {
-                            tie = (unsigned long long *)(buf + i);
-                            if(*tie == 0x90394a3c01000000) { // 0x000000013c4a3990
-                                printf("tie ok\n");
-                            }
-                        }
-                            
-                    }
-                    if(block_type == 0x8037) { // MS-APP-AD
-                        if(block_length == 4) {
-                            ms_app_id = get_i32(buf[i+3], buf[i+2], buf[i+1], buf[i]);
-                            if(ms_app_id == 0x00000003) {
-                                printf("ms_app_id ok");
-                            }
-                        }
-                    }
-                } 
-                padding = block_length % 4;
-                if(padding > 0) {
-                    i += block_length + (4-padding);
-                } else {
-                    i += block_length;
-                };
-            }
-        }
-    }*/
-    
-    
-    /*
-    unsigned char c;
-    c = buf[0] & 0x3f;
-    if(c != 0) {
-        return;    
-    }
-    int i,j,k;
-    
-    unsigned short msg_type, msg_len, atr_type, atr_len;
-    char atr_val[500];
-    unsigned int mag;
-    
-    msg_type = get_i16(buf[1], buf[0]) & 0x3f;    
-    msg_len = get_i16(buf[3], buf[2]);
-    
-    mag = get_i32(buf[7], buf[6], buf[5], buf[4]);
-    
-    j = msg_len;
-    i = 8+12;
-    while(j > 0) {
-        atr_type = get_i16(buf[i+1], buf[i]); i+= 2;
-        atr_len = get_i16(buf[i+1], buf[i]); i+=2;
-        if(atr_len > 100 || atr_len > j) {
-            return;
-        }
-        for(k=0;k<atr_len;k++) atr_val[k] = buf[i++];
-        atr_val[k] = 0;
-        
-        j -= atr_len;
-    }
-    */
 }
 
 void pprint8(unsigned char *p) {
@@ -218,8 +114,197 @@ void decode_sni_20(char *v)
     }
 }
 
-void custom_analiz(SESSION *s, FRAME *frame) {
+bool check_ja3_v2(unsigned char *payload, size_t payload_size) {
+    unsigned int *v;
+    v = (unsigned int *)payload;
+    if((*v & 0x00ffffff) == 0x00010316) {
+        if(payload[5] == 0x01) {
+            unsigned int l;
+            unsigned short ss;
+            ss = data16(payload,7);
+            l = rte_cpu_to_be_16(data16(payload,7));
+            if(l + 9 == payload_size) {
+                unsigned short *s;
+                s = (unsigned short *)(payload+9);
+                if(*s == 0x0303) {
+                    unsigned long *q;
+                    q = (unsigned long *)(payload+76);
+                    if(*q == 0x0313011302135c00) {
+                        q++;
+                        if(*q == 0xa8cca9cc30c02cc0) {
+                            q++;
+                            if(*q == 0x61c05dc0adc0afc0) {
+                                q++;
+                                if(*q == 0xacc0aec02fc02bc0) {
+                                    q++;
+                                    if(*q == 0x28c024c060c05cc0) {
+                                        q++;
+                                        if(*q == 0x27c023c077c073c0) {
+                                            q++;    
+                                            if(*q == 0x14c00ac076c072c0) {
+                                                q++;
+                                                if(*q == 0xa1c09d0013c009c0) {
+                                                    q++;
+                                                    if(*q == 0xa0c09c0051c09dc0) {
+                                                        q++;
+                                                        if(*q == 0xc0003d0050c09cc0) {
+                                                            q++;
+                                                            if(*q == 0x84003500ba003c00) {
+                                                                return true;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    };
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
+bool test_sni_eq_ip(unsigned char *s, unsigned short sz, unsigned int ip) {
+    unsigned short sz1, type1, sni_len, i, k, v;
+    unsigned int ii = 0;
+    sz1 = rte_cpu_to_be_16(data16(s, 0));
+    type1 = s[2];
+    if(type1 == 0) { // host_name
+        sni_len = rte_cpu_to_be_16(data16(s, 3));
+        if(sni_len + 5 == sz) {
+            printf("+5\n");
+            s += 5;
+            i = 0;
+            v = 0;
+            while(i < sni_len) {
+                if(*s == '.') {
+                    ii = ii << 8;
+                    ii = ii | v;
+                    k++;
+                    v = 0;
+                } else {
+                    if(*s >= '0' && *s <= '9') {
+                        v *= 10;
+                        v += (*s - '0');
+                    } else {
+                        return false;
+                    }
+                }
+                s++;
+                i++;
+            }
+            ii = ii << 8;
+            ii = ii | v;
+            if(ii == ip) {
+                return true;
+            }
+        }
+    }
     
+    return false;
+}
+
+bool check_ja3_v3(unsigned char *payload, size_t payload_size, unsigned int ip) {
+    
+    unsigned int *v;
+    v = (unsigned int *)payload;
+    if((*v & 0x00ffffff) == 0x00010316) {
+        if(payload[5] == 0x01) {
+            unsigned int l;
+            l = rte_cpu_to_be_16(data16(payload,7));
+            if(l + 9 == payload_size) {
+                unsigned short *s;
+                s = (unsigned short *)(payload+9);
+                if(*s == 0x0303) {
+                    if(payload[43] == 32) { // session_id_length
+                        if(rte_cpu_to_be_16(data16(payload,43 + 1 + 32 )) == 74) { // cipher_suites_length
+                            unsigned long *q;
+                            q = (unsigned long *)(payload+78);
+                                     
+                            if( *q    == 0x2fc0a9cc2cc02bc0 && // cipher_suites
+                               *(q+1) == 0x9f009e00a8cc30c0 &&
+                               *(q+2) == 0x9ec0adc0acc0aacc &&
+                               *(q+3) == 0x27c024c023c09fc0 &&
+                               *(q+4) == 0x09c06b00670028c0 &&
+                               *(q+5) == 0x330014c013c00ac0 &&
+                               *(q+6) == 0x9cc09d009c003900 &&
+                               *(q+7) == 0x35003c003d009dc0 &&
+                               *(q+8) == 0x0313021301132f00) 
+                            {
+                                bool flag_supported_groups = false;
+                                unsigned char *server_name_block = nullptr;
+                                unsigned short server_name_block_sz;
+                                unsigned short comp_methods_length = rte_cpu_to_be_16(data16(payload,78 + 74 ));
+                                unsigned short extensions_length = rte_cpu_to_be_16(data16(payload,78 + 74 + 2 ));
+                                if(extensions_length + 156 == payload_size) {
+                                    unsigned short i, type, sz;
+                                    i = 0;
+                                    while(extensions_length + i < payload_size) { // TLS extensions
+                                        type = rte_cpu_to_be_16(data16(payload,78 + 74 + 2 + 2 + i)); 
+                                        sz = rte_cpu_to_be_16(data16(payload,78 + 74 + 2 + 4 + i));
+                                        if(type == 0) { // server name
+                                            if(i + 4 + sz <  payload_size) {
+                                                server_name_block = (unsigned char *)(payload + 78 + 74 + 2 + 2 + i + 4);
+                                                server_name_block_sz = sz;
+                                            }
+                                        }
+                                        if(type == 10) { // supported groups
+                                            if(sz == 20) {
+                                                unsigned long *e;
+                                                e = (unsigned long *)(payload + 78 + 74 + 2 + 4 + i + 4);
+                                                if(*e == 0x010117001e001d00) {
+                                                    e++;
+                                                    if(*e == 0x401030118000201) {
+                                                        flag_supported_groups = true;
+                                                        if(server_name_block != nullptr) {
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        i += 4 + sz;
+                                    }
+                                    if(flag_supported_groups) {
+                                        if(test_sni_eq_ip(server_name_block, server_name_block_sz, ip)) {
+                                            return true;
+                                        }
+                            
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
+
+void custom_analiz(SESSION *s, FRAME *frame) {
+
+    if(frame->payload_size > 0) {        
+        //check_ja3_v2(frame->payload, frame->payload_size);
+        //check_ja3_v3(frame->payload, frame->payload_size, frame->ipv4_dst_ip);
+        if(frame->SNI.size() > 0) {
+            unsigned char *q;
+            unsigned int *x;
+            
+            q = (unsigned char *)frame->SNI[0].c_str();
+            x = (unsigned int *)q;
+            printf("%x %x\n", x[0], x[1]);
+        }
+    };
+    printf("111111\n");
+    return;
+    /*
     if(frame->ipv4_dst_port == 443 && frame->payload_size > 0 && s->packet_count == 4) {
         unsigned int *v, l;
         unsigned short *s;
@@ -247,7 +332,7 @@ void custom_analiz(SESSION *s, FRAME *frame) {
                                                 if(*q == 0x3d009c009d003300) {
                                                     q++;
                                                     if(*q == 0xff002f0035003c00) {
-                                                        printf("443 %x\n", *q);
+                                                        printf("443");
                                                     }
                                                 }
                                             }
@@ -267,370 +352,8 @@ void custom_analiz(SESSION *s, FRAME *frame) {
     };
     
     return;
-    
-    /*
-    if(frame->ipv4_dst_port == 4500 && s->packet_count == 1 ) {
-        if(frame->payload_size > 100) {
-            unsigned int *v;
-            v = (unsigned int *)frame->payload;
-            if(*v == 0) {
-                v += 5;
-                if(*v == 0x08232035) {
-                    v++;
-                    if(*v == 0x01000000) {
-                        printf("1111111\n");
-                        global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
-                    }
-                }
-            }
-        }
-    }
-    
-    if(frame->ip_proto == 17 && frame->ipv4_dst_port == 65142 && s->packet_count == 1 ) { // udp
-        if(frame->payload[0] == 1 && frame->payload[1] == 0 && frame->payload[2] == 0 && frame->payload[3] == 0) {        
-                printf("wg\n");
-                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
-            }
-        
-    }
-    
-    if(frame->ip_proto == 17 && frame->ipv4_dst_port == 443 && s->packet_count == 1 ) { // udp
-        if(frame->payload_size == 86) {
-            if(frame->payload[0] == 0x38) {
-                printf("38\n");
-            }
-            if(frame->frame_size >= 94 && 
-               frame->payload_size == 86 &&
-               frame->payload[0] == 0x38     
-                    ) {
-                printf("62\n");
-                
-                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
-                
-            }        
-        }
-    }
-    
-    return;
-    
-    char ss[100];
-    
-    if(frame->ip_proto == 6 && frame->ipv4_dst_port == 443 && s->packet_with_payload_count == 1) {
-        if(frame->SNI.size() > 0) {
-            ipv4_to_char(frame->ipv4_dst_ip, ss);
-            if(frame->SNI[0] == ss) {
-                printf("pppp\n");
-                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
-            }
-        };
-        
-    }
-    
-    if(frame->ipv4_dst_port == 4500 && s->packet_count == 1 ) {
-        if(frame->payload_size > 100) {
-            if(frame->payload[0] == 0 && frame->payload[1] == 0 && frame->payload[2] == 0 && frame->payload[3] == 0) {        
-                printf("4500\n");
-                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
-            }
-        }
-    }
-  
-    if(frame->ip_proto == 17 && frame->ipv4_dst_port == 443 && s->packet_count == 1 ) { // udp
-        if(frame->payload_size == 148) {
-            
-            if(frame->payload[0] == 1 && frame->payload[1] == 0 && frame->payload[2] == 0 && frame->payload[3] == 0) {        
-                printf("wg\n");
-                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
-            }
-        }
-        
-    }
-    
-    if(frame->ip_proto == 17 && frame->ipv4_dst_port == 443 && s->packet_count == 1 ) { // udp
-        if(frame->payload_size == 86) {
-            if(frame->payload[0] == 0x38) {
-                printf("38\n");
-            }
-            if(frame->frame_size >= 94 && 
-               frame->payload_size == 86 &&
-               frame->payload[0] == 0x38     
-                    ) {
-                printf("62\n");
-                
-                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
-                
-            }        
-        }
-    }
+
     */
     
-    /*
-    if(frame->dns_responce) {
-        printf("%s\n", frame->dns_responce_name.c_str());
-    }
-    
-    if(frame->ip_proto == 17) { // udp
-        if(frame->payload_size > 20) {
-            if(frame->payload[0] == 0x38) {
-                printf("38\n");
-            }
-            if(frame->frame_size == 96 && 
-               frame->payload_size == 54 &&
-               frame->payload[0] == 0x38     
-                    ) {
-                printf("62\n");
-                
-                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
-                
-            }        
-        }
-    }
-    
-    return;
-    */
-    /*
-    
-    if(frame->ipv4_dst_port == 443) 
-    {
-        unsigned int *s;
-        s = (unsigned int *)frame->payload;
-        if(*s == 0x01030316) 
-        {
-        
-            unsigned short sz1, ver1, sz3, sz4;
-            unsigned int sz2, ofset, *v2;
-            
-            sz1 = get_i16(frame->payload[4], frame->payload[3]);
-            if(sz1 + 5 == frame->payload_size) {
-                if(frame->payload[5] == 0x01) {
-                    sz2 = get_i24(frame->payload[8], frame->payload[7], frame->payload[6]);        
-                    if(sz2 + 4 == sz1) {
-                        ver1 = get_i16(frame->payload[10], frame->payload[9]);
-                        if(ver1 == 0x0303) {
-                            if(frame->payload[43] == 0 ) {
-                                sz3 = get_i16(frame->payload[45], frame->payload[44]);
-                                if(sz3 == 50) {
-                                    unsigned long long *d;
-                                    d = (unsigned long long *)(frame->payload + 46);
-                                    if(*d == 0x2cc0031302130113) {
-                                        d++;
-                                        if(*d == 0xa9cc2fc030c02bc0) {
-                                            d++;
-                                            if(*d == 0x23c027c0aacca8cc) {
-                                                d++;
-                                                if(*d == 0x09c00ac024c028c0) {
-                                                    d++;
-                                                    if(*d == 0x13cc14cc13c014c0) {
-                                                        d++;
-                                                        if(*d == 0xadccacccabcc15cc) {
-                                                            ofset = 46 + 50;
-                                                            unsigned short type, sz, *v1 = (unsigned short *)(frame->payload + ofset); ofset+=2;
-                                                            if(*v1 == 0x0001) {
-                                                                sz4 = get_i16(frame->payload[ofset+1], frame->payload[ofset]); ofset += 2;
-                                                                if(sz4 + ofset == frame->payload_size) {
-                                                                    
-                                                                    while(sz4 > 0) {
-                                                                        type = get_i16(frame->payload[ofset+1], frame->payload[ofset]); ofset += 2;
-                                                                        sz   = get_i16(frame->payload[ofset+1], frame->payload[ofset]); ofset += 2;
-                                                                        if(type == 0x002b) { // tls.handshake.extension.type   supported_version
-                                                                            if(sz == 3) {
-                                                                                if(frame->payload[ofset] == 0x02 &&
-                                                                                   frame->payload[ofset+1] == 0x03 &&
-                                                                                   frame->payload[ofset+2] == 0x04 
-                                                                                  )
-                                                                                {
-                                                                                    printf("supported version only TLS 1.3\n");
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                        if(type == 0x000a) {
-                                                                            v2 = (unsigned int *)(frame->payload + ofset);
-                                                                            if(*v2 == 0x19000a00) {
-                                                                                v2++;
-                                                                                if(*v2 == 0x17001800) {
-                                                                                    v2++;
-                                                                                    if(*v2 == 0x00011500) {
-                                                                                        printf("aaa\n");
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                        unsigned long *x;
-                                                                        if(type == 0x000d) {
-                                                                            if(sz == 32) {
-                                                                                x = (unsigned long *)(frame->payload + ofset);
-                                                                                if(*x == 0x304030503061e00) {
-                                                                                    x++;
-                                                                                    if(*x == 0x5080b0806080302) {
-                                                                                        x++;
-                                                                                        if(*x == 0x106090804080a08) {
-                                                                                            x++;
-                                                                                            if(*x == 0x102010301040105) {
-                                                                                                x++;
-                                                                                            }
-                                                                                        }
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                        sz4 -= 4;                                                                        
-                                                                        ofset += sz;
-                                                                        sz4 -= sz;
-                                                                    }
-                                                                    
-                                                                    printf("++++\n");
-                                                                }                                                                
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }                                        
-                                    }
-                                    printf("160303\n"); 
 
-                                }
-                            }
-                        }
-                    }
-                }
-                
-            }
-            
-        }
-        
-    
-        
-    }
-    
-    if(frame->ipv4_dst_port == 80) {
-        if(frame->payload_size >= 38 && frame->payload_size < 255) {
-            if(frame->payload[0] == 0x82) {
-                unsigned char sz = frame->payload[1] & 0x3f;
-                if(sz+6 == frame->payload_size) {
-                    unsigned int *mask = (unsigned int *)&frame->payload[2];
-                    unsigned int *src, dst;
-                    src = (unsigned int *)(frame->payload+6);
-                    dst = (*src ^ *mask);
-                    if(dst == 0x00650000) { // 0x00006500
-                        src++;
-                        dst = (*src ^ *mask);
-                        if(dst == 0x00000100) { // 0x00006500 00010000
-                            src++;
-                            dst = (*src ^ *mask);
-                            if(dst == 0x20000066) { // 0x00006500 00010000 66000020
-                                src++;
-                                dst = (*src ^ *mask);
-                                if(dst == 0x00000002) { // 0x00006500000100006600002002000000
-                                    printf("+++\n");
-                                }
-                            }   
-                        }
-                    }
-                    pprint8(frame->payload);
-                    pprint8(frame->payload+8);
-                }
-            }
-        }
-    }
-    
-    return;
-    
-    if(s->packet_count == 0) {
-        printf("0\n");
-    }
-    if(frame->ip_proto == 6) {
-        if(frame->ipv4_dst_port == 443 || frame->ipv4_src_port == 443) {
-            if(s->packet_with_payload_count == 1 ) {
-                
-                if(is_ip(frame->ipv4_dst_ip, 192,168,1,86) ||
-                   is_ip(frame->ipv4_src_ip, 192,168,1,86) 
-                  ) 
-                {
-                    pprint8(frame->payload);
-                    printf("1\n");            
-                }
-            }
-        }
-    }
-
-
-    if( is_ip(frame->ipv4_dst_ip, 192,168,1,175) ||
-        is_ip(frame->ipv4_src_ip, 192,168,1,175) 
-      ) 
-    {
-        if(frame->ip_proto == 17) {
-            pprint8(frame->payload);
-            printf("1\n");            
-        }
-        return;
-    }
-    if( is_ip(frame->ipv4_dst_ip, 192,168,1,5) ||
-        is_ip(frame->ipv4_src_ip, 192,168,1,5) 
-      ) 
-    {
-        if(frame->ip_proto == 17) {
-            pprint8(frame->payload);
-            printf("1\n");            
-        }
-        return;
-    }
-    
-    if( is_ip(frame->ipv4_dst_ip, 192,168,1,195) ||
-        is_ip(frame->ipv4_src_ip, 192,168,1,195) 
-      ) 
-    {
-        if(frame->ip_proto == 17) {
-            
-            
-            
-            if( is_ip(frame->ipv4_src_ip, 192,168,1,195) ) {
-                if(frame->ipv4_dst_port == 4500) {
-                    printf("4500\n");
-                    global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
-                }
-                
-                if(frame->ipv4_dst_port == 443) {
-                    if(s->packet_count == 1) {
-                        if(  (frame->payload[0] >= 0x01 && frame->payload[0] <= 0x04)
-                                && frame->payload[1] == 0x00 
-                                && frame->payload[2] == 0x00 
-                                && frame->payload[3] == 0x00
-                           ) 
-                        {
-                            //pprint8(frame->payload);
-                            //printf("1\n"); 
-                            global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
-                        }
-                    }
-                }                
-            }
-            
-            if( is_ip(frame->ipv4_dst_ip, 192,168,1,195) ) {
-                if(frame->ipv4_src_port == 443) {
-                    if(        frame->payload[0] >= 0x01 && frame->payload[0] <= 0x04
-                            && frame->payload[1] == 0x00 
-                            && frame->payload[2] == 0x00 
-                            && frame->payload[3] == 0x00) {
-                        //pprint8(frame->payload);
-                        //printf("1\n");
-                        global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_src_ip);
-                    }
-                }
-            }
-        }
-        if(frame->ip_proto == 6) {
-            printf("1\n");
-            if(frame->SNI.size() > 0) {
-                for(auto& s : frame->SNI) {
-                    printf("[%s]\n", s.c_str());
-                }
-            }
-        }
-        return;
-    }
-    
-    char cc[100];
-    
-    */
 }

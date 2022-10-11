@@ -62,7 +62,7 @@ extern bool GLOBAL_STOP;
                     
                 } else {
                     if (event.type == ConfigureNotify) {
-                        printf("ConfigureNotify\n");
+                        //printf("ConfigureNotify\n");
                     } else {
                         if (event.type == ReparentNotify) {
                             printf("ReparentNotify\n");

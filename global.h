@@ -81,11 +81,13 @@ public:
     void set_WindowListBtnStart(bool v) {
         WindowListBtnStart = v;
     }
-    
-    
+    void test1();
+    int f_serial = -1;
+    void serial_io();
+    unsigned char need_write_serial_5bytes[5];
     
     GLOBAL() {
-        
+        for(int i=0;i<5;i++) need_write_serial_5bytes[i] = 0;
     }
 };
 

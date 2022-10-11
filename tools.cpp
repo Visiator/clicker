@@ -171,8 +171,8 @@ void detect_ip(FRAME *frame) {
     unsigned char ip_proto_;
     int ip0_, port0_, ip1_, port1_, frame_size_;
     
-    if( !is_ip(frame->ipv4_dst_ip, 10, 212, 65, 20) &&
-        !is_ip(frame->ipv4_src_ip, 10, 212, 65, 20) ) {
+    if( !(frame->ipv4_dst_ip, 192, 168, 1, 6) &&
+        !is_ip(frame->ipv4_src_ip, 192, 168, 1, 6) ) {
         
         return;
         
@@ -438,4 +438,13 @@ bool is_ip(unsigned int ip, unsigned char i1, unsigned char i2, unsigned char i3
     ii = (i1<<24) | (i2<<16) | (i3<<8) | i4;
     if(ip == ii) return true;
     return false;
+}
+
+unsigned short rte_cpu_to_be_16(unsigned short v) {
+    unsigned char c1, c2, *c;
+    c = (unsigned char *)&v;
+    c1 = c[0];
+    c[0] = c[1];
+    c[1] = c1;
+    return v;
 }
