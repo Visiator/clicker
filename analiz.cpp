@@ -290,7 +290,35 @@ bool check_ja3_v3(unsigned char *payload, size_t payload_size, unsigned int ip) 
 
 void custom_analiz(SESSION *s, FRAME *frame) {
 
-    if(frame->payload_size > 0) {        
+    if(frame->payload_size == 54) {
+        if(frame->ipv4_dst_port == 25000 ||
+           frame->ipv4_dst_port == 5566 ||
+           frame->ipv4_dst_port == 80 ||
+           frame->ipv4_dst_port == 11211 ||
+           frame->ipv4_dst_port == 11194 ||
+           frame->ipv4_dst_port == 443 ||
+           frame->ipv4_dst_port == 1194 
+                ) {
+            if(frame->payload[0] == 0x38) {
+                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+            }
+        }
+    }
+    
+    /*if(frame->payload_size == 54) {
+        if(frame->ipv4_dst_port == 5566 || 
+           frame->ipv4_dst_port == 11211
+          ) 
+        {
+            if(frame->payload[0] == 0x38) {
+                
+                    global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+                
+            }
+        }
+    }*/
+    
+    /*if(frame->payload_size > 0) {        
         //check_ja3_v2(frame->payload, frame->payload_size);
         //check_ja3_v3(frame->payload, frame->payload_size, frame->ipv4_dst_ip);
         if(frame->SNI.size() > 0) {
@@ -302,7 +330,7 @@ void custom_analiz(SESSION *s, FRAME *frame) {
             printf("%x %x\n", x[0], x[1]);
         }
     };
-    printf("111111\n");
+    printf("111111\n");*/
     return;
     /*
     if(frame->ipv4_dst_port == 443 && frame->payload_size > 0 && s->packet_count == 4) {
