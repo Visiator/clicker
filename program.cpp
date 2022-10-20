@@ -6,6 +6,7 @@
 #include "program.h"
 #include "global.h"
 #include "tools.h"
+
 #include <dirent.h>
 #include <algorithm> 
 #include "GUI/GUI.h"
@@ -313,15 +314,15 @@ void PROGRAMS::execute() {
         for(auto& p : item_) {
             if(p.need_run) {
                 p.need_run = false;
-                p.is_run = true;
+                p.is_run_program = true;
                 p.next_step = 0;
                 p.init();
             }
             if(p.need_stop) {
                 p.need_stop = false;
-                p.is_run = false;
+                p.is_run_program = false;
             }
-            if(p.is_run) {
+            if(p.is_run_program) {
                 p.execute_next_step();
             };
         }
@@ -511,7 +512,7 @@ bool SPRITE::detect_sprite(SCREEN *src) {
     } else {
         is_detected = false;
     }
-    
+    return is_detected;
     /*int x, y, xx, yy;
     
     y = 0;
@@ -543,7 +544,7 @@ bool SPRITE::detect_sprite(SCREEN *src) {
 }
 
 void PROGRAM::print(char *s) {
-    
+    print_out_add(s);
 }
 
 void PROGRAM::execute_next_step() {
@@ -657,3 +658,18 @@ void PROGRAM::exec_set(std::string v1, std::string v2, std::string v3) {
     
     it->second = calc_value(v3);
 }
+
+void PROGRAM::print_out_lock() {
+    //print_out_mutex.lock();
+}
+
+void PROGRAM::print_out_unlock() {
+    //print_out_mutex.unlock();
+}
+
+void PROGRAM::print_out_add(std::string s) {
+    if(print_out.size() < 20) {
+        print_out.push_back(s);
+    }
+}
+

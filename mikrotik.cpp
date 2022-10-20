@@ -311,11 +311,11 @@ bool MIKROTIK::set_firewall_ip(unsigned int _ip) {
 }
 
 void MIKROTIK::lock() {
-    mutex.lock();
+    mmutex.lock();
 }
     
 void MIKROTIK::unlock() {
-    mutex.unlock();
+    mmutex.unlock();
 }
 
 void MIKROTIK::set_mikrotik_info(ELEMENT *v) {

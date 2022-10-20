@@ -262,6 +262,9 @@ void GUI::create_elements() {
     q = elements.add(this, PanelProg_id, ELEMENT::Type::ProgramText ,  5, 115, 350, 850, COLOR::ProgTextBG, COLOR::ProgText, "ProgText");
     ProgText_id = q->id;
     
+    q = elements.add(this, PanelProg_id, ELEMENT::Type::Print ,  370, 115, 350, 850, COLOR::ProgTextBG, COLOR::ProgText, "Print");
+    Print_id = q->id;
+    
     q = elements.add(this, PanelIf_id, ELEMENT::Type::List,  5, 25, 180, 325, COLOR::ListBG, COLOR::ListBorder, "Interface");
     IfList_id = q->id;
     
@@ -327,6 +330,7 @@ void GUI::create_elements() {
     
     ProgText = elements.get_element_by_id(ProgText_id);
     ProgText->program = &(programs.item_[0]);
+    Print = elements.get_element_by_id(Print_id);
     
     PanelIf = elements.get_element_by_id(PanelIf_id);
     PanelPcap = elements.get_element_by_id(PanelPcap_id);

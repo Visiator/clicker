@@ -79,9 +79,6 @@ int main(int argc, char** argv) {
     std::vector<std::string> list;
 
     mikrotik.set_ip_login_pass("192.168.5.5", "admin", "Qq1233!!");
-    //mikrotik.set_firewall_ip("54.55.66.77");
-    
-    //mikrotik.set_firewall_ip(0x11223344);
     
     programs.init();
     
@@ -93,8 +90,7 @@ int main(int argc, char** argv) {
     
     Load_NetIfList(gui.IfList);
     Load_Folders(gui.FoldersList);
-    //->item.push_back({ELEMENT_item::ListItem, "If1"});
-
+    
     std::vector<std::string> lst;
     
     webcams.init(&lst, &programs.grab_screen_buffer, &programs.item_[0]);

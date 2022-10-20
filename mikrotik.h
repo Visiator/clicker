@@ -36,7 +36,7 @@ private:
 
     std::string _ip, _login, _pass;
 
-    std::mutex mutex;
+    std::mutex mmutex;
     
     void lock();
     void unlock();

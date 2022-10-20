@@ -146,6 +146,26 @@ void ELEMENT::paint(SCREEN_BUFFER *screen) {
     int px = getx(), py = gety(), ww;
     if(parent != nullptr) parent->get_parent_xy(&px, &py);
     
+    if(type == Type::Print) {
+        px = getx(), py = gety();
+        if(parent != nullptr) parent->get_parent_xy(&px, &py);
+        
+        screen->fill(px, py, getw(), geth(), bg_color);
+
+        screen->rectangle(px, py, getw(), geth(), border_color);
+        if(program != nullptr) {
+            x = 5;
+            y = 5;
+            
+            for(auto const& p : program->print_out) {
+                screen->fonts.print(px + x, py + y, "arial", 12, p.c_str(), 0xffffff);
+                
+                y += 20;
+            }
+        }
+        return;
+    }
+    
     if(type == Type::ProgramText) {
         px = getx(), py = gety();
         if(parent != nullptr) parent->get_parent_xy(&px, &py);

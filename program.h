@@ -13,6 +13,7 @@
 #ifndef PROGRAM_H
 #define PROGRAM_H
 
+#include <mutex>
 #include <vector>
 #include <string>
 #include <thread>
@@ -117,17 +118,22 @@ public:
     std::map<std::string, std::string> vars;
     int idx = 0;
     
-
+    std::vector<std::string> print_out;
+    std::mutex p_mutex;
+    void print_out_lock();
+    void print_out_unlock();
+    void print_out_add(std::string s);
+    
     void load();
     void load_text(std::string& FolderName);
     void detect_sprites(SCREEN *src);
     void compile();
     
-    bool is_run = false;
+    bool is_run_program = false;
     bool need_run = false;
     bool need_stop = false;
-    void run()  { need_run = true;  };
-    void stop() { need_stop = true; };
+    void run()  { print_out_add("run"); need_run = true;  };
+    void stop() { print_out_add("stop"); need_stop = true; };
     
     int get_label_idx(std::string s);
     int get_else_idx(int v);
@@ -147,7 +153,35 @@ public:
 
     
     std::vector<PROGRAM_line> line;
-    PROGRAM(int idx) : idx(idx), is_run(false) {};
+    
+    void copy_from_src(const PROGRAM& src) {
+        while(is_run_program) {
+            usleep(1);
+        }
+        for(int i=0;i<10;i++) ttimer[i] = src.ttimer[i];
+        sprite = src.sprite;
+        idx = src.idx;
+        vars = src.vars;
+        print_out = src.print_out;
+        //p_mutex = src.p_mutex;
+    }
+    PROGRAM& operator=(PROGRAM&& src) {
+        copy_from_src(src);
+        return *this;
+    }
+    PROGRAM& operator=(const PROGRAM& src) {
+        
+        return *this;
+    }   
+    PROGRAM(int idx) : idx(idx), is_run_program(false) {};
+    PROGRAM(PROGRAM&& src) {
+        *this = std::move(src);
+    }
+    PROGRAM(const PROGRAM& src) {
+        if(this != &src) {
+            copy_from_src(src);
+        }
+    }
     ~PROGRAM(){};
 };
 

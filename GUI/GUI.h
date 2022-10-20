@@ -137,11 +137,11 @@ public:
     std::queue<UI_ACTION> ui_action;
     
     unsigned int TabIf_id = 0, TabPcap_id = 0, TabGrab_id = 0, TabProg_id = 0, PanelPcap_id = 0, PanelGrab_id = 0, PanelProg_id = 0, View_id = 0
-    , Mikrotik_to_txt_id = 0, Mikrotik_from_txt_id = 0, test1_id = 0, SpriteList_id = 0, ProgText_id = 0;
+    , Mikrotik_to_txt_id = 0, Mikrotik_from_txt_id = 0, test1_id = 0, SpriteList_id = 0, ProgText_id = 0, Print_id = 0;
     
     ELEMENT *TabIf = nullptr, *TabPcap = nullptr, *TabGrab = nullptr, *TabProg = nullptr
             , *PanelIf = nullptr, *PanelPcap = nullptr, *PanelGrab = nullptr, *PanelProg = nullptr, *View = nullptr
-            , *Mikrotik_to_txt = nullptr, *Mikrotik_from_txt = nullptr, *test1 = nullptr, *SpriteList = nullptr, *ProgText = nullptr;
+            , *Mikrotik_to_txt = nullptr, *Mikrotik_from_txt = nullptr, *test1 = nullptr, *SpriteList = nullptr, *ProgText = nullptr, *Print = nullptr;
     
     unsigned int WindowList_id = 0, WindowListBtn_id = 0, PanelIf_id = 0, Memo1_id = 0, ProgramList_id = 0, IfList_id = 0, FoldersList_id = 0, FilesList_id = 0, PCAPinfo_id = 0, SnifRun_id = 0;
     unsigned int WindowListBtnStart_id = 0;

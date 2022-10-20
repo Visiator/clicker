@@ -123,7 +123,7 @@ public:
     
     enum Type 
     {
-        Undefine, Edit, Memo, Field, List, Panel, PCAPinfo, Button, View, MikrotikInfo, SpriteList, ProgramText
+        Undefine, Edit, Memo, Field, List, Panel, PCAPinfo, Button, View, MikrotikInfo, SpriteList, ProgramText, Print
     };
     _FRAME green_rec;
     GUI *gui;
