@@ -59,7 +59,7 @@ public:
     bool is_need_block_complete, is_need_block_show;
     
     
-    std::string dns;
+    std::string dns_name;
     
     void ssave(FILE *f) {
         //fprintf(f, "", );
@@ -82,7 +82,7 @@ public:
         direction = undefined;
         dhcp_request = false; dhcp_responce = false;
         dns_request = false; dns_responce = false;
-        dns = "";
+        dns_name = "";
         size = 0;
         payload_size = 0;
         packet_count = 0;
@@ -135,8 +135,9 @@ public:
             return;
         }
     }
-    SESSION() {
+    SESSION(std::string dns_name_) {
         clean();
+        dns_name = dns_name_;
     };
 };
 

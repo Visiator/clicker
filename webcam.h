@@ -8,8 +8,12 @@
 
 #include <linux/videodev2.h>
 
-#define IMAGE_WIDTH     640
-#define IMAGE_HEIGHT    480
+#include "GUI/GUI_Primitives.h"
+
+#define IMAGE_WIDTH     1920
+#define IMAGE_HEIGHT    1080
+
+class PROGRAM;
 
 struct buffer {
         void   *start;
@@ -32,6 +36,7 @@ public:
         };
         return *this;
     }
+    
     WEBCAM(const WEBCAM& src) {
         this->name  = src.name;
     }
@@ -47,11 +52,13 @@ public:
 
 class WEBCAMS {
 public:
-    
+    SCREEN *src = nullptr;
     buffer* devbuffer = nullptr;
+    PROGRAM *program = nullptr;
+    
     
     std::vector<WEBCAM> item;
-    void init(std::vector<std::string> *list);
+    void init(std::vector<std::string> *list, SCREEN *scr_, PROGRAM *program_);
     
     bool execute_is_run = false;
     std::thread* execute_thread = nullptr;

@@ -196,7 +196,7 @@ void PCAP::analiz(int frame_no, unsigned char *buf, int buf_size) {
     
     frame.clean();
     
-    // 2022 save_hex_dump_for_Wireshark(frame_no, buf, buf_size);
+    // 2022  (frame_no, buf, buf_size);
     
     if(frame_no == 210) {
         printf("210\n");

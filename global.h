@@ -74,7 +74,8 @@ public:
     
     void active_IF_tab();
     void active_PCAP_tab();
-    void active_CLICKER_tab();
+    void active_GRAB_tab();
+    void active_PROG_tab();
     
     unsigned int WindowListId = 0;
     bool WindowListBtnStart = false;

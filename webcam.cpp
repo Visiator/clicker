@@ -12,13 +12,17 @@
 
 #include "webcam.h"
 #include "tools.h"
+#include "program.h"
 #include "GUI/GUI_Primitives.h"
 
 extern bool GLOBAL_STOP;
 
-TEXTURA tt;
+//TEXTURA tt;
 
-void WEBCAMS::init(std::vector<std::string> *list) {
+void WEBCAMS::init(std::vector<std::string> *list, SCREEN *src_, PROGRAM *program_) {
+    
+    src = src_;
+    program = program_;
     
     struct v4l2_capability device_params;
     
@@ -39,6 +43,7 @@ void WEBCAMS::init(std::vector<std::string> *list) {
             
             item.push_back({s, driver, card, bus_info});
             a = s+" | "+driver+" | "+card+" | "+bus_info;
+            printf("%s\n", a.c_str());
             list->push_back(a);
         };
         
@@ -153,6 +158,9 @@ void WEBCAMS::execute() {
     
     while(GLOBAL_STOP == false) {
         getFrame(fd, "111");
+        if(program != nullptr) {
+            program->detect_sprites(src);
+        }
         usleep(100);
     }
     closeDevice(fd);
@@ -200,7 +208,7 @@ void WEBCAMS::getFrame(int fd, std::string file_name)
     {
         if(readFrame(fd, "file_name.jpg"))
            break;
-
+        if(GLOBAL_STOP != false) break; 
         i++;
     }
 
@@ -216,6 +224,8 @@ int WEBCAMS::readFrame(int fd, std::string file_name)
     buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     buf.memory = V4L2_MEMORY_MMAP;
 
+    buf.length = 0;
+
     if (xioctl(fd, VIDIOC_DQBUF, &buf) == EAGAIN) {
             return 0;
     };
@@ -228,24 +238,105 @@ int WEBCAMS::readFrame(int fd, std::string file_name)
     int i=0, j=0;
     
     int r, g, b;
+    int r1, g1, b1;
+    int r2, g2, b2;
+    int r3, g3, b3;
+    int r4, g4, b4;
     float y1, y2, u, v;
     
-    if(buf.length == 614400) {
-        tt.set_size(640, 480);
+    //if(buf.length == 614400) {
+    //    src->set_size(640, 480);
+    //if(buf.length == 691200) {
+    if(buf.length == 4147200) {
+        src->set_size(IMAGE_WIDTH/2, IMAGE_HEIGHT/2); // 960 * 540 = 518400
+    
         unsigned int *q;
         unsigned char *w;
         w = (unsigned char *)temp->start;
-        q = tt.buf;
+        q = src->buffer;
         
-        while(i<614400) {
+        int x, xx, y, yy;
+        y = 0;
+        j = 0;
+        while(y < IMAGE_HEIGHT/2) {
+            
+            x = 0;
+            while(x < IMAGE_WIDTH/2) {
+
+                
+                ////////////////////////////////////////////////////////////////
+                    y1 = w[i];
+                    u =  w[i+1];
+                    y2 = w[i+2];
+                    v =  w[i+3];
+
+                    r1 = y1 + 1.402 * (v-128);
+                    g1 = y1 - 0.714 * (v-128) - 0.344 * (u-128);
+                    b1 = y1 + 1.772 * (u-128);
+
+                    if(r1 < 0) r1 = 0;            if(r1 > 255) r1 = 255;
+                    if(g1 < 0) g1 = 0;            if(g1 > 255) g1 = 255;
+                    if(b1 < 0) b1 = 0;            if(b1 > 255) b1 = 255;
+
+                    r2 = y2 + 1.402 * (v-128);
+                    g2 = y2 - 0.714 * (v-128) - 0.344 * (u-128);
+                    b2 = y2 + 1.772 * (u-128);
+
+                    if(r2 < 0) r2 = 0;            if(r2 > 255) r2 = 255;
+                    if(g2 < 0) g2 = 0;            if(g2 > 255) g2 = 255;
+                    if(b2 < 0) b2 = 0;            if(b2 > 255) b2 = 255;
+
+                    ////////////////////////////////////////////////////////////
+
+                    y1 = w[i + IMAGE_WIDTH*2];
+                    u =  w[i+1 + IMAGE_WIDTH*2];
+                    y2 = w[i+2 + IMAGE_WIDTH*2];
+                    v =  w[i+3 + IMAGE_WIDTH*2];
+
+                    r3 = y1 + 1.402 * (v-128);
+                    g3 = y1 - 0.714 * (v-128) - 0.344 * (u-128);
+                    b3 = y1 + 1.772 * (u-128);
+
+                    if(r3 < 0) r3 = 0;            if(r3 > 255) r3 = 255;
+                    if(g3 < 0) g3 = 0;            if(g3 > 255) g3 = 255;
+                    if(b3 < 0) b3 = 0;            if(b3 > 255) b3 = 255;
+
+                    r4 = y2 + 1.402 * (v-128);
+                    g4 = y2 - 0.714 * (v-128) - 0.344 * (u-128);
+                    b4 = y2 + 1.772 * (u-128);
+
+                    if(r4 < 0) r4 = 0;            if(r4 > 255) r4 = 255;
+                    if(g4 < 0) g4 = 0;            if(g4 > 255) g4 = 255;
+                    if(b4 < 0) b4 = 0;            if(b4 > 255) b4 = 255;
+
+                    
+                    ////////////////////////////////////////////////////////////
+                    
+                    r = (r1 + r2 + r3 + r4)/4;
+                    g = (g1 + g2 + g3 + g4)/4;
+                    b = (b1 + b2 + b3 + b4)/4;
+                    
+                    g = g << 8;
+                    r = r << 16;
+
+                    src->buffer[j++] = r | g | b;
+                    i += 4;
+                ////////////////////////////////////////////////////////////////
+                    
+                
+                x += 1;
+            }
+            i += IMAGE_WIDTH * 2;
+            y += 1;
+        }
+        i += 2;
+        /***
+        //while(i<614400) {
+        while(i<4147200) {
             y1 = w[i];
             u =  w[i+1];
             y2 = w[i+2];
             v =  w[i+3];
-            
-            //r = y1 + 1.4065 * (v - 128);			     //r0
-            //g = y1 - 0.3455 * (u - 128) - 0.7169 * (v - 128); //g0
-            //b = y1 + 1.1790 * (u - 128);			     //b0
             
             r = y1 + 1.402 * (v-128);
             g = y1 - 0.714 * (v-128) - 0.344 * (u-128);
@@ -255,36 +346,26 @@ int WEBCAMS::readFrame(int fd, std::string file_name)
             if(g < 0) g = 0;            if(g > 255) g = 255;
             if(b < 0) b = 0;            if(b > 255) b = 255;
             
-            
-            
             g = g << 8;
             r = r << 16;
             
-            tt.buf[j++] = r | g | b;
-            
-            //r = y2 + 1.4065 * (v - 128);			     //r0
-            //g = y2 - 0.3455 * (u - 128) - 0.7169 * (v - 128); //g0
-            //b = y2 + 1.1790 * (u - 128);			     //b0
+            src->buffer[j++] = r | g | b;
             
             r = y2 + 1.402 * (v-128);
             g = y2 - 0.714 * (v-128) - 0.344 * (u-128);
             b = y2 + 1.772 * (u-128);
             
-            //R = Y + 1.402V
-            //G = Y - 0.344U - 0.714V
-            //B = Y + 1.772U
-            
             if(r < 0) r = 0;            if(r > 255) r = 255;
             if(g < 0) g = 0;            if(g > 255) g = 255;
             if(b < 0) b = 0;            if(b > 255) b = 255;
             
-            
             g = g << 8;
             r = r << 16;
             
-            tt.buf[j++] = r | g | b;
+            src->buffer[j++] = r | g | b;
             i += 4;
         }
+        ***/
     }
     
     return 1;
@@ -387,3 +468,4 @@ int WEBCAMS::setfmtCamera(int fd)
 		(format.fmt.pix.pixelformat>>24)&0xff);
 	return 0;
 }
+

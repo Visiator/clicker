@@ -3,6 +3,7 @@
 #include "pcap.h"
 #include "GUI_Element.h"
 #include "GUI_Primitives.h"
+#include "../program.h"
 
 #include "GUI.h"
 
@@ -58,6 +59,22 @@ void ELEMENT::paint_green_rec(SCREEN_BUFFER *screen, int px, int py) {
     
 }
 
+void generate_file_name(const char *dir, char *file_name) {
+    struct timeval tv;
+    gettimeofday(&tv,nullptr);
+    struct tm       *tm;
+    char buf[100];
+    if((tm = localtime(&tv.tv_sec)) != NULL)
+    {
+        strftime(buf, 100, "%Y-%m-%d_%H-%M-%S", tm);
+    };
+    
+    
+    sprintf(file_name, "%s/%s.bmp", dir, buf);
+    
+    //return (tv.tv_sec*1000+tv.tv_usec/1000);
+}
+
 void ELEMENT::paint_green_rec_x2(SCREEN_BUFFER *screen, int px, int py) {
 
     if(grab_screen == nullptr || grab_screen->buffer == nullptr || grab_screen->w == 0) return;
@@ -91,11 +108,27 @@ void ELEMENT::paint_green_rec_x2(SCREEN_BUFFER *screen, int px, int py) {
     };
     if(need_save_bmp) {
         FILE *f;
-        f = fopen("11.bmp", "wb");
-        save_textura_to_BMP_file_(f, bf, ww, hh);
-        fclose(f);
+        char file_name[100], file_name_info[100];
+        generate_file_name("progs/prg0", file_name);
+        f = fopen(file_name, "wb");
+        if(f != NULL) {
+            save_textura_to_BMP_file_(f, bf, ww, hh);
+            fclose(f);
+            strcpy(file_name_info, file_name);
+            strcat(file_name_info, "_info");
+            f = fopen(file_name_info, "wb");
+            if(f != NULL) {
+                save_textura_info(f, green_rec.x, green_rec.y, (char *)"");
+                fclose(f);
+            };
+            
+            program->sprite.push_back({file_name});
+            
+        } else {
+            printf("open file error\n");
+        }
         need_save_bmp = false;
-        
+        delete[] bf;
         printf("save bmp\n");
     };
 
@@ -109,9 +142,72 @@ void ELEMENT::paint(SCREEN_BUFFER *screen) {
         if(q->is_visible == false) return;
         q = q->parent;
     }
-    int dx = 0, dy = 0;
+    int dx = 0, dy = 0, i, x, y;
     int px = getx(), py = gety(), ww;
     if(parent != nullptr) parent->get_parent_xy(&px, &py);
+    
+    if(type == Type::ProgramText) {
+        px = getx(), py = gety();
+        if(parent != nullptr) parent->get_parent_xy(&px, &py);
+        
+        screen->fill(px, py, getw(), geth(), bg_color);
+
+        screen->rectangle(px, py, getw(), geth(), border_color);
+        if(program != nullptr) {
+            x = 5;
+            y = 5;
+            for(auto const& ln : program->line) {
+                screen->fonts.print(px + x, py + y, "arial", 12, ln.info.c_str(), 0xffffff);
+                screen->fonts.print(px + x+200, py + y, "arial", 12, ln.raw.c_str(), 0xcccccc);
+                y += 20;
+            }
+        }
+        return;
+    }
+    
+    if(type == Type::SpriteList) {
+        px = getx(), py = gety();
+        if(parent != nullptr) parent->get_parent_xy(&px, &py);
+        
+        screen->fill(px, py, getw(), geth(), bg_color);
+
+        screen->rectangle(px, py, getw(), geth(), border_color);
+        
+        i = 0;
+        x = 5;
+        y = 5;
+        int max_h = 0;
+        while(i < program->sprite.size()) {
+        
+            if(px + x + program->sprite[i].w + 5 > w) {
+                x = 5;
+                y += max_h + 5;
+            } 
+            
+            if(max_h < program->sprite[i].h) {
+                max_h = program->sprite[i].h;
+            }
+            
+            screen->fill(px + x, py + y, program->sprite[i].w, program->sprite[i].h, program->sprite[i].bitmap);
+            
+            unsigned int clr;
+            clr = border_color;
+            if(program->sprite[i].is_detected) {
+                clr = 0xff00ff;
+                //screen->rectangle(px+program->sprite[i].is_detected_x, py+program->sprite[i].is_detected_y, program->sprite[i].w, program->sprite[i].h, clr);
+            } else {
+                clr = bg_color;
+            }
+            
+            screen->rectangle(px + x-1, py + y-1, program->sprite[i].w+2, program->sprite[i].h+2, clr);
+            screen->rectangle(px + x-2, py + y-2, program->sprite[i].w+4, program->sprite[i].h+4, clr);
+            
+            x += program->sprite[i].w+5;
+            i++;
+        }
+        
+        return;
+    }
     
     if(type == Type::MikrotikInfo) {
         px = getx(), py = gety();
@@ -157,7 +253,11 @@ void ELEMENT::paint(SCREEN_BUFFER *screen) {
             hh = grab_screen->h < h ? grab_screen->h : h;
             for(int j=0;j<hh;j++) {
                 q = screen->buffer + (py+j)*screen->w + px;
-                for(int i=0;i<ww;i++) *q++ = *v++;
+                v = grab_screen->buffer + j*grab_screen->w;
+                for(int i=0;i<ww;i++) {
+                    *q++ = *v++;
+
+                }
             };
             grab_screen->unlock();            
         }
@@ -166,6 +266,14 @@ void ELEMENT::paint(SCREEN_BUFFER *screen) {
         
         paint_green_rec_x2(screen, px, py);
         
+        i = 0;
+        while(i < program->sprite.size()) {
+
+            if(program->sprite[i].is_detected) {
+                screen->rectangle(px+program->sprite[i].is_detected_x, py+program->sprite[i].is_detected_y, program->sprite[i].w, program->sprite[i].h, 0xff00ff);
+            }
+            i++;
+        }
         return;
     }
     

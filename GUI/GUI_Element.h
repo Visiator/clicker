@@ -23,6 +23,7 @@
 class GUI;
 //class PCAP;
 class ELEMENT;
+class PROGRAM;
 
 class ELEMENT_item : public RECTANGLE {
 public:
@@ -122,7 +123,7 @@ public:
     
     enum Type 
     {
-        Undefine, Edit, Memo, Field, List, Panel, PCAPinfo, Button, View, MikrotikInfo
+        Undefine, Edit, Memo, Field, List, Panel, PCAPinfo, Button, View, MikrotikInfo, SpriteList, ProgramText
     };
     _FRAME green_rec;
     GUI *gui;
@@ -138,7 +139,7 @@ public:
     SCREEN *grab_screen = nullptr;
     bool need_save_bmp = false;
     unsigned int info1, info2;
-    
+    PROGRAM *program = nullptr;
     
     std::vector<ELEMENT_item> item;
     void get_parent_xy(int *px, int *py);
@@ -164,6 +165,7 @@ public:
         type = src.type;
         caption = src.caption;
         item = src.item;            
+        program = src.program;
         RECTANGLE::copy_from_src(src); 
     }
     

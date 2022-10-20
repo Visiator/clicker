@@ -146,6 +146,7 @@ public:
     std::string dns_request_name;
     std::string dns_responce_name;
     unsigned int session_size, session_payload_size, session_packet_count, session_packet_with_payload_count;
+    std::string  session_dns_name;
     bool is_ipv4_fragment;
     std::vector<CERT> cert_list;
     int cert_count;
@@ -281,6 +282,7 @@ public:
         session_payload_size = 0;
         session_packet_count = 0;
         session_packet_with_payload_count = 0;
+        session_dns_name = "";
         
         eth2_buf = nullptr;
         eth2_buf_size = 0;

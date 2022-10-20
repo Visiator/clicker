@@ -11,7 +11,7 @@
 #include "sessions.h"
 #include "tools.h"
 
-extern std::map<unsigned int, std::string> global_dns_list;
+std::map<unsigned int, std::string> global_dns_list;
 extern SESSIONS sessions;
 
 
@@ -52,10 +52,8 @@ void FRAME::add_dns_responce(char *name, unsigned int ip) {
     s = name;
     std::pair<unsigned int, std::string> pp;
     pp = std::make_pair(ip, s);
-
-    
  
-    // 2022 global_dns_list.insert(pp);  
+    global_dns_list.insert(pp);  
     
     //save_to_file_DNS_LIST(ip, name);
 }
@@ -143,6 +141,7 @@ void FRAME::get_packet_no_from_session(SESSIONS &sessions) {
     session_payload_size = it->second.payload_size;
     session_packet_count = it->second.packet_count;
     session_packet_with_payload_count = it->second.packet_with_payload_count;
+    session_dns_name = it->second.dns_name;
     
 }
 

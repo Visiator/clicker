@@ -13,6 +13,7 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
+#include <vector>
 #include <stdio.h>
 #include <string.h>
 
@@ -37,8 +38,16 @@ void detect_ip(FRAME *frame);
 int get_ui8(unsigned char *item, int idx, unsigned char *v, int index);
 int get_ui16(unsigned char *item, int idx, unsigned short *v, int index);
 int get_ui16_R(unsigned char *item, int idx, unsigned short *v, int index);
+void save_textura_info(FILE *f, int x, int y, char *nic);
 void save_textura_to_BMP_file_(FILE *f, unsigned int *bitmap, int w, int h);
+void load_from_BMP_buffer(unsigned char *buf, unsigned int buf_size, std::vector<unsigned int> &bitmap, unsigned int &w, unsigned int &h);
 bool is_ip(unsigned int ip, unsigned char i1, unsigned char i2, unsigned char i3, unsigned char i4);
+std::string get_word(std::string s);
+std::string del_word(std::string s);
+std::string rl_trim(std::string s);
+std::string remove_double_space(std::string s);
+
+int my_atoi(const char *v);
 
 #endif /* TOOLS_H */
 

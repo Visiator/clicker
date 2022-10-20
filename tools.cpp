@@ -327,6 +327,7 @@ void detect_ip(FRAME *frame) {
     fprintf(f, "udp:%05d:%05d\n", udp_val_e, udp_val_i);   
     fprintf(f, "sni:%s\n", sni);
     fprintf(f, "cert:%s\n", cert);
+    fprintf(f, "dns_name:%s\n", frame->session_dns_name.c_str());
     
     fclose(f);
     
@@ -363,6 +364,12 @@ void write4(FILE *f, unsigned int v) {
     
 void write3(FILE *f, unsigned char b, unsigned char g, unsigned char r) {
     fprintf(f, "%c%c%c", b, g, r);
+}
+
+void save_textura_info(FILE *f, int x, int y, char *nic) {
+    fprintf(f, "x:%d\n", x);
+    fprintf(f, "y:%d\n", y);
+    fprintf(f, "nic:%s\n", nic);
 }
 
 void save_textura_to_BMP_file_(FILE *f, unsigned int *bitmap, int w, int h) {
@@ -447,4 +454,199 @@ unsigned short rte_cpu_to_be_16(unsigned short v) {
     c[0] = c[1];
     c[1] = c1;
     return v;
+}
+
+void load_from_BMP_buffer(unsigned char *buf, unsigned int buf_size, std::vector<unsigned int> &bitmap, unsigned int &w, unsigned int &h) {
+        int inverse = 0;
+
+        if (buf == nullptr) return;
+        //if (bitmap != nullptr) delete[] bitmap;
+
+        //bitmap = nullptr;
+        w = 0;
+        h = 0;
+
+        if(buf_size < 50) return;
+
+        unsigned short *bfType, *bfReserved1, *bfReserved2;
+        unsigned int *bfSize, *bfOffBits;
+
+        bfType = (unsigned short *)&(buf[0]);
+        bfSize = (unsigned int *)&(buf[2]);
+        bfReserved1 = (unsigned short *)&(buf[6]);
+        bfReserved2 = (unsigned short *)&(buf[8]);
+        bfOffBits = (unsigned int *)&(buf[10]);
+
+
+        if (*bfType != 0x4d42) return;
+
+
+        unsigned int *BITMAPINFO_ver, *biWidth, *biHeight, *biCompression, *biSizeImage, *biClrUsed, *biClrImportant;
+        unsigned short *biBitCount;
+
+        int i, j, delta, x, y;
+        //unsigned int *q;
+        delta = *bfOffBits;
+
+        BITMAPINFO_ver = (unsigned int *)&(buf[14]);
+
+        if (*BITMAPINFO_ver == 40) {
+                biWidth = (unsigned int *)&(buf[14 + 0x04]);
+                biHeight = (unsigned int *)&(buf[14 + 0x08]);
+                biBitCount = (unsigned short *)&(buf[14 + 0x0e]);
+                biCompression = (unsigned int *)&(buf[14 + 0x10]);
+                biSizeImage = (unsigned int *)&(buf[14 + 0x14]);
+                biClrUsed = (unsigned int *)&(buf[14 + 0x20]);
+                biClrImportant = (unsigned int *)&(buf[14 + 0x24]);
+                if (*biCompression == 0 && *biBitCount == 24) {
+                    
+                        w = *biWidth;
+                        h = *biHeight;
+
+                        bitmap.resize(w * h);
+                        
+                        //bitmap = new unsigned int[w * h]; 
+                        
+                        w = *biWidth;
+                        h = *biHeight;
+                        
+                        //q = (unsigned int *)bitmap;
+                        char cc[4];
+                        unsigned int *qq;
+                        qq = (unsigned int *)cc;
+                        
+                        i = delta;
+                        for (y = h - 1; y >= 0; y--) {
+                                j = 0;
+                                for (x = 0; x < w; x++) {
+                                
+                                    if(i+3 >= buf_size) {
+                                        
+                                        return;
+                                    }
+                                    
+                                        if (inverse == 0) {
+                                
+                                                cc[3] = 0;
+                                                cc[0] = buf[i];
+                                                cc[1] = buf[i + 1];
+                                                cc[2] = buf[i + 2];
+                                        }
+                                        else {
+                                                cc[3] = 0;
+                                                cc[2] = buf[i];
+                                                cc[1] = buf[i + 1];
+                                                cc[0] = buf[i + 2];
+                                        }
+                                        bitmap[y*w + x] = *qq;
+                                        i += 3;
+                                        j += 3;
+                                }
+                                j = w % 4;
+
+                                i += j;
+                        };
+                        return;
+                }
+                return;
+        }
+};
+
+std::string get_word(std::string s) {
+    
+    if(s.length()>=2) {
+        if(s[0] == '=' && s[1] == '=') return "==";
+        if(s[0] == '!' && s[1] == '=') return "!=";
+        if(s[0] == '>' && s[1] == '=') return ">=";
+        if(s[0] == '<' && s[1] == '=') return "<=";
+        if(s[0] == '<' && s[1] == '>') return "<>";
+
+        if(s[0] == '+' && s[1] == '=') return "+=";
+        if(s[0] == '-' && s[1] == '=') return "-=";
+        if(s[0] == '/' && s[1] == '=') return "/=";
+        if(s[0] == '*' && s[1] == '=') return "*=";
+
+    }
+    if(s.length()>=1) {
+        if(s[0] == '=') return "=";
+        if(s[0] == '+') return "+";
+        if(s[0] == '-') return "-";
+        if(s[0] == '/') return "/";
+        if(s[0] == '*') return "*";
+        if(s[0] == '<') return "<";
+        if(s[0] == '>') return ">";
+    }
+    
+    std::string r;
+    int i;
+    i = 0;
+    while(i < s.length()) {
+        if(s[i] == ' ' || s[i] == '=' || s[i] == '+' || s[i] == '.' || s[i] == ',' || s[i] == '/' || s[i] == '*') {
+            return r;
+        }
+        r += s[i];
+        i++;
+    }
+    return s;
+}
+
+std::string del_word(std::string s) {
+    std::string w, ss;
+    w = get_word(s);
+    if(s.length() == w.length()) return "";
+    
+    ss = s.substr(w.length(), s.length());
+
+    if(ss.length() > 1 && ss[0] == ' ') ss = ss.substr(1, ss.length());
+    
+    return ss;
+}
+        
+std::string rl_trim(std::string s) {
+    while(s.length() > 0 && s[0] == ' ') {
+        s = s.substr(1, s.length());
+    }
+    
+    while(s.length() > 0 && s[s.length()-1] == ' ') {
+        s = s.substr(0, s.length()-1);
+    };
+    
+    return s;
+}
+
+std::string remove_double_space(std::string s) {
+
+    std::string s1, s2;
+    
+    int i = 0;
+    while( i < s.length()-1) {
+        while(s[i] == ' ' && s[i+1] == ' ') {
+            s1 = s.substr(0, i);
+            s2 = s.substr(i+1, s.length());
+            s = s1 + s2;
+        }
+        i++;
+    }
+    
+    return s;
+}
+
+int my_atoi(const char *v) {
+    int r, i, z;
+    z = 0;
+    r = 0;
+    i = 0;
+    if(v == nullptr) return 0;
+    if(v[i] == '-') { z = 1; i++; };
+    while(v[i] != 0) {
+        if(v[i] == '.' || v[i] == ',') break;
+        if(v[i] >= '0' && v[i] <= '9') {
+            r *= 10;
+            r += (v[i] - '0');
+        }
+        i++;
+    }
+    if(z == 1) r *= -1;
+    
+    return r;
 }

@@ -192,23 +192,35 @@ void GLOBAL::set_SnifferRun(bool val) {
 void GLOBAL::active_IF_tab() {
     gui->PanelIf->is_visible = true;
     gui->PanelPcap->is_visible = false;
-    gui->PanelClicker->is_visible = false;
+    gui->PanelGrab->is_visible = false;
+    gui->PanelProg->is_visible = false;
     gui->focus = nullptr;
 }
 
 void GLOBAL::active_PCAP_tab() {
     gui->PanelIf->is_visible = false;
     gui->PanelPcap->is_visible = true;
-    gui->PanelClicker->is_visible = false;
+    gui->PanelGrab->is_visible = false;
+    gui->PanelProg->is_visible = false;
     gui->focus = nullptr;
 }
 
-void GLOBAL::active_CLICKER_tab() {
+void GLOBAL::active_GRAB_tab() {
     gui->PanelIf->is_visible = false;
     gui->PanelPcap->is_visible = false;
-    gui->PanelClicker->is_visible = true;
+    gui->PanelGrab->is_visible = true;
+    gui->PanelProg->is_visible = false;
     gui->focus = gui->View;
 }
+
+void GLOBAL::active_PROG_tab() {
+    gui->PanelIf->is_visible = false;
+    gui->PanelPcap->is_visible = false;
+    gui->PanelGrab->is_visible = false;
+    gui->PanelProg->is_visible = true;
+    gui->focus = gui->View;
+}
+
 
 void GLOBAL::add_ip_to_queue_to_send_mikrotik(unsigned int ip) {
     if(ip_to_add_s.find(ip) != ip_to_add_s.end()) {

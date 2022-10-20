@@ -162,6 +162,22 @@ public:
         
     }
     
+    void fill(unsigned int xx, unsigned int yy, unsigned int ww, unsigned int hh, std::vector<unsigned int> &bitmap) {
+        if(xx+ww >= w ) return;
+        if(yy+hh >= h ) return;
+        
+        unsigned int *q;
+        unsigned int i, j, k = 0;
+        for(j = 0; j < hh; j++) {
+            q = buffer + (yy+j)*w + xx;
+            for(i = 0; i < ww; i++) {
+                *q++ = bitmap[k++];
+            }
+        }
+        
+    }
+    
+    
     SCREEN_BUFFER() {
         buffer = nullptr;
         w = 0;

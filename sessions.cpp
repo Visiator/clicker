@@ -8,6 +8,8 @@
 
 void custom_analiz(SESSION *s, FRAME *frame);
 
+extern std::map<unsigned int, std::string> global_dns_list;
+
 SESSIONS::SESSIONS() {
     
 }
@@ -57,7 +59,13 @@ void SESSIONS::add_to_session__(FRAME *frame) {
     
     auto it = items.find(frame->session_id);
     if(it == items.end()) {
-        items.insert(std::make_pair(frame->session_id, SESSION()));
+        std::string s = "";
+        std::map<unsigned int, std::string> :: iterator dns_it;
+        dns_it = global_dns_list.find(frame->ipv4_dst_ip);
+        if(dns_it != global_dns_list.end()) {           
+            s = dns_it->second;
+        }
+        items.insert(std::make_pair(frame->session_id, SESSION(s)));
         it = items.find(frame->session_id);
         if(it == items.end()) {
             return;

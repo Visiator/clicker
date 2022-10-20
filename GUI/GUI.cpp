@@ -80,7 +80,8 @@ void GUI::wait_run() {
                     if(a.type == UI_Action_Type::Select) {
                         printf("TabIf Select\n");
                         TabPcap->is_pressed = false;
-                        TabClicker->is_pressed = false;
+                        TabGrab->is_pressed = false;
+                        TabProg->is_pressed = false;
                         global.active_IF_tab();
                     };
                     if(a.type == UI_Action_Type::Deselect) {
@@ -91,19 +92,33 @@ void GUI::wait_run() {
                     if(a.type == UI_Action_Type::Select) {
                         printf("PcapIf Select\n");
                         TabIf->is_pressed = false;
-                        TabClicker->is_pressed = false;
+                        TabGrab->is_pressed = false;
+                        TabProg->is_pressed = false;
                         global.active_PCAP_tab();
                     };
                     if(a.type == UI_Action_Type::Deselect) {
                         printf("PcapIf Deselect\n");
                     };
                 }
-                if(a.id == TabClicker_id) {
+                if(a.id == TabGrab_id) {
                     if(a.type == UI_Action_Type::Select) {
-                        printf("TabClicker Select\n");
+                        printf("TabGrab Select\n");
                         TabPcap->is_pressed = false;
                         TabIf->is_pressed = false;
-                        global.active_CLICKER_tab();
+                        TabProg->is_pressed = false;
+                        global.active_GRAB_tab();
+                    };
+                    if(a.type == UI_Action_Type::Deselect) {
+                        printf("TabClicker Deselect\n");
+                    };
+                }
+                if(a.id == TabProg_id) {
+                    if(a.type == UI_Action_Type::Select) {
+                        printf("TabGrab Select\n");
+                        TabPcap->is_pressed = false;
+                        TabIf->is_pressed = false;
+                        TabGrab->is_pressed = false;
+                        global.active_PROG_tab();
                     };
                     if(a.type == UI_Action_Type::Deselect) {
                         printf("TabClicker Deselect\n");
@@ -195,12 +210,12 @@ void GUI::wait_run() {
                 }
                 if(a.id == Mikrotik_to_txt_id) {
                     printf("Mikrotik_to_txt_id\n");
-                    mikrotik.ip_list_to_txt("from_mikrotik.txt");
+                    mikrotik.ip_list_to_txt((char *)"from_mikrotik.txt");
                     Mikrotik_to_txt->is_pressed = false;
                 }
                 if(a.id == Mikrotik_from_txt_id) {
                     printf("Mikrotik_from_txt_id\n");
-                    mikrotik.ip_list_from_txt("to_mikrotik.txt");
+                    mikrotik.ip_list_from_txt((char *)"to_mikrotik.txt");
                     Mikrotik_from_txt->is_pressed = false;
                 }
                 if(a.id == test1_id) {
@@ -224,20 +239,29 @@ void GUI::create_elements() {
     q = elements.add(this, 0, ELEMENT::Type::Button ,  60, 5, 45, 25, COLOR::ListBG, COLOR::ListBorder, "pcap");
     TabPcap_id = q->id;
     
-    q = elements.add(this, 0, ELEMENT::Type::Button ,  115, 5, 45, 25, COLOR::ListBG, COLOR::ListBorder, "click");
-    TabClicker_id = q->id;
+    q = elements.add(this, 0, ELEMENT::Type::Button ,  115, 5, 45, 25, COLOR::ListBG, COLOR::ListBorder, "grab");
+    TabGrab_id = q->id;
+
+    q = elements.add(this, 0, ELEMENT::Type::Button ,  170, 5, 45, 25, COLOR::ListBG, COLOR::ListBorder, "prog");
+    TabProg_id = q->id;
 
     ////////////////////////////////////////////////////////////////////////////
     
-    q = elements.add(this, 0, ELEMENT::Type::Panel,  5, 40, 500, 680, COLOR::PanelBG, COLOR::PanelBorder, "PanelIf");
+    q = elements.add(this, 0, ELEMENT::Type::Panel,  5, 35, 500, 680, COLOR::PanelBG, COLOR::PanelBorder, "PanelIf");
     PanelIf_id = q->id;
 
-    q = elements.add(this, 0, ELEMENT::Type::Panel,  5, 40, 640, 680, COLOR::PanelBG, COLOR::PanelBorder, "PanelPcap");
+    q = elements.add(this, 0, ELEMENT::Type::Panel,  5, 35, 640, 680, COLOR::PanelBG, COLOR::PanelBorder, "PanelPcap");
     PanelPcap_id = q->id;
 
-    q = elements.add(this, 0, ELEMENT::Type::Panel,  5, 40, 640, 680, COLOR::PanelBG, COLOR::PanelBorder, "PanelClicker");
-    PanelClicker_id = q->id;
+    q = elements.add(this, 0, ELEMENT::Type::Panel,  5, 35, 970, 1010, COLOR::PanelBG, COLOR::PanelBorder, "PanelGrab");
+    PanelGrab_id = q->id;
 
+    q = elements.add(this, 0, ELEMENT::Type::Panel,  5, 35, 970, 1010, COLOR::PanelBG, COLOR::PanelBorder, "PanelProg");
+    PanelProg_id = q->id;
+    
+    q = elements.add(this, PanelProg_id, ELEMENT::Type::ProgramText ,  5, 115, 350, 850, COLOR::ProgTextBG, COLOR::ProgText, "ProgText");
+    ProgText_id = q->id;
+    
     q = elements.add(this, PanelIf_id, ELEMENT::Type::List,  5, 25, 180, 325, COLOR::ListBG, COLOR::ListBorder, "Interface");
     IfList_id = q->id;
     
@@ -265,22 +289,24 @@ void GUI::create_elements() {
     q = elements.add(this, PanelPcap_id, ELEMENT::Type::PCAPinfo,  5, 380, 180, 150, COLOR::ListBG, COLOR::ListBorder, "PCAPinfo");
     PCAPinfo_id = q->id;
   
-    q = elements.add(this, PanelClicker_id, ELEMENT::Type::List,  5, 25, 100, 100, COLOR::ListBG, COLOR::ListBorder, "Programs");
+    q = elements.add(this, PanelProg_id, ELEMENT::Type::List,  5, 25, 100, 80, COLOR::ListBG, COLOR::ListBorder, "Programs");
     ProgramList_id = q->id;
 
-    q = elements.add(this, PanelClicker_id, ELEMENT::Type::List,  110, 25, 230, 100, COLOR::ListBG, COLOR::ListBorder, "Windows");
+    q = elements.add(this, PanelGrab_id, ELEMENT::Type::List,  110, 25, 230, 80, COLOR::ListBG, COLOR::ListBorder, "Windows");
     WindowList_id = q->id;
     
-    q = elements.add(this, PanelClicker_id, ELEMENT::Type::Panel,  330, 25, 90, 30, COLOR::ListBG, COLOR::ListBorder, "Btn");    
+    q = elements.add(this, PanelGrab_id, ELEMENT::Type::Panel,  330, 25, 90, 30, COLOR::ListBG, COLOR::ListBorder, "Btn");    
     WindowListBtn_id = q->id;
 
     q = elements.add(this, WindowListBtn_id, ELEMENT::Type::Button,  5, 5, 80, 20, COLOR::ListBG, COLOR::ListBorder, "Start");
     WindowListBtnStart_id = q->id;
 
     
-    q = elements.add(this, PanelClicker_id, ELEMENT::Type::View,  55, 155, 550, 500, COLOR::ListBG, COLOR::ListBorder, "View");
+    q = elements.add(this, PanelGrab_id, ELEMENT::Type::View,  5, 115, 960, 540, COLOR::ListBG, COLOR::ListBorder, "View");
     View_id = q->id;
        
+    q = elements.add(this, PanelGrab_id, ELEMENT::Type::SpriteList,  5, 660, 960, 345, COLOR::ListBG, COLOR::ListBorder, "SpriteList");
+    SpriteList_id = q->id;
     
     elements.recalc_parent_id();
     
@@ -296,14 +322,23 @@ void GUI::create_elements() {
     
     TabIf = elements.get_element_by_id(TabIf_id);
     TabPcap = elements.get_element_by_id(TabPcap_id);
-    TabClicker = elements.get_element_by_id(TabClicker_id);
+    TabGrab = elements.get_element_by_id(TabGrab_id);
+    TabProg = elements.get_element_by_id(TabProg_id);
+    
+    ProgText = elements.get_element_by_id(ProgText_id);
+    ProgText->program = &(programs.item_[0]);
     
     PanelIf = elements.get_element_by_id(PanelIf_id);
     PanelPcap = elements.get_element_by_id(PanelPcap_id);
-    PanelClicker = elements.get_element_by_id(PanelClicker_id);
+    PanelGrab = elements.get_element_by_id(PanelGrab_id);
+    PanelProg = elements.get_element_by_id(PanelProg_id);
     
     View = elements.get_element_by_id(View_id);
     View->grab_screen = &programs.grab_screen_buffer;
+    View->program = &(programs.item_[0]);
+    
+    SpriteList = elements.get_element_by_id(SpriteList_id);
+    SpriteList->program = &(programs.item_[0]);
     
     ProgramList = elements.get_element_by_id(ProgramList_id);
     WindowList = elements.get_element_by_id(WindowList_id);
@@ -312,7 +347,8 @@ void GUI::create_elements() {
     WindowListBtn->h = WindowList->h;
     
     PanelPcap->is_visible = false;
-    PanelClicker->is_visible = false;
+    PanelGrab->is_visible = false;
+    PanelProg->is_visible = false;
     
     TabIf->is_pressed = true;
     

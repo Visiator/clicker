@@ -1,0 +1,26 @@
+
+set v=100+233
+
+set timer0 = 0
+
+  :start  
+
+print 123
+
+if timer0 > 10
+
+    print 10
+    if timer1 = 5
+	print 555
+    endif
+    set timer0 = 0
+
+else
+
+    print timer0
+
+endif
+
+stop
+
+goto start
