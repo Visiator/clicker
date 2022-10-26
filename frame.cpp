@@ -101,6 +101,18 @@ void FRAME::detect_direction() {
         return;
     }
 
+    if( (ipv4_src_ip & 0xffff0000) == 0xc3100000) 
+    {
+        direction = egress;
+        return;
+    }
+    if( (ipv4_dst_ip & 0xffff0000) == 0xc3100000) 
+    {
+        direction = ingress;
+        return;
+    }
+    
+    wtf("direction ?");
 }
 
 char *decode_ip_proto(unsigned char v, char *c) {

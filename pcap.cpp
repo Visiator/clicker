@@ -224,6 +224,8 @@ void PCAP::analiz(int frame_no, unsigned char *buf, int buf_size) {
     if(frame.ethernet_ii_type == 0x0800) {
         
         analiz_ipv4(frame_no, buf + 6+6+2, buf_size-(6+6+2), &frame);
+    } else if(frame.ethernet_ii_type == 0x8100) {    // Virtual LAN
+        analiz_ipv4(frame_no, buf + 6+6+2+2+2, buf_size-(6+6+2+2+2), &frame);
     } else if(frame.ethernet_ii_type == 0x86dd) {    // ipv6
              
     } else if(frame.ethernet_ii_type == 0x0027) {    // stp
@@ -425,7 +427,7 @@ void PCAP::analiz_ipv4_tcp(int frame_no, unsigned char *buf, int buf_size, FRAME
     
     ss = s;
     // net option 12 byte
-    
+    printf("%s\n", s);
     FILE *f;
     /*f = fopen("seq_ack.txt", "ab");
     if(f != NULL) {

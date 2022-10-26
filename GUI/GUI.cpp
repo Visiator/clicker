@@ -222,6 +222,17 @@ void GUI::wait_run() {
                     test1->is_pressed = false;
                     global.test1();
                 }
+                if(a.id == BtnProgRun_id) {
+                    if(BtnProgRun->is_pressed == true) {
+                        programs.item_[0].run();
+                    } else {
+                        programs.item_[0].stop();
+                    }
+                }
+                if(a.id == BtnProgLoad_id) {
+                    programs.item_[0].load();
+                    BtnProgLoad->is_pressed = false;
+                }
             }
         }
         this->screen.need_update = true;
@@ -264,6 +275,17 @@ void GUI::create_elements() {
     
     q = elements.add(this, PanelProg_id, ELEMENT::Type::Print ,  370, 115, 350, 850, COLOR::ProgTextBG, COLOR::ProgText, "Print");
     Print_id = q->id;
+    
+    //q = elements.add(this, IfList_id, ELEMENT::Type::Button ,  55, 295, 65, 25, COLOR::ListBG, COLOR::ListBorder, "RUN");
+    
+    q = elements.add(this, PanelProg_id, ELEMENT::Type::Button ,  130, 35, 50, 25, COLOR::ListBG, COLOR::ListBorder, "Load");
+    BtnProgLoad_id = q->id;
+    
+    q = elements.add(this, PanelProg_id, ELEMENT::Type::Button ,  130, 70, 50, 25, COLOR::ListBG, COLOR::ListBorder, "RUN");
+    BtnProgRun_id = q->id;
+    
+    
+    //BtnProgLoad_id = 0, BtnProgRun_id
     
     q = elements.add(this, PanelIf_id, ELEMENT::Type::List,  5, 25, 180, 325, COLOR::ListBG, COLOR::ListBorder, "Interface");
     IfList_id = q->id;
@@ -331,6 +353,7 @@ void GUI::create_elements() {
     ProgText = elements.get_element_by_id(ProgText_id);
     ProgText->program = &(programs.item_[0]);
     Print = elements.get_element_by_id(Print_id);
+    Print->program = &(programs.item_[0]);
     
     PanelIf = elements.get_element_by_id(PanelIf_id);
     PanelPcap = elements.get_element_by_id(PanelPcap_id);
@@ -359,6 +382,9 @@ void GUI::create_elements() {
     Mikrotik_to_txt = elements.get_element_by_id(Mikrotik_to_txt_id);
     Mikrotik_from_txt = elements.get_element_by_id(Mikrotik_from_txt_id);
     
+    BtnProgLoad = elements.get_element_by_id(BtnProgLoad_id);
+    BtnProgRun = elements.get_element_by_id(BtnProgRun_id);
+    
     test1 = elements.get_element_by_id(test1_id);
     
     Memo1->item.push_back({this, ELEMENT_item::String, "str1"});
@@ -369,6 +395,8 @@ void GUI::create_elements() {
     ProgramList->item.push_back({this, ELEMENT_item::ListItem, "prg1"});
     ProgramList->item.push_back({this, ELEMENT_item::ListItem, "prg2"});
     ProgramList->item.push_back({this, ELEMENT_item::ListItem, "prg3"});
+    
+    
     
     global.mikrotik_info = Memo1;
     mikrotik.set_mikrotik_info(Memo1);

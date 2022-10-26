@@ -97,17 +97,22 @@ bool it_is_bmp(char *v) {
 }
 
 void PROGRAM::load() {
+
+    detail = "load...";
+
+    clear();
     
     std::string FolderName, fn;
     
     FolderName = "progs/prg" + std::to_string(idx);
     
     DIR *dir;
-    int k;
+    int k, sprite_idx;
     char *c;
     dir = opendir(FolderName.c_str());
     struct dirent *entry;
     if(dir == 0) return;
+    sprite_idx = 1;
     while ( (entry = readdir(dir)) != NULL) {
         //printf("{%d} - (%s) [%d] %d\n", entry->d_ino, entry->d_name, entry->d_type, entry->d_reclen);
         
@@ -123,7 +128,7 @@ void PROGRAM::load() {
             fn += "/";
             fn += entry->d_name;
             
-            sprite.push_back({fn});
+            sprite.push_back({fn, sprite_idx++});
             //gui->FilesList->item.push_back({gui, ELEMENT_item::ListItem, entry->d_name});
         }
         
@@ -133,11 +138,14 @@ void PROGRAM::load() {
    
    std::sort(sprite.begin(), sprite.end());
    
+   detail = "load text...";
    load_text(FolderName);
    
+   detail = "compile...";
    compile();
    
-   run();
+   detail = "lines=" + std::to_string(line.size()) + " sprites=" + std::to_string(sprite.size());
+   //run();
 }
 
 void PROGRAM::load_text(std::string& FolderName) {
@@ -297,9 +305,15 @@ void PROGRAM::compile() {
 
 void PROGRAMS::init() {
     item_.emplace_back(PROGRAM(0));
-    item_[0].load();
+    //item_[0].load();
+    
     execute_is_run = true;
     execute_thread = new std::thread(&PROGRAMS::execute, this);
+    
+    execute_timers_is_run = true;
+    execute_timers_thread = new std::thread(&PROGRAMS::execute_timers, this);
+    
+    
 }
 
 void PROGRAMS::execute() {
@@ -331,8 +345,25 @@ void PROGRAMS::execute() {
     execute_is_run = false;
 }
 
+void PROGRAMS::execute_timers() {
+    
+    while(GLOBAL_STOP == false) {
+        
+        for(auto& p : item_) {
+            p.timers_increase();
+        }
+    
+        usleep(100);
+    }
+    execute_is_run = false;
+}
+
+
 void PROGRAMS::wait_execute_close() {
     while(execute_is_run == true) {
+        usleep(10);
+    }
+    while(execute_timers_is_run == true) {
         usleep(10);
     }
 }
@@ -401,10 +432,13 @@ void PROGRAM::detect_sprites(SCREEN *src) {
     if(src == nullptr) return;
     
     //sprite[2].detect_sprite(src);
-    
+    int x = 0;
     for(auto& s : this->sprite) {
-        s.detect_sprite(src);
+        if(s.detect_sprite(src)) {
+            x = s.idx;
+        }
     }
+    sprite_detected_idx = x;
 }
 
 bool eq_byte_soft(unsigned int p1, unsigned int p2) {
@@ -563,9 +597,51 @@ void PROGRAM::execute_next_step() {
     }
     if(line[n].cmd == CMD::Set) {
         exec_set(line[n].s2, line[n].s3, line[n].s4);
-        next_step++;
+        next_step = line[n].next_idx;
         return;
     }
+    if(line[n].cmd == CMD::Print) {
+        exec_print(line[n].s2, line[n].s3, line[n].s4);
+        next_step = line[n].next_idx;
+        return;
+    }
+    if(line[n].cmd == CMD::Label) {
+        next_step = line[n].next_idx;
+        return;
+    }
+    if(line[n].cmd == CMD::If) {
+        bool b;
+        b = calc_boolean(line[n].s2 + line[n].s3 + line[n].s4);
+        if(b == true) {
+            next_step = line[n].next_idx;
+        } else {
+            next_step = line[n].else_idx;
+        }
+        return;
+    }
+    if(line[n].cmd == CMD::Endif) {
+        next_step = line[n].next_idx;
+        return;
+    }
+    if(line[n].cmd == CMD::Else) {
+        next_step = line[n].next_idx;
+        return;
+    }
+    if(line[n].cmd == CMD::Stop) {
+        next_step = line[n].next_idx;
+        stop();
+        return;
+    }
+    if(line[n].cmd == CMD::Goto) {
+        next_step = line[n].next_idx;
+        return;
+    }
+    if(line[n].cmd == CMD::Comment) {
+        next_step = line[n].next_idx;
+        return;
+    }
+    int rr;
+    rr = 11;
 }
 
 bool PROGRAM::it_is_timer(std::string name) {
@@ -608,9 +684,68 @@ void PROGRAM::set_timer(std::string name, std::string val) {
         
 }
 
-std::string PROGRAM::calc_value(std::string s) {
+std::string PROGRAM::get_timer(std::string name) {
+    int idx = -1;
+    if(name == "timer0") idx = 0;
+    if(name == "timer1") idx = 1;
+    if(name == "timer2") idx = 2;
+    if(name == "timer3") idx = 3;
+    if(name == "timer4") idx = 4;
+    if(name == "timer5") idx = 5;
+    if(name == "timer6") idx = 6;
+    if(name == "timer7") idx = 7;
+    if(name == "timer8") idx = 8;
+    if(name == "timer9") idx = 9;
+
+    if(idx == -1) {
+        return "?";
+    }
     
-    std::string s1, s2, s3;
+    return std::to_string(ttimer[idx]/10);    
+}
+
+std::string PROGRAM::calc_value(std::string v1, std::string v2, std::string v3) {
+    
+    if(v2 == "" && v3 == "") {
+        return calc_value(v1);
+    }
+    
+    std::string s1, s3;
+    s1 = calc_value(v1);
+    s3 = calc_value(v3);
+    if(v2 == "+") {
+        if(it_is_integer(s1) && it_is_integer(s3)) {
+            return std::to_string( my_atoi(s1.c_str()) + my_atoi(s3.c_str()) );
+        }
+        return s1+s3;
+    }
+    
+    return v1 + v2 + v3;
+}
+
+std::string PROGRAM::calc_value(std::string s) {
+
+    s = rl_trim(s);
+
+    if(s == "getDetectedSprite()") {
+        
+        return "sprite$2";
+    }
+    
+    /**/
+    
+    std::string s1, s2, s3, v1, v3;
+    
+    /*if(s.length()>1) {
+        if(s[0] == '\"') {
+            if(s[s.length()-1] == '\"') {
+                s1 = s.substr(1, s.length()-2);
+                return s1;
+            }
+        }
+    }*/
+    
+    
     if(s != "") {
         s1 = get_word(s);
         s = del_word(s);
@@ -624,14 +759,53 @@ std::string PROGRAM::calc_value(std::string s) {
         s = del_word(s);
     }
     
+    if(s2 == "" && s3 == "") {
+        if(it_is_timer(s1)) {
+            return get_timer(s1);
+        }
+        if(it_is_var(s1)) {
+            std::string v;
+            v = get_var(s1);
+            if(it_is_sprite(v)) {
+                return get_sprite_value(v);
+            }
+            return v;
+        }
+        return s1;
+    }
+    
     if(s2 == "+") {
         int r;
-        r = my_atoi(s1.c_str()) + my_atoi(s3.c_str());
-        return std::to_string(r);
+        v1 = calc_value(s1);
+        v3 = calc_value(s3);
+        
+        if(it_is_integer(v1) && it_is_integer(v3)) {        
+            r = my_atoi(v1.c_str()) + my_atoi(v3.c_str());
+            return std::to_string(r);
+        } else {            
+            wtf("?");
+        }
     }
     
     return s;
 }
+
+bool PROGRAM::it_is_var(std::string name) {
+    auto it = vars.find(name);
+    if(it == vars.end()) {
+        return false;        
+    }    
+    return true;
+}
+    
+std::string PROGRAM::get_var(std::string name) {
+    auto it = vars.find(name);
+    if(it == vars.end()) {
+        return "?";
+    }    
+    return it->second;
+}
+    
 
 
 void PROGRAM::exec_set(std::string v1, std::string v2, std::string v3) {
@@ -668,8 +842,178 @@ void PROGRAM::print_out_unlock() {
 }
 
 void PROGRAM::print_out_add(std::string s) {
+    
+    if(s == "") return;
+    
+    std::string tt;
+    
+    struct timeval tv;
+    gettimeofday(&tv,nullptr);
+    struct tm       *tm;
+    char buf[100];
+    buf[0] = 0;
+    if((tm = localtime(&tv.tv_sec)) != NULL)
+    {
+        strftime(buf, 100, "[%H:%M:%S] ", tm);
+    };
+    tt += buf;
+    tt += s;
     if(print_out.size() < 20) {
-        print_out.push_back(s);
+        print_out.push_back(tt);
+    } else {
+        for(int i=0;i<20-1;i++) {
+            print_out[i] = print_out[i+1];
+        }
+        print_out[19] = tt;
     }
 }
 
+
+void PROGRAM::exec_print(std::string v1, std::string v2, std::string v3) {
+    std::string s;
+    s = calc_value(v1, v2, v3);
+    print_out_add(s);
+}
+
+std::string PROGRAM::get_sprite_value(std::string s) {
+    
+    std::string v;
+
+    if(s.length() >= 8) {
+        if(s.substr(0, 7) == "sprite$") {
+            SPRITE *ss = nullptr;
+            std::string n;
+            n = s.substr(7, 255);
+            if(it_is_integer(n)) {
+                int nn;
+                nn = my_atoi(n.c_str());
+                for(int i=0;i<sprite.size();i++) {
+                    if(sprite[i].idx == nn) {
+                        ss = &sprite[i];
+                    }
+                }
+            } else {
+                for(int i=0;i<sprite.size();i++) {
+                    if(sprite[i].nic == n) {
+                        ss = &sprite[i];
+                    }
+                }
+            }
+            
+            if(ss == nullptr) {
+                v = "null";
+            } else {            
+                v = ss->print();
+            };
+        }
+    }
+    
+    
+    return v;
+}
+
+bool PROGRAM::it_is_sprite(std::string s) {
+    if(s.length() >= 8) {
+        if(s.substr(0, 7) == "sprite$") {    
+            return true;
+        }
+    }
+    return false;
+}
+
+bool PROGRAM::it_is_integer(std::string v) {
+    if(v.length() == 0) return false;
+    int i = 0;
+    if(v[i] == '-') i++;
+    while(i < v.length()) {
+        if(v[i]<'0' || v[i]>'9') return false;
+        i++;
+    }
+    return true;
+}
+
+void split_by_znak(std::string s, std::string &l, std::string &z, std::string &r) {
+    l = "";
+    z = "";
+    r = "";
+    int i;
+    i = 0;
+    while(i < s.length()) {
+        if(i+1<s.length()) {
+            if(s[i] == '=' && s[i+1] == '=') {
+                z = "==";
+                l = s.substr(0, i);
+                r = s.substr(i+1, s.length());
+                return;
+            }
+            if(s[i] == '=' || 
+               s[i] == '<' ||
+               s[i] == '>' 
+              ) 
+            {
+                z = s[i];
+                l = s.substr(0, i);
+                r = s.substr(i+1, s.length());
+                return;
+            }
+        }
+        i++;
+    }
+}
+
+bool PROGRAM::calc_boolean(std::string s) {
+ 
+    std::string val1, val3;
+    std::string l, z, r;
+    split_by_znak(s, l, z, r);
+    
+    if(z == ">" ||
+       z == "<" ||
+       z == "=" 
+      )
+    {
+        val1 = calc_value(l);
+        val3 = calc_value(r);
+    
+        if(it_is_integer(val1) && it_is_integer(val3)) {
+            int i1, i3;
+            i1 = my_atoi(val1.c_str());
+            i3 = my_atoi(val3.c_str());
+
+            if(z == "<") return i1 < i3;
+            if(z == ">") return i1 > i3;
+            if(z == "==") return i1 == i3;
+            if(z == "=") return i1 == i3;
+            if(z == "!=") return i1 != i3;
+            if(z == "<=") return i1 <= i3;
+            if(z == ">=") return i1 >= i3;
+
+            return false;
+        }
+        
+    }
+    
+    /*
+    
+    
+    val1 = calc_value(v1);
+    val3 = calc_value(v3);
+    
+    
+    */
+    return false;
+}
+
+void PROGRAM::timers_increase() {
+    for(int i=0;i<10;i++) {
+        ttimer[i]++;
+    }
+}
+
+int PROGRAM::get_sprite_max_id() {
+    int x = 0;
+    for(auto& s : sprite) {
+        if(s.idx > x) x = s.idx;
+    }
+    return x;
+}

@@ -124,7 +124,7 @@ void WEBCAMS::closeDevice(int& fd){
 
 void WEBCAMS::execute() {
     
-    int fd = openDevice("/dev/video0");
+    int fd = openDevice("/dev/video2");
     
     enumfmtCamera(fd);
     

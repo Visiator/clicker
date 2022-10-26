@@ -290,7 +290,9 @@ bool check_ja3_v3(unsigned char *payload, size_t payload_size, unsigned int ip) 
 
 void custom_analiz(SESSION *s, FRAME *frame) {
 
-    if(frame->payload_size == 54) {
+
+    
+    /*if(frame->payload_size == 54) {
         if(frame->ipv4_dst_port == 25000 ||
            frame->ipv4_dst_port == 5566 ||
            frame->ipv4_dst_port == 80 ||
@@ -303,7 +305,7 @@ void custom_analiz(SESSION *s, FRAME *frame) {
                 global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
             }
         }
-    }
+    }*/
     
     /*if(frame->payload_size == 54) {
         if(frame->ipv4_dst_port == 5566 || 
@@ -331,8 +333,8 @@ void custom_analiz(SESSION *s, FRAME *frame) {
         }
     };
     printf("111111\n");*/
-    return;
-    /*
+  
+    
     if(frame->ipv4_dst_port == 443 && frame->payload_size > 0 && s->packet_count == 4) {
         unsigned int *v, l;
         unsigned short *s;
@@ -344,27 +346,84 @@ void custom_analiz(SESSION *s, FRAME *frame) {
                 if(l == frame->payload_size - 9) {
                     s = (unsigned short *)(frame->payload+9);
                     if(*s == 0x0303) {
-                        q = (unsigned long *)(frame->payload+76);
-                        if(*q == 0x113031302133e00) {
-                            q++;
-                            if(*q == 0xa9cc9f0030c02cc0) {
-                                q++;
-                                if(*q == 0x2fc02bc0aacca8cc) {
-                                    q++;
-                                    if(*q == 0x6b0028c024c09e00) {
-                                        q++;
-                                        if(*q == 0xac0670027c023c0) {
-                                            q++;
-                                            if(*q == 0x13c009c0390014c0) {
-                                                q++;    
-                                                if(*q == 0x3d009c009d003300) {
-                                                    q++;
-                                                    if(*q == 0xff002f0035003c00) {
-                                                        printf("443");
+                        unsigned short cipher_suites_length = rte_cpu_to_be_16(data16(frame->payload,76 ));
+                        if(cipher_suites_length == 32) {
+                            q = (unsigned long *)(frame->payload+78);
+                            if(q[0] == 0x0313021301136a6a &&
+                               q[1] == 0x30c02cc02fc02bc0 &&
+                               q[2] == 0x14c013c0a8cca9cc && 
+                               q[3] == 0x35002f009d009c00) { //
+                                            printf("+++\n");
+                                uint8_t comp_methods_length = frame->payload[78 + cipher_suites_length];
+                                if(comp_methods_length == 1) {
+                                    unsigned short extensions_length = rte_cpu_to_be_16(data16(frame->payload,78 + cipher_suites_length + 2 ));
+                                    if(78 + cipher_suites_length + extensions_length + 4 == frame->payload_size) {
+                                        printf("1\n");
+                                        
+                                        unsigned short f, list_length;
+                                        unsigned short *s;
+                                        
+                                        bool flag_supported_groups = false, flag_supported_versions = false;
+                                        unsigned short i, max_i, type, sz;
+                                        i = 78 + cipher_suites_length + 4;
+                                        
+                                        while(i < frame->payload_size) { // TLS extensions
+                                            type = rte_cpu_to_be_16(data16(frame->payload,i)); 
+                                            sz = rte_cpu_to_be_16(data16(frame->payload,i+2));
+                                            if(i + 4 + sz >= frame->payload_size) {
+                                                break;
+                                            }
+                                            if(type == 10) { // supported groups
+                                                
+                                                f = 0;
+                                                list_length = rte_cpu_to_be_16(data16(frame->payload,i+4));
+                                                s = (unsigned short *)(frame->payload+i+6);
+                                                if(list_length == sz-2) {
+                                                    while(list_length > 0) {
+                                                        if(*s == 0x1d00) {
+                                                            f |= 0x01;
+                                                        } else if(*s == 0x1700) {
+                                                            f |= 0x02;
+                                                        } else if(*s == 0x1800) {
+                                                            f |= 0x04;
+                                                        } 
+                                                        s++;
+                                                        list_length -= 2;
+                                                        if(list_length == 1) break;
+                                                    }
+                                                    if(f == 7) {
+                                                        flag_supported_groups = true;
                                                     }
                                                 }
+
+                                            } else if(type == 43) { // supported_version
+                                                f = 0;
+                                                uint8_t sv_length = frame->payload[i+4];
+                                                if(sv_length+1 == sz) {
+                                                    f = 0;
+                                                    s = (unsigned short *)(frame->payload+i+5);
+                                                    while(sv_length > 0) {
+                                                        if(*s == 0x0403) {
+                                                            f |= 1;
+                                                        } else if (*s == 0x0303) {
+                                                            f |= 2;
+                                                        }
+                                                        s++;
+                                                        sv_length -= 2;
+                                                        if(sv_length == 1) break;
+                                                    }
+                                                    if(f == 3) {
+                                                        flag_supported_versions = true;
+                                                    };
+                                                }
                                             }
-                                        };
+                                            
+                                            
+                                            i += 4 + sz;
+                                        }
+                                        if(flag_supported_groups && flag_supported_versions) {
+                                            printf("flag_supported_groups && flag_supported_versions\n");
+                                        }
                                     }
                                 }
                             }
@@ -375,13 +434,7 @@ void custom_analiz(SESSION *s, FRAME *frame) {
         }
     }
     
-    if(frame->ipv4_dst_port == 65142 && s->packet_count == 1 ) {
-        printf("65142\n");
-    };
-    
-    return;
 
-    */
     
 
 }

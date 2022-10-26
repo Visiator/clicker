@@ -1,15 +1,24 @@
 
+set spr = sprite$1
+print spr
 set v=100+233
+set z= v
+print "z=" + z
 
-set timer0 = 0
+
+
+set timer0 = 3
+set timer1= 5
 
   :start  
 
-print 123
+set spr = getDetectedSprite()
+
+print spr
 
 if timer0 > 10
 
-    print 10
+    #print 10
     if timer1 = 5
 	print 555
     endif
@@ -21,6 +30,5 @@ else
 
 endif
 
-stop
 
 goto start

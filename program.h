@@ -28,7 +28,9 @@
 
 class SPRITE {
 public:  
+    int idx = 0;
     std::string file_name;
+    std::string nic;
     std::vector<unsigned int> bitmap;
     bool is_detected = false;
     int is_detected_x = 0, is_detected_y = 0;
@@ -36,6 +38,13 @@ public:
     void load_from_bmp(std::string& file_name_);
     bool eq(SCREEN *src, int x, int y);
     bool detect_sprite(SCREEN *src);
+    
+    std::string print() {
+        std::string s;
+        s = "sprite:" + std::to_string(idx) + ":" + nic + ":" + (is_detected ? "detect" : "-");
+        return s;
+    }
+    
     bool operator<(const SPRITE &r) const
     {
         return file_name < r.file_name;        
@@ -45,16 +54,17 @@ public:
         return file_name > r.file_name;        
     }
     
-    SPRITE(std::string& file_name_){ load_from_bmp(file_name_); };
-    SPRITE(char* file_name_){ 
+    SPRITE(std::string& file_name_, int idx_){ idx = idx_; load_from_bmp(file_name_); };
+    SPRITE(char* file_name_, int idx_){ 
         std::string fn;
         fn = file_name_;
+        idx_ = idx;
         load_from_bmp(fn); 
     };
 };
 
 enum CMD {
-    Undef, Label, Goto, If, Else, Endif, Print, Set, Stop
+    Undef, Label, Goto, If, Else, Endif, Print, Set, Stop, Comment
 };
 
 class PROGRAM_line {
@@ -65,6 +75,10 @@ public:
     
     void decode_CMD() {
         if(s1.length() > 1) {
+            if(s1[0] == '#') {
+                cmd = CMD::Comment;
+                return;
+            }
             if(s1[0] == ':') {
                 cmd = CMD::Label;
                 return;
@@ -113,16 +127,29 @@ public:
 
 class PROGRAM {
 public:
+    int sprite_detected_idx = 0;
     int ttimer[10];
+    void timers_increase();
     std::vector<SPRITE> sprite;
     std::map<std::string, std::string> vars;
     int idx = 0;
+    std::string detail;
     
     std::vector<std::string> print_out;
     std::mutex p_mutex;
     void print_out_lock();
     void print_out_unlock();
     void print_out_add(std::string s);
+    
+    void clear() {
+        for(int i=0;i<10;i++) ttimer[i] = 0;
+        sprite.clear();
+        vars.clear();
+        detail = "";
+        print_out.clear();
+        line.clear();
+        
+    }
     
     void load();
     void load_text(std::string& FolderName);
@@ -147,13 +174,26 @@ public:
     
     void print(char *s);
     void exec_set(std::string v1, std::string v2, std::string v3);
+    void exec_print(std::string v1, std::string v2, std::string v3);
+    bool calc_boolean(std::string s);
+    
     std::string calc_value(std::string e);
+    std::string calc_value(std::string v1, std::string v2, std::string v3);
+    
     bool it_is_timer(std::string name);
     void set_timer(std::string name, std::string val);
+    std::string get_timer(std::string name);
 
+    bool it_is_var(std::string name);
+    std::string get_var(std::string name);
+    
+    bool it_is_integer(std::string val);
+    bool it_is_sprite(std::string val);
+    
+    std::string get_sprite_value(std::string s);
     
     std::vector<PROGRAM_line> line;
-    
+    int get_sprite_max_id();
     void copy_from_src(const PROGRAM& src) {
         while(is_run_program) {
             usleep(1);
@@ -196,6 +236,10 @@ public:
     bool execute_is_run = false;
     std::thread* execute_thread = nullptr;
     void execute();    
+    
+    bool execute_timers_is_run = false;
+    std::thread* execute_timers_thread = nullptr;
+    void execute_timers();
     
     void wait_execute_close();
     

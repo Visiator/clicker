@@ -121,8 +121,8 @@ void ELEMENT::paint_green_rec_x2(SCREEN_BUFFER *screen, int px, int py) {
                 save_textura_info(f, green_rec.x, green_rec.y, (char *)"");
                 fclose(f);
             };
-            
-            program->sprite.push_back({file_name});
+            int z = program->get_sprite_max_id() + 1;
+            program->sprite.push_back({file_name, z});
             
         } else {
             printf("open file error\n");
@@ -182,6 +182,13 @@ void ELEMENT::paint(SCREEN_BUFFER *screen) {
                 y += 20;
             }
         }
+        screen->fonts.print(px + 5, py + h - 30, "arial", 12, program->detail.c_str(), 0xcccccc);
+        
+        char ss[100];
+        sprintf(ss, "%d", program->sprite_detected_idx);
+        screen->fonts.print(px + w - 40, py + h - 30, "arial", 12, ss, 0xcccccc);
+        
+        
         return;
     }
     

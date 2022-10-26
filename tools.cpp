@@ -578,11 +578,21 @@ std::string get_word(std::string s) {
     }
     
     std::string r;
-    int i;
+    int i, k;
     i = 0;
+    k = 0;
     while(i < s.length()) {
-        if(s[i] == ' ' || s[i] == '=' || s[i] == '+' || s[i] == '.' || s[i] == ',' || s[i] == '/' || s[i] == '*') {
-            return r;
+        if(s[i] == '\"') {
+            if(k == 0) {
+                k = 1;
+            } else {
+                k = 0;
+            }
+        }
+        if(k == 0) {
+            if(s[i] == ' ' || s[i] == '=' || s[i] == '+' || s[i] == '.' || s[i] == ',' || s[i] == '/' || s[i] == '*') {
+                return r;
+            }
         }
         r += s[i];
         i++;
