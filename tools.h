@@ -22,6 +22,7 @@ class FRAME;
 char *ipv4_to_char(unsigned int ip, char *buf);
 unsigned int char_to_ipv4(char *buf);
 
+bool my_strcmp(const char *s1, int s1_max_size, const char *s2);
 void usleep(int milliseconds);
 void set_GLOBAL_STOP(const wchar_t *str);
 void wtf(const char *info, int frame_no, unsigned char *buf, int buf_size);

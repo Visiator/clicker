@@ -99,6 +99,18 @@ void usleep(int milliseconds) {
     std::this_thread::sleep_for (std::chrono::milliseconds(milliseconds));
 }
 
+bool my_strcmp(const char *s1, int s1_max_size, const char *s2) {
+    if(s1 == nullptr || s2 == nullptr) return false;
+    int i;
+    i = 0;
+    while( i < s1_max_size && s1[i] != 0 && s2[i] != 0 && s1[i] == s2[i]) {
+        i++;
+    }
+    if( i >= s1_max_size ) return false;
+    if(s1[i] == 0 && s2[i] == 0) return true;
+    return false;
+}
+
 void set_GLOBAL_STOP(const wchar_t *str) {
     GLOBAL_STOP = true;
 }
@@ -369,6 +381,8 @@ void write3(FILE *f, unsigned char b, unsigned char g, unsigned char r) {
 void save_textura_info(FILE *f, int x, int y, char *nic) {
     fprintf(f, "x:%d\n", x);
     fprintf(f, "y:%d\n", y);
+    fprintf(f, "mouse_press_target_percent_w:50\n");
+    fprintf(f, "mouse_press_target_percent_w:50\n");
     fprintf(f, "nic:%s\n", nic);
 }
 

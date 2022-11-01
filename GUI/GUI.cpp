@@ -270,10 +270,10 @@ void GUI::create_elements() {
     q = elements.add(this, 0, ELEMENT::Type::Panel,  5, 35, 970, 1010, COLOR::PanelBG, COLOR::PanelBorder, "PanelProg");
     PanelProg_id = q->id;
     
-    q = elements.add(this, PanelProg_id, ELEMENT::Type::ProgramText ,  5, 115, 350, 850, COLOR::ProgTextBG, COLOR::ProgText, "ProgText");
+    q = elements.add(this, PanelProg_id, ELEMENT::Type::ProgramText ,  5, 115, 550, 850, COLOR::ProgTextBG, COLOR::ProgText, "ProgText");
     ProgText_id = q->id;
     
-    q = elements.add(this, PanelProg_id, ELEMENT::Type::Print ,  370, 115, 350, 850, COLOR::ProgTextBG, COLOR::ProgText, "Print");
+    q = elements.add(this, PanelProg_id, ELEMENT::Type::Print ,  570, 115, 350, 850, COLOR::ProgTextBG, COLOR::ProgText, "Print");
     Print_id = q->id;
     
     //q = elements.add(this, IfList_id, ELEMENT::Type::Button ,  55, 295, 65, 25, COLOR::ListBG, COLOR::ListBorder, "RUN");

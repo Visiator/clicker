@@ -1,4 +1,8 @@
 
+#mouse_press 245 418
+
+#stop
+
 set spr = sprite$1
 print spr
 set v=100+233
@@ -15,6 +19,10 @@ set timer1= 5
 set spr = getDetectedSprite()
 
 print spr
+
+mouse_press spr
+
+#stop
 
 if timer0 > 10
 

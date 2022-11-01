@@ -4,7 +4,7 @@
 #include <algorithm> 
 
 
-
+#include <termios.h>
 #include "GUI/GUI.h"
 #include "GUI/GUI_Element.h"
 #include "global.h"
@@ -65,7 +65,7 @@ void GLOBAL::execute2() {
             mikrotik.set_firewall_ip(iip);
         }
         
-        usleep(100);
+        usleep(1);
     }
     execute2_is_run = false;
 }
@@ -259,39 +259,309 @@ unsigned int GLOBAL::get_ip_to_queue_to_send_mikrotik() {
 
 
 void GLOBAL::test1() {
-    printf("test1\n");
-    for(int i=0;i<5;i++) need_write_serial_5bytes[i] = 0;
+    int xx = 0, yy = 0, i, j, k=0;
+    
+    FILE *f;
+    f = fopen("/prj/clicker/tt.txt", "rb");
+    if(f != NULL)
+    {
+        i = fgetc(f);
+        while(i != EOF) {
+            if(i == '\n') {
+                k++;
+            } else {
+                if(i != '\r') {
+                    if(i >= '0' && i <= '9') {
+                        if(k == 0) {
+                            xx *= 10;
+                            xx += i-'0';
+                        }
+                        if(k == 1) {
+                            yy *= 10;
+                            yy += i-'0';
+                        }
+                    }
+                }
+            }
+            i = fgetc(f);
+        }
+        fclose(f);
+    }
+    
+    
+    printf("test1 %d %d\n", xx, yy);
+    for(int i=0;i<6;i++) need_write_serial_5bytes[i] = 0;
     /*
     need_write_serial_5bytes[1] = 55;
     need_write_serial_5bytes[4] = 'X';
     need_write_serial_5bytes[0] = 'K';
     */
-    need_write_serial_5bytes[1] = 55;
-    need_write_serial_5bytes[2] = -99;
-    need_write_serial_5bytes[4] = 0xac;
-    need_write_serial_5bytes[0] = 'M';
+    
+    for(int i=0;i<5;i++)
+    {
+        need_write_serial_5bytes[6] = 0;
+        
+        need_write_serial_5bytes[1] = -99;
+        need_write_serial_5bytes[2] = -99;
+        need_write_serial_5bytes[3] = 0x00;
+        need_write_serial_5bytes[4] = i+1;
+        need_write_serial_5bytes[0] = 'M';
+        while(need_write_serial_5bytes[0] != 0) {
+            usleep(1);
+        }
+        while(need_write_serial_5bytes[6] != i+1) {
+            usleep(1);
+        }
+        printf("i\n");
+    };
+    usleep(100);
+    while(xx > 0 || yy > 0)
+    {
+        int dx, dy;
+        dx = xx; if(dx > 15) dx = 15;
+        dy = yy; if(dy > 15) dy = 15;
+        
+        need_write_serial_5bytes[6] = 0;
+        
+        need_write_serial_5bytes[1] = dx;
+        need_write_serial_5bytes[2] = dy;
+        need_write_serial_5bytes[3] = 0x00;
+        need_write_serial_5bytes[4] = i+1;
+        need_write_serial_5bytes[0] = 'M';
+        while(need_write_serial_5bytes[0] != 0) {
+            usleep(1);
+        }
+        while(need_write_serial_5bytes[6] != i+1) {
+            usleep(1);
+        }
+        xx -= dx;
+        yy -= dy;
+        usleep(10);
+        //printf("i\n");
+    };
 }
 
 
 void GLOBAL::serial_io() {
     unsigned char c;
+    struct termios tty;
     int s;
     if(f_serial == -1) {
         
-        f_serial = open("/dev/ttyUSB1", O_RDWR | O_NOCTTY | O_NDELAY);
-        if (f_serial != -1)
+        f_serial = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NDELAY);
+        if (f_serial == -1) return;
+        
+        if(tcgetattr(f_serial, &tty) != 0) {
+            printf("Error %i from tcgetattr: %s\n", errno, strerror(errno));
+            return;
+        }
+        
+            tty.c_cflag &= ~PARENB; // Clear parity bit, disabling parity (most common)
+            tty.c_cflag &= ~CSTOPB; // Clear stop field, only one stop bit used in communication (most common)
+            tty.c_cflag &= ~CSIZE; // Clear all bits that set the data size 
+            tty.c_cflag |= CS8; // 8 bits per byte (most common)
+            tty.c_cflag &= ~CRTSCTS; // Disable RTS/CTS hardware flow control (most common)
+            tty.c_cflag |= CREAD | CLOCAL; // Turn on READ & ignore ctrl lines (CLOCAL = 1)
+
+            tty.c_lflag &= ~ICANON;
+            tty.c_lflag &= ~ECHO; // Disable echo
+            tty.c_lflag &= ~ECHOE; // Disable erasure
+            tty.c_lflag &= ~ECHONL; // Disable new-line echo
+            tty.c_lflag &= ~ISIG; // Disable interpretation of INTR, QUIT and SUSP
+            tty.c_iflag &= ~(IXON | IXOFF | IXANY); // Turn off s/w flow ctrl
+            tty.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL); // Disable any special handling of received bytes
+
+            tty.c_oflag &= ~OPOST; // Prevent special interpretation of output bytes (e.g. newline chars)
+            tty.c_oflag &= ~ONLCR; // Prevent conversion of newline to carriage return/line feed
+            // tty.c_oflag &= ~OXTABS; // Prevent conversion of tabs to spaces (NOT PRESENT ON LINUX)
+            // tty.c_oflag &= ~ONOEOT; // Prevent removal of C-d chars (0x004) in output (NOT PRESENT ON LINUX)
+
+            tty.c_cc[VTIME] = 10;    // Wait for up to 1s (10 deciseconds), returning as soon as any data is received.
+            tty.c_cc[VMIN] = 0;
+        
+        cfsetispeed(&tty, B57600);
+        cfsetospeed(&tty, B57600);
+     
+        if (tcsetattr(f_serial, TCSANOW, &tty) != 0) {
+            printf("Error %i from tcsetattr: %s\n", errno, strerror(errno));
+        }
+        
         fcntl(f_serial, F_SETFL, FNDELAY);
     }
     if(f_serial != -1) {
         
         s = read(f_serial, &c, 1);
-        if(s != 0) {
-            printf("read = %x\n", c);
+        if(s != 0 && s != -1) {
+            printf("read = [0x%02x]\n", c);
+            need_write_serial_5bytes[6] = c;
         }
         if(need_write_serial_5bytes[0] != 0) {
             s = write(f_serial, need_write_serial_5bytes, 5);
-            for(int i=0;i<5;i++) need_write_serial_5bytes[i] = 0;
-            //printf("write=%d\n", s);
+            for(int i=1;i<5;i++) need_write_serial_5bytes[i] = 0;
+            printf("write=%d\n", s);
+            need_write_serial_5bytes[0] = 0;
         }
+        usleep(1);
     }
 }
+
+bool GLOBAL::MousePress(int mx_, int my_, int mk, int double_click_) {
+    int mx, my;
+    mx = (float)mx_ * (float)1.4;
+    my = (float)my_ * (float)1.4;
+    
+    int x, y, dx, dy;
+    int timeout = 30;
+    while(need_write_serial_5bytes[0] != 0) {
+        timeout--;
+        if(timeout <= 0) {
+            printf("MouseMove timeout 1\n");
+            return false;
+        }
+        usleep(100);
+    }
+ 
+    
+    for(int i=0;i<10;i++) {
+        need_write_serial_5bytes[1] = -90;
+        need_write_serial_5bytes[2] = -90;
+        need_write_serial_5bytes[3] = 0x0;
+        need_write_serial_5bytes[4] = 0xac;
+        need_write_serial_5bytes[0] = 'M';
+
+        while(need_write_serial_5bytes[0] != 0) {
+            usleep(1);
+        }
+        while(need_write_serial_5bytes[6] != 0xac) {
+            usleep(1);
+        }
+
+        usleep(10);
+    }    
+    
+    x = 0;
+    y = 0;
+    int i = 1;
+    while(mx - x > 0 || my - y > 0) {
+    
+        dx = mx - x; if(dx > 15) dx = 15;
+        dy = my - y; if(dy > 15) dy = 15;
+        
+        need_write_serial_5bytes[6] = 0;
+        
+        need_write_serial_5bytes[1] = dx;
+        need_write_serial_5bytes[2] = dy;
+        need_write_serial_5bytes[3] = 0x0;
+        need_write_serial_5bytes[4] = i + 1;
+        need_write_serial_5bytes[0] = 'M';
+
+        while(need_write_serial_5bytes[0] != 0) {
+            usleep(1);
+        }
+        while(need_write_serial_5bytes[6] != i+1) {
+            usleep(1);
+        }
+        i++;
+        x += dx;
+        y += dy;
+        
+        usleep(20);
+
+    }
+    usleep(500);
+    if(mk == 1) {
+        need_write_serial_5bytes[6] = 0;
+        
+        need_write_serial_5bytes[1] = 1;
+        need_write_serial_5bytes[2] = 1;
+        need_write_serial_5bytes[3] = 0x01;
+        need_write_serial_5bytes[4] = 0xad;
+        need_write_serial_5bytes[0] = 'M';
+
+        while(need_write_serial_5bytes[0] != 0) {
+            usleep(1);
+        }
+        while(need_write_serial_5bytes[6] != 0xad) {
+            usleep(1);
+        }
+        usleep(500);
+        if(double_click_ == 1) {
+            need_write_serial_5bytes[6] = 0;
+        
+            need_write_serial_5bytes[1] = 1;
+            need_write_serial_5bytes[2] = 1;
+            need_write_serial_5bytes[3] = 0x01;
+            need_write_serial_5bytes[4] = 0xad;
+            need_write_serial_5bytes[0] = 'M';
+
+            while(need_write_serial_5bytes[0] != 0) {
+                usleep(1);
+            }
+            while(need_write_serial_5bytes[6] != 0xad) {
+                usleep(1);
+            }
+
+            usleep(500);    
+        }
+        need_write_serial_5bytes[6] = 0;
+        
+        need_write_serial_5bytes[1] = 0;
+        need_write_serial_5bytes[2] = 0;
+        need_write_serial_5bytes[3] = 0x00;
+        need_write_serial_5bytes[4] = 0xad;
+        need_write_serial_5bytes[0] = 'M';
+
+        while(need_write_serial_5bytes[0] != 0) {
+            usleep(1);
+        }
+        while(need_write_serial_5bytes[6] != 0xad) {
+            usleep(1);
+        }
+
+    }
+    usleep(500);
+    
+        for(int i=0;i<10;i++) {
+        need_write_serial_5bytes[1] = -90;
+        need_write_serial_5bytes[2] = -90;
+        need_write_serial_5bytes[3] = 0x0;
+        need_write_serial_5bytes[4] = 0xac;
+        need_write_serial_5bytes[0] = 'M';
+
+        while(need_write_serial_5bytes[0] != 0) {
+            usleep(1);
+        }
+        while(need_write_serial_5bytes[6] != 0xac) {
+            usleep(1);
+        }
+
+        usleep(10);
+    }   
+    usleep(500);
+    return true;
+}
+
+/*while(xx > 0 || yy > 0)
+    {
+        int dx, dy;
+        dx = xx; if(dx > 15) dx = 15;
+        dy = yy; if(dy > 15) dy = 15;
+        
+        need_write_serial_5bytes[6] = 0;
+        
+        need_write_serial_5bytes[1] = dx;
+        need_write_serial_5bytes[2] = dy;
+        need_write_serial_5bytes[3] = 0x00;
+        need_write_serial_5bytes[4] = i+1;
+        need_write_serial_5bytes[0] = 'M';
+        while(need_write_serial_5bytes[0] != 0) {
+            usleep(1);
+        }
+        while(need_write_serial_5bytes[6] != i+1) {
+            usleep(1);
+        }
+        xx -= dx;
+        yy -= dy;
+        usleep(10);
+        //printf("i\n");
+    };*/

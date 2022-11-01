@@ -263,7 +263,10 @@ int WEBCAMS::readFrame(int fd, std::string file_name)
             x = 0;
             while(x < IMAGE_WIDTH/2) {
 
-                
+                if(x < 331 || x > 628) {
+                    src->buffer[j++] = 0xff;
+                    i += 4;
+                } else {
                 ////////////////////////////////////////////////////////////////
                     y1 = w[i];
                     u =  w[i+1];
@@ -319,10 +322,11 @@ int WEBCAMS::readFrame(int fd, std::string file_name)
                     g = g << 8;
                     r = r << 16;
 
-                    src->buffer[j++] = r | g | b;
+                    src->buffer[j-331] = r | g | b;
+                    j++;
                     i += 4;
                 ////////////////////////////////////////////////////////////////
-                    
+                };    
                 
                 x += 1;
             }

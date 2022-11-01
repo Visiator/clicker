@@ -67,6 +67,8 @@ public:
     std::thread *execute2_thread ;
     void execute2();
     
+    bool MousePress(int mx_, int my_, int mk_, int double_click_);
+    
     
     void set_gui(GUI *val){
         gui = val;
@@ -85,10 +87,10 @@ public:
     void test1();
     int f_serial = -1;
     void serial_io();
-    unsigned char need_write_serial_5bytes[5];
+    unsigned char need_write_serial_5bytes[6];
     
     GLOBAL() {
-        for(int i=0;i<5;i++) need_write_serial_5bytes[i] = 0;
+        for(int i=0;i<6;i++) need_write_serial_5bytes[i] = 0;
     }
 };
 

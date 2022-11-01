@@ -54,6 +54,15 @@ void SPRITE::load_from_bmp(std::string& file_name_) {
             if(m[0][0] == 'y' && m[0][1] == 0) {
                 is_detected_y = atoi(m[1]);
             }
+            if(my_strcmp(m[0], 100, "mouse_press_target_percent_w")) {
+                mouse_press_target_percent_w = atoi(m[1]);
+            }
+            if(my_strcmp(m[0], 100, "mouse_press_target_percent_h")) {
+                mouse_press_target_percent_h = atoi(m[1]);
+            }
+            if(my_strcmp(m[0], 100, "double_click")) {
+                double_click = atoi(m[1]);
+            }
             m[0][0] = 0;
             m[1][0] = 0;
             j = 0;
@@ -75,8 +84,8 @@ void SPRITE::load_from_bmp(std::string& file_name_) {
     
     delete[] b;
     
-    delta = w*h/1000*5;
-    
+    delta = (w*h*5)/1000;
+    if(delta == 0) delta = 1;
 }
 
 bool it_is_bmp(char *v) {
@@ -188,6 +197,22 @@ void PROGRAM::load_text(std::string& FolderName) {
         line.push_back({ln});
     }
     delete[] b;
+}
+
+std::string PROGRAM::getDetectedSprite() {
+   
+    std::string r;
+    int i;
+    i = 0;
+    while(i < sprite.size()) {
+        if(sprite[i].is_detected) {
+            r = "sprite$" + std::to_string(sprite[i].idx);
+            return r;
+        }
+        i++;
+    }
+    
+    return "no";
 }
 
 int PROGRAM::get_else_idx(int v) {
@@ -523,7 +548,7 @@ bool SPRITE::eq(SCREEN *src, int p_x, int p_y) {
         }
         y++;
     }
-    if(p2 < delta) {
+    if(p2 < delta || p2 == 0) {
         is_detected = true;
         is_detected_x = p_x;
         is_detected_y = p_y;
@@ -640,6 +665,11 @@ void PROGRAM::execute_next_step() {
         next_step = line[n].next_idx;
         return;
     }
+    if(line[n].cmd == CMD::MousePress) {
+        exec_MousePress(line[n].s2, line[n].s3, 1);
+        next_step = line[n].next_idx;
+        return;
+    }
     int rr;
     rr = 11;
 }
@@ -729,7 +759,7 @@ std::string PROGRAM::calc_value(std::string s) {
 
     if(s == "getDetectedSprite()") {
         
-        return "sprite$2";
+        return getDetectedSprite();
     }
     
     /**/
@@ -868,11 +898,72 @@ void PROGRAM::print_out_add(std::string s) {
     }
 }
 
+void PROGRAM::exec_MousePress(std::string v1, std::string v2, int mk) {
+    std::string x1, x2;
+    if(v1.length() > 0 && v2.length() > 0) {
+        
+        x1 = calc_value(v1);
+        x2 = calc_value(v2);
+        if(it_is_integer(x1) && it_is_integer(x2)) {
+            global.MousePress(my_atoi(x1.c_str()), my_atoi(x2.c_str()), mk, 0);
+            return;
+        }
+    }
+       
+    if(v1.length() > 0 && v2.length() == 0 && it_is_var(v1)) {
+        x1 = get_var(v1);
+        if(it_is_sprite(x1)) {
+            int x = -1, y = -1, double_click = -1;
+            if(get_XY_from_sprite(x1, x, y, double_click)) {
+                global.MousePress(x, y, mk, double_click);
+                return;
+            }
+        }        
+    }
+    
+}
 
 void PROGRAM::exec_print(std::string v1, std::string v2, std::string v3) {
     std::string s;
     s = calc_value(v1, v2, v3);
     print_out_add(s);
+}
+
+bool PROGRAM::get_XY_from_sprite(std::string s,int &x, int &y, int &double_click) {
+    x = -1;
+    y = -1;
+    double_click = -1;
+    if(s.length() >= 8) {
+        if(s.substr(0, 7) == "sprite$") {
+            SPRITE *ss = nullptr;
+            std::string n;
+            n = s.substr(7, 255);
+            if(it_is_integer(n)) {
+                int nn;
+                nn = my_atoi(n.c_str());
+                for(int i=0;i<sprite.size();i++) {
+                    if(sprite[i].idx == nn) {
+                        ss = &sprite[i];
+                    }
+                }
+            } else {
+                for(int i=0;i<sprite.size();i++) {
+                    if(sprite[i].nic == n) {
+                        ss = &sprite[i];
+                    }
+                }
+            }
+            
+            if(ss != nullptr) {
+                x = ss->is_detected_x + ((float)ss->w/(float)100 * (float)ss->mouse_press_target_percent_w);
+                y = ss->is_detected_y + ((float)ss->h/(float)100 * (float)ss->mouse_press_target_percent_h);
+                double_click = ss->double_click;
+                return true;
+            };
+        }
+    }
+    
+    return false;
 }
 
 std::string PROGRAM::get_sprite_value(std::string s) {

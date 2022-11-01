@@ -34,6 +34,8 @@ public:
     std::vector<unsigned int> bitmap;
     bool is_detected = false;
     int is_detected_x = 0, is_detected_y = 0;
+    int mouse_press_target_percent_w = 50, mouse_press_target_percent_h = 50;
+    int double_click = 0;
     unsigned int w = 0, h = 0, delta = 0;
     void load_from_bmp(std::string& file_name_);
     bool eq(SCREEN *src, int x, int y);
@@ -41,7 +43,7 @@ public:
     
     std::string print() {
         std::string s;
-        s = "sprite:" + std::to_string(idx) + ":" + nic + ":" + (is_detected ? "detect" : "-");
+        s = "sprite:" + std::to_string(idx) + ":" + nic + ":" + (is_detected ? "detect" : "-") + ":" + std::to_string(is_detected_x) + "-" + std::to_string(is_detected_y);
         return s;
     }
     
@@ -64,7 +66,7 @@ public:
 };
 
 enum CMD {
-    Undef, Label, Goto, If, Else, Endif, Print, Set, Stop, Comment
+    Undef, Label, Goto, If, Else, Endif, Print, Set, Stop, Comment, MousePress
 };
 
 class PROGRAM_line {
@@ -111,6 +113,12 @@ public:
                 cmd = CMD::Set;
                 return;
             }
+            
+            if(s1 == "mouse_press" || s1 == "mousepress") {
+                cmd = CMD::MousePress;
+                return;
+            }
+            
             cmd = CMD::Undef;
         }
     }
@@ -164,7 +172,7 @@ public:
     
     int get_label_idx(std::string s);
     int get_else_idx(int v);
-    
+    std::string getDetectedSprite();
     void init() {
         for(int i=0;i<10;i++) ttimer[i] = 0;        
     }
@@ -175,6 +183,8 @@ public:
     void print(char *s);
     void exec_set(std::string v1, std::string v2, std::string v3);
     void exec_print(std::string v1, std::string v2, std::string v3);
+    void exec_MousePress(std::string v1, std::string v2, int mk);
+    
     bool calc_boolean(std::string s);
     
     std::string calc_value(std::string e);
@@ -191,6 +201,7 @@ public:
     bool it_is_sprite(std::string val);
     
     std::string get_sprite_value(std::string s);
+    bool get_XY_from_sprite(std::string s,int &x, int &y, int &double_click);
     
     std::vector<PROGRAM_line> line;
     int get_sprite_max_id();
