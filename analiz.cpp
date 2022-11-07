@@ -42,7 +42,7 @@ void custom_analiz_udp(int frame_no, unsigned char *buf, int buf_size, FRAME *fr
         if(frame->session_packet_count == 0) {
             if(frame->payload_size > 4) {
                 if(frame->payload[0] == 0x01) {
-                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_src_ip);
+                //global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_src_ip);
 
                 printf("ddd\n");
                 };
@@ -333,7 +333,51 @@ void custom_analiz(SESSION *s, FRAME *frame) {
         }
     };
     printf("111111\n");*/
-  
+    
+    if(frame->ipv4_dst_port == 3306 && frame->payload_size > 0 && s->packet_count == 4) {
+        
+        //printf("qqqqq\n");
+        if(    frame->payload[0] == 0x00
+            && frame->payload[frame->payload_size-4] == 0
+            && frame->payload[frame->payload_size-3] == 0
+            && frame->payload[frame->payload_size-2] == 0
+            && frame->payload[frame->payload_size-1] == 0
+            
+            ) 
+        {
+            
+            global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+        }
+    }
+
+            
+    
+    if(frame->ipv4_dst_port == 54783 && frame->payload_size > 0 && s->packet_count <=1 && frame->payload[0] == 0x38)
+    {
+        if(    frame->payload[frame->payload_size-4] == 0
+            && frame->payload[frame->payload_size-3] == 0
+            && frame->payload[frame->payload_size-2] == 0
+            && frame->payload[frame->payload_size-1] == 0
+            
+            ) 
+        {
+            //(udp.payload[0:4] == 00:00:00:00 && udp.payload[21:1] == 0x20 && udp.payload[-1:1] == 0x5e ) && (udp.dstport in {4500, 500})
+            global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+        }
+    }
+    if(frame->ipv4_dst_port == 4500 && frame->payload_size > 0 && s->packet_count <=1) {
+         if(    frame->payload[0] == 0
+            && frame->payload[1] == 0
+            && frame->payload[2] == 0
+            && frame->payload[3] == 0
+            && frame->payload[21] == 0x20
+            
+            ) 
+        {
+            // (udp.payload[0:4] == 00:00:00:00 && udp.payload[21:1] == 0x20) && (udp.dstport == 4500)
+            global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+        }
+    }
     
     if(frame->ipv4_dst_port == 443 && frame->payload_size > 0 && s->packet_count == 4) {
         unsigned int *v, l;

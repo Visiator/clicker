@@ -258,7 +258,7 @@ unsigned int GLOBAL::get_ip_to_queue_to_send_mikrotik() {
 
 
 
-void GLOBAL::test1() {
+bool GLOBAL::test1() {
     int xx = 0, yy = 0, i, j, k=0;
     
     FILE *f;
@@ -296,7 +296,7 @@ void GLOBAL::test1() {
     need_write_serial_5bytes[4] = 'X';
     need_write_serial_5bytes[0] = 'K';
     */
-    
+    uint64_t t;
     for(int i=0;i<5;i++)
     {
         need_write_serial_5bytes[6] = 0;
@@ -306,16 +306,21 @@ void GLOBAL::test1() {
         need_write_serial_5bytes[3] = 0x00;
         need_write_serial_5bytes[4] = i+1;
         need_write_serial_5bytes[0] = 'M';
-        while(need_write_serial_5bytes[0] != 0) {
+        
+        t = GetTickCount();
+        while(need_write_serial_5bytes[0] != 0  && GLOBAL_STOP == false) {
+            if(t+2000 < GetTickCount()) return false;
             usleep(1);
         }
-        while(need_write_serial_5bytes[6] != i+1) {
+        t = GetTickCount();
+        while(need_write_serial_5bytes[6] != i+1  && GLOBAL_STOP == false) {
+            if(t+2000 < GetTickCount()) return false;
             usleep(1);
         }
         printf("i\n");
     };
     usleep(100);
-    while(xx > 0 || yy > 0)
+    while((xx > 0 || yy > 0) && GLOBAL_STOP == false)
     {
         int dx, dy;
         dx = xx; if(dx > 15) dx = 15;
@@ -328,10 +333,14 @@ void GLOBAL::test1() {
         need_write_serial_5bytes[3] = 0x00;
         need_write_serial_5bytes[4] = i+1;
         need_write_serial_5bytes[0] = 'M';
-        while(need_write_serial_5bytes[0] != 0) {
+        t = GetTickCount();
+        while(need_write_serial_5bytes[0] != 0  && GLOBAL_STOP == false) {
+            if(t+2000 < GetTickCount()) return false;
             usleep(1);
         }
-        while(need_write_serial_5bytes[6] != i+1) {
+        t = GetTickCount();
+        while(need_write_serial_5bytes[6] != i+1  && GLOBAL_STOP == false) {
+            if(t+2000 < GetTickCount()) return false;
             usleep(1);
         }
         xx -= dx;
@@ -389,7 +398,7 @@ void GLOBAL::serial_io() {
         fcntl(f_serial, F_SETFL, FNDELAY);
     }
     if(f_serial != -1) {
-        
+        c = 0;
         s = read(f_serial, &c, 1);
         if(s != 0 && s != -1) {
             printf("read = [0x%02x]\n", c);
@@ -412,7 +421,9 @@ bool GLOBAL::MousePress(int mx_, int my_, int mk, int double_click_) {
     
     int x, y, dx, dy;
     int timeout = 30;
-    while(need_write_serial_5bytes[0] != 0) {
+    uint64_t t;
+    t = GetTickCount();
+    while(need_write_serial_5bytes[0] != 0 && GLOBAL_STOP == false) {
         timeout--;
         if(timeout <= 0) {
             printf("MouseMove timeout 1\n");
@@ -429,10 +440,20 @@ bool GLOBAL::MousePress(int mx_, int my_, int mk, int double_click_) {
         need_write_serial_5bytes[4] = 0xac;
         need_write_serial_5bytes[0] = 'M';
 
-        while(need_write_serial_5bytes[0] != 0) {
+        t = GetTickCount();
+        
+        while(need_write_serial_5bytes[0] != 0 && GLOBAL_STOP == false) {
+            
+            if(t + 2000 < GetTickCount()) {
+                return false;
+            }
             usleep(1);
         }
-        while(need_write_serial_5bytes[6] != 0xac) {
+        t = GetTickCount();
+        while(need_write_serial_5bytes[6] != 0xac && GLOBAL_STOP == false) {
+            if(t+2000 < GetTickCount()) {
+                return false;
+            }
             usleep(1);
         }
 
@@ -442,7 +463,7 @@ bool GLOBAL::MousePress(int mx_, int my_, int mk, int double_click_) {
     x = 0;
     y = 0;
     int i = 1;
-    while(mx - x > 0 || my - y > 0) {
+    while(mx - x > 0 || my - y > 0 && GLOBAL_STOP == false) {
     
         dx = mx - x; if(dx > 15) dx = 15;
         dy = my - y; if(dy > 15) dy = 15;
@@ -455,10 +476,14 @@ bool GLOBAL::MousePress(int mx_, int my_, int mk, int double_click_) {
         need_write_serial_5bytes[4] = i + 1;
         need_write_serial_5bytes[0] = 'M';
 
-        while(need_write_serial_5bytes[0] != 0) {
+        t = GetTickCount();
+        while(need_write_serial_5bytes[0] != 0 && GLOBAL_STOP == false) {
+            if(t+2000 < GetTickCount()) return false;
             usleep(1);
         }
-        while(need_write_serial_5bytes[6] != i+1) {
+        t = GetTickCount();
+        while(need_write_serial_5bytes[6] != i+1 && GLOBAL_STOP == false) {
+            if(t+2000 < GetTickCount()) return false;
             usleep(1);
         }
         i++;
@@ -478,10 +503,14 @@ bool GLOBAL::MousePress(int mx_, int my_, int mk, int double_click_) {
         need_write_serial_5bytes[4] = 0xad;
         need_write_serial_5bytes[0] = 'M';
 
-        while(need_write_serial_5bytes[0] != 0) {
+        t = GetTickCount();
+        while(need_write_serial_5bytes[0] != 0 && GLOBAL_STOP == false) {
+            if(t+2000 < GetTickCount()) return false;
             usleep(1);
         }
-        while(need_write_serial_5bytes[6] != 0xad) {
+        t = GetTickCount();
+        while(need_write_serial_5bytes[6] != 0xad && GLOBAL_STOP == false) {
+            if(t+2000 < GetTickCount()) return false;
             usleep(1);
         }
         usleep(500);
@@ -494,10 +523,14 @@ bool GLOBAL::MousePress(int mx_, int my_, int mk, int double_click_) {
             need_write_serial_5bytes[4] = 0xad;
             need_write_serial_5bytes[0] = 'M';
 
-            while(need_write_serial_5bytes[0] != 0) {
+            t = GetTickCount();
+            while(need_write_serial_5bytes[0] != 0 && GLOBAL_STOP == false) {
+                if(t+2000 < GetTickCount()) return false;
                 usleep(1);
             }
-            while(need_write_serial_5bytes[6] != 0xad) {
+            t = GetTickCount();
+            while(need_write_serial_5bytes[6] != 0xad && GLOBAL_STOP == false) {
+                if(t+2000 < GetTickCount()) return false;
                 usleep(1);
             }
 
@@ -511,10 +544,14 @@ bool GLOBAL::MousePress(int mx_, int my_, int mk, int double_click_) {
         need_write_serial_5bytes[4] = 0xad;
         need_write_serial_5bytes[0] = 'M';
 
-        while(need_write_serial_5bytes[0] != 0) {
+        t = GetTickCount();
+        while(need_write_serial_5bytes[0] != 0 && GLOBAL_STOP == false) {
+            if(t+2000 < GetTickCount()) return false;
             usleep(1);
         }
-        while(need_write_serial_5bytes[6] != 0xad) {
+        t = GetTickCount();
+        while(need_write_serial_5bytes[6] != 0xad && GLOBAL_STOP == false) {
+            if(t+2000 < GetTickCount()) return false;
             usleep(1);
         }
 
@@ -528,10 +565,14 @@ bool GLOBAL::MousePress(int mx_, int my_, int mk, int double_click_) {
         need_write_serial_5bytes[4] = 0xac;
         need_write_serial_5bytes[0] = 'M';
 
-        while(need_write_serial_5bytes[0] != 0) {
+        t = GetTickCount();
+        while(need_write_serial_5bytes[0] != 0 && GLOBAL_STOP == false) {
+            if(t+2000 < GetTickCount()) return false;
             usleep(1);
         }
-        while(need_write_serial_5bytes[6] != 0xac) {
+        t = GetTickCount();
+        while(need_write_serial_5bytes[6] != 0xac && GLOBAL_STOP == false) {
+            if(t+2000 < GetTickCount()) return false;
             usleep(1);
         }
 

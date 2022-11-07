@@ -84,7 +84,7 @@ public:
     void set_WindowListBtnStart(bool v) {
         WindowListBtnStart = v;
     }
-    void test1();
+    bool test1();
     int f_serial = -1;
     void serial_io();
     unsigned char need_write_serial_5bytes[6];
