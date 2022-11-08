@@ -380,7 +380,7 @@ void PROGRAMS::execute_timers() {
     
         usleep(100);
     }
-    execute_is_run = false;
+    execute_timers_is_run = false;
 }
 
 

@@ -333,7 +333,7 @@ void custom_analiz(SESSION *s, FRAME *frame) {
         }
     };
     printf("111111\n");*/
-    
+    /*
     if(frame->ipv4_dst_port == 3306 && frame->payload_size > 0 && s->packet_count == 4) {
         
         //printf("qqqqq\n");
@@ -378,8 +378,18 @@ void custom_analiz(SESSION *s, FRAME *frame) {
             global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
         }
     }
-    
+    */
     if(frame->ipv4_dst_port == 443 && frame->payload_size > 0 && s->packet_count == 4) {
+        
+        if(frame->SNI.size() > 0 && frame->SNI[0].length() > 15) {
+            std::string s;
+            s = frame->SNI[0].substr(14, 255);
+            if(s == ".cloudfront.net") {
+                //printf("+\n");
+                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+            }
+        }
+        
         unsigned int *v, l;
         unsigned short *s;
         unsigned long *q;
@@ -391,6 +401,7 @@ void custom_analiz(SESSION *s, FRAME *frame) {
                     s = (unsigned short *)(frame->payload+9);
                     if(*s == 0x0303) {
                         unsigned short cipher_suites_length = rte_cpu_to_be_16(data16(frame->payload,76 ));
+
                         if(cipher_suites_length == 32) {
                             q = (unsigned long *)(frame->payload+78);
                             if(q[0] == 0x0313021301136a6a &&

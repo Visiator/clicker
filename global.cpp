@@ -348,7 +348,10 @@ bool GLOBAL::test1() {
         usleep(10);
         //printf("i\n");
     };
-}
+    
+    return true;
+    
+};
 
 
 void GLOBAL::serial_io() {

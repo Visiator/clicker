@@ -60,14 +60,7 @@ void FRAME::add_dns_responce(char *name, unsigned int ip) {
 
 void FRAME::detect_direction() {
     
-    if( //((ipv4_src_ip & 0xff000000) == 0x0a) ||
-        ((ipv4_dst_ip & 0xff000000) == 0x0a)
-       )
-    {
-        int g = 111;
-        printf("1++++++ %d\n", g);
-        
-    }
+    
     
     if( ((ipv4_src_ip & 0xff000000) ==   0xc0000000) &&
             ((ipv4_src_ip & 0xff0000) == 0x00a80000) 
@@ -112,6 +105,21 @@ void FRAME::detect_direction() {
         return;
     }
     
+    
+    if( //((ipv4_src_ip & 0xff000000) == 0x0a) ||
+        ((ipv4_dst_ip & 0xff000000) == 0x0a000000)
+       )
+    {
+        direction = ingress;
+        return;
+    }
+    if( //((ipv4_src_ip & 0xff000000) == 0x0a) ||
+        ((ipv4_src_ip & 0xff000000) == 0x0a000000)
+       )
+    {
+        direction = egress;
+        return;
+    }    
     wtf("direction ?");
 }
 
