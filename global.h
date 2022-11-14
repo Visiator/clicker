@@ -25,6 +25,7 @@
 
 class GUI;
 class ELEMENT;
+class SCREEN;
 
 class GLOBAL {
 public:
@@ -67,8 +68,20 @@ public:
     std::thread *execute2_thread ;
     void execute2();
     
-    bool MousePress(int mx_, int my_, int mk_, int double_click_);
+    bool MousePress(int mx_, int my_, int mk_, int double_click_, int scr_w, int scr_h);
     
+    bool mouse_to_left_top();
+    bool mouse_to_right_top();
+    bool mouse_to_left_bottom();
+    bool mouse_to_right_bottom();
+    
+    bool mouse_move_from_left_top(int x, int y, int k, int double_click);
+    bool mouse_move_from_right_bottom(int x, int y, int k, int double_click);
+    
+    bool mouse_move_from_right_top(int x, int y, int k, int double_click);
+    
+    void mouse_press();
+    void mouse_unpress();
     
     void set_gui(GUI *val){
         gui = val;
@@ -88,6 +101,8 @@ public:
     int f_serial = -1;
     void serial_io();
     unsigned char need_write_serial_5bytes[6];
+    
+    void colibrate_mouse();
     
     GLOBAL() {
         for(int i=0;i<6;i++) need_write_serial_5bytes[i] = 0;

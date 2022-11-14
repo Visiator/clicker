@@ -50,5 +50,7 @@ std::string remove_double_space(std::string s);
 
 int my_atoi(const char *v);
 
+bool is_local_ip(unsigned int ip);
+
 #endif /* TOOLS_H */
 

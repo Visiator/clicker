@@ -643,8 +643,8 @@ std::string remove_double_space(std::string s) {
     std::string s1, s2;
     
     int i = 0;
-    while( i < s.length()-1) {
-        while(s[i] == ' ' && s[i+1] == ' ') {
+    while( i+1 < s.length()) {
+        while(i+1 < s.length() && (s[i] == ' ' || s[i] == 9) && (s[i+1] == ' ' || s[i+1] == 9)) {
             s1 = s.substr(0, i);
             s2 = s.substr(i+1, s.length());
             s = s1 + s2;
@@ -673,4 +673,17 @@ int my_atoi(const char *v) {
     if(z == 1) r *= -1;
     
     return r;
+}
+
+bool is_local_ip(unsigned int ip) {
+    // 192 = c0
+    // 168 = a8
+    // 10 = 0a
+
+    if((ip & 0xff000000) == 0xc0000000 &&
+       (ip & 0x00ff0000) == 0x00a80000 ) 
+    {
+        return true;
+    };
+    return false;
 }

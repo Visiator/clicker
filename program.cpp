@@ -16,9 +16,9 @@ extern GLOBAL global;
 extern GUI gui;
 
 void SPRITE::load_from_bmp(std::string& file_name_) {
-    file_name = file_name_;
+    file__name = file_name_;
     FILE *f;
-    f = fopen(file_name.c_str(), "rb");
+    f = fopen(file__name.c_str(), "rb");
     if(f == NULL) {
         printf("open file error\n");
         return;
@@ -30,8 +30,8 @@ void SPRITE::load_from_bmp(std::string& file_name_) {
     
     fclose(f);
     
-    file_name += "_info";
-    f = fopen(file_name.c_str(), "rb");
+    file__name += "_info";
+    f = fopen(file__name.c_str(), "rb");
     if(f == NULL) {
         printf("open file error\n");
         return;
@@ -63,6 +63,12 @@ void SPRITE::load_from_bmp(std::string& file_name_) {
             if(my_strcmp(m[0], 100, "double_click")) {
                 double_click = atoi(m[1]);
             }
+            if(my_strcmp(m[0], 100, "nic")) {
+                nic = m[1];
+            }
+            if(my_strcmp(m[0], 100, "nopress")) {
+                nopress = atoi(m[1]);
+            }
             m[0][0] = 0;
             m[1][0] = 0;
             j = 0;
@@ -84,7 +90,7 @@ void SPRITE::load_from_bmp(std::string& file_name_) {
     
     delete[] b;
     
-    delta = (w*h*5)/1000;
+    delta = (float)(w*h*5)/(float)300;
     if(delta == 0) delta = 1;
 }
 
@@ -176,6 +182,7 @@ void PROGRAM::load_text(std::string& FolderName) {
         
         
         if(ch == '\n') {
+            ln = rl_trim(ln);
             if(ln != "") {
                 line.push_back({ln});
             }
@@ -193,6 +200,7 @@ void PROGRAM::load_text(std::string& FolderName) {
         }
         i++;
     }
+    ln = rl_trim(ln);
     if(ln != "") {
         line.push_back({ln});
     }
@@ -346,7 +354,7 @@ void PROGRAMS::execute() {
     while(GLOBAL_STOP == false) {
         
         if(global.WindowListBtnStart) {
-            Grab_Sprites(global.WindowListId);
+            //Grab_Sprites(global.WindowListId);
         } else {
             
         }
@@ -380,7 +388,7 @@ void PROGRAMS::execute_timers() {
     
         usleep(100);
     }
-    execute_timers_is_run = false;
+    execute_is_run = false;
 }
 
 
@@ -402,7 +410,7 @@ unsigned int avg(unsigned int v1, unsigned int v2, unsigned int v3, unsigned int
     return r | (g<<8) | (b<<16);
 }
 
-
+/*
 void PROGRAMS::Grab_Sprites(Window w) {
 
     if(w == 0) {
@@ -452,9 +460,114 @@ void PROGRAMS::Grab_Sprites(Window w) {
     
     XCloseDisplay(d);
 }
-
+*/
 void PROGRAM::detect_sprites(SCREEN *src) {
-    if(src == nullptr) return;
+    if(src == nullptr || src->buffer == nullptr || src->w == 0 || src->h == 0) return;
+    bool is_mouse_pointer_detect = false;
+    int min_x=9999, min_y=9999, max_x=0, max_y=0;
+    unsigned int *q, c1, c2, c3, a, aa = 0;
+    /*
+    for(int yy=0;yy<540;yy++) {
+        q = src->buffer + yy*src->w;
+        a = 0;
+        for(int xx=0;xx<300;xx++) {
+            c1 = (*q & 0xff0000)>>16;
+            c2 = (*q & 0xff00)>>8;
+            c3 = (*q & 0xff);
+            //if(c1 == 0xff && c2 >= 0x15 && c2 <= 0x1e && c3 >= 0x20 && c3 <= 0x2f) {
+            if(c1 >= 0xF0 && c1 <= 0xFF && c2 >= 0x90 && c2 <= 0x9f && c3 == 0) {
+                    a++;
+                    *q++ = 0xffff00;
+                    if(xx < min_x) min_x = xx;
+                    if(xx > max_x) max_x = xx;
+                    if(yy < min_y) min_y = yy;
+                    if(yy > max_y) max_y = yy;
+            } else {
+                //*q++ = 0xff0000;
+                q++;
+            }
+        }
+        //if(a > 15) break;
+        aa += a;
+        
+    }
+
+    if(aa > 10) {
+        //printf("ccccccc\n");
+    }
+    
+    if(aa >= 103 && aa <= 150) {
+        if(max_x - min_x >= 18 &&
+           max_x - min_x <= 22 &&
+           max_y - min_y >= 18 &&
+           max_y - min_y <= 22)
+        {
+        
+            src->mouse_pointer_detect_x = min_x + (max_x - min_x)/2;
+            src->mouse_pointer_detect_y = min_y + (max_y - min_y)/2;
+            src->mouse_pointer_detect = GetTickCount();
+            is_mouse_pointer_detect = true;
+            //printf("111 %d %d\n", max_x - min_x, max_y - min_y);
+        }
+    } else {
+        if(aa >= 29 && aa <= 36) {
+            if(min_x >= 0 && min_x <= 1 &&
+               max_x >= 9 && max_x <= 11 && 
+               min_y >= 0 && min_y <= 1 &&
+               max_y >= 9 && max_y <= 11)
+            {
+                //printf("333\n");
+                src->mouse_pointer_detect_x = min_x;
+                src->mouse_pointer_detect_y = min_y;
+                src->mouse_pointer_detect = GetTickCount();
+                is_mouse_pointer_detect = true;
+            } else {
+             
+                if(min_x >= 286 && min_x <= 291 &&
+                   max_x >= 294 && max_x <= 300 && 
+                   min_y >= 0 && min_y <= 1 &&
+                   max_y >= 9 && max_y <= 11)
+                {
+                    //printf("444\n");
+                    src->mouse_pointer_detect_x = max_x;
+                    src->mouse_pointer_detect_y = min_y;
+                    src->mouse_pointer_detect = GetTickCount();
+                    is_mouse_pointer_detect = true;
+                } else {
+                    if( min_x >= 0 && min_x <= 1 &&
+                        max_x >= 9 && max_x <= 11 && 
+                        min_y >= 528 && min_y <= 531 &&
+                        max_y >= 538 && max_y <= 540)
+                    {
+                        
+                        src->mouse_pointer_detect_x = min_x;
+                        src->mouse_pointer_detect_y = max_y;
+                        src->mouse_pointer_detect = GetTickCount();
+                        is_mouse_pointer_detect = true;
+                    } else {
+                        if( min_x >= 286 && min_x <= 290 &&
+                            max_x >= 294 && max_x <= 300 && 
+                            min_y >= 528 && min_y <= 531 &&
+                            max_y >= 538 && max_y <= 540)
+                        {
+                            //printf("ssss\n");    
+                            src->mouse_pointer_detect_x = max_x;
+                            src->mouse_pointer_detect_y = max_y;
+                            src->mouse_pointer_detect = GetTickCount();
+                            is_mouse_pointer_detect = true;
+                        }
+                    }
+                }
+            
+            }
+        }
+    }
+    */
+    if(is_mouse_pointer_detect) {
+        printf("MOUSE detect %d %d\n", src->mouse_pointer_detect_x, src->mouse_pointer_detect_y);
+    } else {
+        printf("MOUSE not detect\n");
+    }
     
     //sprite[2].detect_sprite(src);
     int x = 0;
@@ -464,10 +577,11 @@ void PROGRAM::detect_sprites(SCREEN *src) {
         }
     }
     sprite_detected_idx = x;
+    src->detect_sprite_end++;
 }
 
 bool eq_byte_soft(unsigned int p1, unsigned int p2) {
-    unsigned int r1, r2, g1, g2, b1, b2;
+    unsigned int r1, r2, g1, g2, b1, b2, delta = 5;
     r1 = p1 & 0xff;
     r2 = p2 & 0xff;
     
@@ -478,31 +592,31 @@ bool eq_byte_soft(unsigned int p1, unsigned int p2) {
     b2 = (p2 & 0xff0000)>>16;
     
     if(r1 < r2) {
-        if(r1 + 25 < r2) {
+        if(r1 + delta < r2) {
             return false;
         }
     } else {
-        if(r2 + 25 < r1) {
+        if(r2 + delta < r1) {
             return false;
         }
     }
     
     if(g1 < g2) {
-        if(g1 + 25 < g2) {
+        if(g1 + delta < g2) {
             return false;
         }
     } else {
-        if(g2 + 25 < g1) {
+        if(g2 + delta < g1) {
             return false;
         }
     }
     
     if(b1 < b2) {
-        if(b1 + 25 < b2) {
+        if(b1 + delta < b2) {
             return false;
         }
     } else {
-        if(b2 + 25 < b1) {
+        if(b2 + delta < b1) {
             return false;
         }
     }
@@ -820,6 +934,15 @@ std::string PROGRAM::calc_value(std::string s) {
     return s;
 }
 
+bool PROGRAM::it_is_sprite_name(std::string name) {
+    int i = 0;
+    while(i < sprite.size()) {
+        if(sprite[i].nic == name) return true;
+        i++;
+    }
+    return false;
+}
+
 bool PROGRAM::it_is_var(std::string name) {
     auto it = vars.find(name);
     if(it == vars.end()) {
@@ -905,7 +1028,7 @@ void PROGRAM::exec_MousePress(std::string v1, std::string v2, int mk) {
         x1 = calc_value(v1);
         x2 = calc_value(v2);
         if(it_is_integer(x1) && it_is_integer(x2)) {
-            global.MousePress(my_atoi(x1.c_str()), my_atoi(x2.c_str()), mk, 0);
+            global.MousePress(my_atoi(x1.c_str()), my_atoi(x2.c_str()), mk, 0, 300, 540);
             return;
         }
     }
@@ -914,11 +1037,30 @@ void PROGRAM::exec_MousePress(std::string v1, std::string v2, int mk) {
         x1 = get_var(v1);
         if(it_is_sprite(x1)) {
             int x = -1, y = -1, double_click = -1;
-            if(get_XY_from_sprite(x1, x, y, double_click)) {
-                global.MousePress(x, y, mk, double_click);
+            if(get_XY_from_sprite_by_idx(x1, x, y, double_click)) {
+                global.MousePress(x, y, mk, double_click, 300, 540);
                 return;
             }
         }        
+    }
+    
+    if(v1.length() > 0 && v2.length() == 0 && it_is_sprite_name(v1)) {
+        printf("ssssss\n");
+        
+        int x = -1, y = -1, double_click = -1;
+        if(get_XY_from_sprite_by_name(v1, x, y, double_click)) {
+            global.MousePress(x, y, mk, double_click, 300, 540);
+            return;
+        }
+        
+        /*x1 = get_var(v1);
+        if(it_is_sprite(x1)) {
+            int x = -1, y = -1, double_click = -1;
+            if(get_XY_from_sprite(x1, x, y, double_click)) {
+                global.MousePress(x, y, mk, double_click, 300, 540);
+                return;
+            }
+        }*/        
     }
     
 }
@@ -929,7 +1071,28 @@ void PROGRAM::exec_print(std::string v1, std::string v2, std::string v3) {
     print_out_add(s);
 }
 
-bool PROGRAM::get_XY_from_sprite(std::string s,int &x, int &y, int &double_click) {
+bool PROGRAM::get_XY_from_sprite_by_name(std::string s,int &x, int &y, int &double_click) {
+    x = -1;
+    y = -1;
+    double_click = -1;
+
+    int i = 0;
+    while(i < sprite.size()) {
+        if(sprite[i].nic == s) {
+            if(sprite[i].nopress == 1) return true;
+            x = sprite[i].is_detected_x + ((float)sprite[i].w/(float)100 * (float)sprite[i].mouse_press_target_percent_w);
+            y = sprite[i].is_detected_y + ((float)sprite[i].h/(float)100 * (float)sprite[i].mouse_press_target_percent_h);
+            double_click = sprite[i].double_click;
+            
+            return true;
+        }
+        i++;
+    }
+    
+    return false;
+}
+
+bool PROGRAM::get_XY_from_sprite_by_idx(std::string s,int &x, int &y, int &double_click) {
     x = -1;
     y = -1;
     double_click = -1;
@@ -955,6 +1118,7 @@ bool PROGRAM::get_XY_from_sprite(std::string s,int &x, int &y, int &double_click
             }
             
             if(ss != nullptr) {
+                if(ss->nopress == 1) return true;
                 x = ss->is_detected_x + ((float)ss->w/(float)100 * (float)ss->mouse_press_target_percent_w);
                 y = ss->is_detected_y + ((float)ss->h/(float)100 * (float)ss->mouse_press_target_percent_h);
                 double_click = ss->double_click;
@@ -1050,6 +1214,60 @@ void split_by_znak(std::string s, std::string &l, std::string &z, std::string &r
         }
         i++;
     }
+    l = s;
+}
+
+void split_function_name_and_param(std::string s, std::string &fn, std::string &p1) {
+    
+    fn = "";
+    p1 = "";
+    
+    int i1, i2;
+    i1 = s.find('(');
+    if(i1 > 1) {
+        i2 = s.find(')');
+        if(i2 > i1) {
+            fn = rl_trim(s.substr(0, i1));
+            p1 = rl_trim(s.substr(i1+1, i2-i1-1));
+        }
+    }
+    
+}
+
+bool it_is_function(std::string s) {
+    
+    std::string fn, p1;
+    
+    split_function_name_and_param(s, fn, p1);
+    if(fn != "") return true;
+    return false;
+}
+
+std::string PROGRAM::calc_value_function_sprite_by_nic_is_detected(std::string p) {
+    int i = 0;
+    while(i<sprite.size()) {
+        if(sprite[i].nic == p) {
+            if(sprite[i].is_detected) {
+                return "true";
+            } else {
+                return "false";
+            }
+        }
+        i++;
+    }
+    return "";
+}
+
+std::string PROGRAM::calc_value_function(std::string e) {
+    std::string fn, p1;
+    
+    split_function_name_and_param(e, fn, p1);
+    
+    if(fn == "sprite_by_nic_is_detected") {
+        return calc_value_function_sprite_by_nic_is_detected(p1);
+    }
+    
+    return "";
 }
 
 bool PROGRAM::calc_boolean(std::string s) {
@@ -1057,6 +1275,14 @@ bool PROGRAM::calc_boolean(std::string s) {
     std::string val1, val3;
     std::string l, z, r;
     split_by_znak(s, l, z, r);
+    
+    if(z == "" && it_is_function(l)) {
+        val1 = calc_value_function(l);
+        if(val1 == "true") {
+            return true;
+        }
+        return false;
+    }
     
     if(z == ">" ||
        z == "<" ||

@@ -21,18 +21,7 @@ void analiz_to_block(SESSION* session) {
 
 }
 
-bool is_local_ip(unsigned int ip) {
-    // 192 = c0
-    // 168 = a8
-    // 10 = 0a
 
-    if((ip & 0xff000000) == 0xc0000000 &&
-       (ip & 0x00ff0000) == 0x00a80000 ) 
-    {
-        return false;
-    };
-    return true;
-}
 
 void custom_analiz_udp(int frame_no, unsigned char *buf, int buf_size, FRAME *frame) {
     
@@ -288,9 +277,50 @@ bool check_ja3_v3(unsigned char *payload, size_t payload_size, unsigned int ip) 
 }
 
 
+unsigned char turbovpn_s1[] = { 0x7b ,0x22 ,0x74 ,0x69 ,0x6d ,0x65 ,0x73 ,0x74 ,0x61 ,0x6d ,0x70 ,0x22 ,0x3a ,0x20 };
+
+bool is_bytes(unsigned char *b1, unsigned char *b2, int sz ) {
+    if(b1 == nullptr || b2 == nullptr) return false;
+    int i;
+    i = 0;
+    while(i<sz) {
+        if(b1[i] != b2[i]) return false;
+        i++;
+    }
+    return true;
+}
+
+void custom_analiz_turbo_vpn(SESSION *s, FRAME *frame) {
+    if(s->packet_count == 2 && s->ip_proto == 17) {
+        if(frame->ipv4_src_port >= 90 && frame->ipv4_src_port <= 99) {
+            if(s->frames[0].payload_size == 18 && s->frames[1].payload_size >= 37 && s->frames[1].payload_size <= 38) {
+                if( is_bytes(frame->payload, turbovpn_s1, sizeof(turbovpn_s1) ) ) {
+                    global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_src_ip);
+
+                }
+            }
+        }
+    }
+    
+    if(s->packet_count == 1 && s->ip_proto == 17) {
+        if(frame->ipv4_dst_port == 4500) {
+            if(frame->payload_size > 100) {
+                
+                if(data32(frame->payload, 0) == 0) {
+                    global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+
+                }
+            }
+        }
+        
+    }
+}
+
 void custom_analiz(SESSION *s, FRAME *frame) {
 
-
+    custom_analiz_turbo_vpn(s, frame);
+    
+    return;
     
     /*if(frame->payload_size == 54) {
         if(frame->ipv4_dst_port == 25000 ||
@@ -378,18 +408,8 @@ void custom_analiz(SESSION *s, FRAME *frame) {
             global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
         }
     }
-    */
+    
     if(frame->ipv4_dst_port == 443 && frame->payload_size > 0 && s->packet_count == 4) {
-        
-        if(frame->SNI.size() > 0 && frame->SNI[0].length() > 15) {
-            std::string s;
-            s = frame->SNI[0].substr(14, 255);
-            if(s == ".cloudfront.net") {
-                //printf("+\n");
-                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
-            }
-        }
-        
         unsigned int *v, l;
         unsigned short *s;
         unsigned long *q;
@@ -401,7 +421,6 @@ void custom_analiz(SESSION *s, FRAME *frame) {
                     s = (unsigned short *)(frame->payload+9);
                     if(*s == 0x0303) {
                         unsigned short cipher_suites_length = rte_cpu_to_be_16(data16(frame->payload,76 ));
-
                         if(cipher_suites_length == 32) {
                             q = (unsigned long *)(frame->payload+78);
                             if(q[0] == 0x0313021301136a6a &&
@@ -489,7 +508,7 @@ void custom_analiz(SESSION *s, FRAME *frame) {
         }
     }
     
-
+*/
     
 
 }

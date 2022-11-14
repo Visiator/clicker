@@ -93,12 +93,12 @@ int main(int argc, char** argv) {
     
     std::vector<std::string> lst;
     
-    webcams.init(&lst, &programs.grab_screen_buffer, &programs.item_[0]);
+    webcams.init(&lst, &programs.item_[0].grab_screen_buffer, &programs.item_[0]);
     
     clicker.init();
     
     
-    global.active_PROG_tab();
+    //global.active_PROG_tab();
     
     gui.wait_run();
     

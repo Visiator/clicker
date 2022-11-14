@@ -29,13 +29,13 @@
 class SPRITE {
 public:  
     int idx = 0;
-    std::string file_name;
+    std::string file__name;
     std::string nic;
     std::vector<unsigned int> bitmap;
     bool is_detected = false;
     int is_detected_x = 0, is_detected_y = 0;
     int mouse_press_target_percent_w = 50, mouse_press_target_percent_h = 50;
-    int double_click = 0;
+    int double_click = 0, nopress = 0;
     unsigned int w = 0, h = 0, delta = 0;
     void load_from_bmp(std::string& file_name_);
     bool eq(SCREEN *src, int x, int y);
@@ -49,11 +49,11 @@ public:
     
     bool operator<(const SPRITE &r) const
     {
-        return file_name < r.file_name;        
+        return file__name < r.file__name;        
     }
     bool operator>(const SPRITE &r) const
     {
-        return file_name > r.file_name;        
+        return file__name > r.file__name;        
     }
     
     SPRITE(std::string& file_name_, int idx_){ idx = idx_; load_from_bmp(file_name_); };
@@ -135,6 +135,7 @@ public:
 
 class PROGRAM {
 public:
+    SCREEN grab_screen_buffer;
     int sprite_detected_idx = 0;
     int ttimer[10];
     void timers_increase();
@@ -187,6 +188,8 @@ public:
     
     bool calc_boolean(std::string s);
     
+    std::string calc_value_function_sprite_by_nic_is_detected(std::string p);
+    std::string calc_value_function(std::string e);
     std::string calc_value(std::string e);
     std::string calc_value(std::string v1, std::string v2, std::string v3);
     
@@ -197,11 +200,14 @@ public:
     bool it_is_var(std::string name);
     std::string get_var(std::string name);
     
+    bool it_is_sprite_name(std::string name);
+    
     bool it_is_integer(std::string val);
     bool it_is_sprite(std::string val);
     
     std::string get_sprite_value(std::string s);
-    bool get_XY_from_sprite(std::string s,int &x, int &y, int &double_click);
+    bool get_XY_from_sprite_by_idx(std::string s,int &x, int &y, int &double_click);
+    bool get_XY_from_sprite_by_name(std::string s,int &x, int &y, int &double_click);
     
     std::vector<PROGRAM_line> line;
     int get_sprite_max_id();
@@ -240,7 +246,7 @@ class PROGRAMS {
 public:
     
     std::vector<PROGRAM> item_;
-    SCREEN grab_screen_buffer;
+    
     
     void init();
     
@@ -254,7 +260,7 @@ public:
     
     void wait_execute_close();
     
-    void Grab_Sprites(Window w);
+    //void Grab_Sprites(Window w);
     
     PROGRAMS(){};
     ~PROGRAMS(){};

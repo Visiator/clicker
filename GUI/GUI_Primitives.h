@@ -20,6 +20,13 @@ class SCREEN {
 public:
     std::mutex g_mutex;
 
+    unsigned int grab_begin = 0;
+    unsigned int grab_end = 0;
+    unsigned int detect_sprite_end = 0;
+    int mouse_pointer_detect_x = 0;
+    int mouse_pointer_detect_y = 0;
+    uint64_t mouse_pointer_detect = 0;
+    
     unsigned int *buffer;
     unsigned int w, h;
     void lock() {

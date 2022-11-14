@@ -249,7 +249,9 @@ int WEBCAMS::readFrame(int fd, std::string file_name)
     //if(buf.length == 691200) {
     if(buf.length == 4147200) {
         src->set_size(IMAGE_WIDTH/2, IMAGE_HEIGHT/2); // 960 * 540 = 518400
-    
+        
+        src->grab_begin++;
+        
         unsigned int *q;
         unsigned char *w;
         w = (unsigned char *)temp->start;
@@ -371,7 +373,7 @@ int WEBCAMS::readFrame(int fd, std::string file_name)
         }
         ***/
     }
-    
+    src->grab_end++;
     return 1;
 }
 

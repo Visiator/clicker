@@ -176,10 +176,17 @@ void ELEMENT::paint(SCREEN_BUFFER *screen) {
         if(program != nullptr) {
             x = 5;
             y = 5;
-            for(auto const& ln : program->line) {
+            /*for(auto const& ln : program->line) {
                 screen->fonts.print(px + x, py + y, "arial", 12, ln.info.c_str(), 0xffffff);
                 screen->fonts.print(px + x+350, py + y, "arial", 12, ln.raw.c_str(), 0xcccccc);
                 y += 20;
+            }*/
+            i = 0;
+            while(i < program->line.size() && y + 40 < h) {
+                screen->fonts.print(px + x, py + y, "arial", 12, program->line[i].info.c_str(), 0xffffff);
+                screen->fonts.print(px + x+350, py + y, "arial", 12, program->line[i].raw.c_str(), 0xcccccc);
+                y += 20;
+                i++;
             }
         }
         screen->fonts.print(px + 5, py + h - 30, "arial", 12, program->detail.c_str(), 0xcccccc);

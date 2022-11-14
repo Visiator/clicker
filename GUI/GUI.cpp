@@ -264,16 +264,16 @@ void GUI::create_elements() {
     q = elements.add(this, 0, ELEMENT::Type::Panel,  5, 35, 640, 680, COLOR::PanelBG, COLOR::PanelBorder, "PanelPcap");
     PanelPcap_id = q->id;
 
-    q = elements.add(this, 0, ELEMENT::Type::Panel,  5, 35, 970, 1010, COLOR::PanelBG, COLOR::PanelBorder, "PanelGrab");
+    q = elements.add(this, 0, ELEMENT::Type::Panel,  5, 35, 970, 855, COLOR::PanelBG, COLOR::PanelBorder, "PanelGrab");
     PanelGrab_id = q->id;
 
-    q = elements.add(this, 0, ELEMENT::Type::Panel,  5, 35, 970, 1010, COLOR::PanelBG, COLOR::PanelBorder, "PanelProg");
+    q = elements.add(this, 0, ELEMENT::Type::Panel,  5, 35, 970, 855, COLOR::PanelBG, COLOR::PanelBorder, "PanelProg");
     PanelProg_id = q->id;
     
-    q = elements.add(this, PanelProg_id, ELEMENT::Type::ProgramText ,  5, 115, 550, 850, COLOR::ProgTextBG, COLOR::ProgText, "ProgText");
+    q = elements.add(this, PanelProg_id, ELEMENT::Type::ProgramText ,  5, 115, 550, 735, COLOR::ProgTextBG, COLOR::ProgText, "ProgText");
     ProgText_id = q->id;
     
-    q = elements.add(this, PanelProg_id, ELEMENT::Type::Print ,  570, 115, 350, 850, COLOR::ProgTextBG, COLOR::ProgText, "Print");
+    q = elements.add(this, PanelProg_id, ELEMENT::Type::Print ,  570, 115, 350, 735, COLOR::ProgTextBG, COLOR::ProgText, "Print");
     Print_id = q->id;
     
     //q = elements.add(this, IfList_id, ELEMENT::Type::Button ,  55, 295, 65, 25, COLOR::ListBG, COLOR::ListBorder, "RUN");
@@ -330,7 +330,7 @@ void GUI::create_elements() {
     q = elements.add(this, PanelGrab_id, ELEMENT::Type::View,  5, 115, 960, 540, COLOR::ListBG, COLOR::ListBorder, "View");
     View_id = q->id;
        
-    q = elements.add(this, PanelGrab_id, ELEMENT::Type::SpriteList,  5, 660, 960, 345, COLOR::ListBG, COLOR::ListBorder, "SpriteList");
+    q = elements.add(this, PanelGrab_id, ELEMENT::Type::SpriteList,  5, 660, 960, 190, COLOR::ListBG, COLOR::ListBorder, "SpriteList");
     SpriteList_id = q->id;
     
     elements.recalc_parent_id();
@@ -361,7 +361,7 @@ void GUI::create_elements() {
     PanelProg = elements.get_element_by_id(PanelProg_id);
     
     View = elements.get_element_by_id(View_id);
-    View->grab_screen = &programs.grab_screen_buffer;
+    View->grab_screen = &programs.item_[0].grab_screen_buffer;
     View->program = &(programs.item_[0]);
     
     SpriteList = elements.get_element_by_id(SpriteList_id);

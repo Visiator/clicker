@@ -123,7 +123,7 @@ extern bool GLOBAL_STOP;
 
     bool GUI::low_level_init() {
         
-        start_position.set_xywh(50, 50, 1000, 1050);
+        start_position.set_xywh(50, 50, 1000, 900);
         
         if ((linux.display_ = XOpenDisplay(getenv("DISPLAY"))) == NULL)
         {
