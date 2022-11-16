@@ -206,6 +206,10 @@ void GUI::wait_run() {
                         if(a._data_ == 49) {
                             View->set_need_save_bmp();
                         }
+                        if(a._data_ == 23) {
+                            printf("tab %d:%d\n", View->green_rec.x, View->green_rec.y );
+                            global.MousePress(View->green_rec.x, View->green_rec.y,1,0, 300,540);
+                        }
                     }
                 }
                 if(a.id == Mikrotik_to_txt_id) {

@@ -21,8 +21,6 @@ void analiz_to_block(SESSION* session) {
 
 }
 
-
-
 void custom_analiz_udp(int frame_no, unsigned char *buf, int buf_size, FRAME *frame) {
     
     if(is_local_ip(frame->ipv4_dst_ip)) return;
@@ -314,6 +312,17 @@ void custom_analiz_turbo_vpn(SESSION *s, FRAME *frame) {
         }
         
     }
+    
+    if(s->packet_count == 1 && s->ip_proto == 17) {
+        if(frame->ipv4_dst_port == 4500) {
+            if(frame->ipv4_src_port == 4500) {
+                if(frame->payload_size > 100) {
+                    global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+                }
+            }
+        }
+    }
+                
 }
 
 void custom_analiz(SESSION *s, FRAME *frame) {
