@@ -411,13 +411,13 @@ void GLOBAL::serial_io() {
         c = 0;
         s = read(f_serial, &c, 1);
         if(s != 0 && s != -1) {
-            //printf("read = [0x%02x]\n", c);
+            printf("read = [0x%02x]\n", c);
             need_write_serial_5bytes[6] = c;
         }
         if(need_write_serial_5bytes[0] != 0) {
             s = write(f_serial, need_write_serial_5bytes, 5);
             for(int i=1;i<5;i++) need_write_serial_5bytes[i] = 0;
-            //printf("write=%d\n", s);
+            printf("write=%d\n", s);
             need_write_serial_5bytes[0] = 0;
         }
         usleep(1);
@@ -849,19 +849,19 @@ void GLOBAL::colibrate_mouse() {
     unsigned int k, a;
     uint64_t t;
     
-    goto l1;
+    //goto l1;
     
     need_write_serial_5bytes[1] = 5;
     need_write_serial_5bytes[2] = 5;
-    need_write_serial_5bytes[3] = 0x0;
+    need_write_serial_5bytes[3] = 0x03;
     need_write_serial_5bytes[4] = 0xac;
     need_write_serial_5bytes[0] = 'M';
     
     usleep(200);
-    
+    return;
     need_write_serial_5bytes[1] = -5;
     need_write_serial_5bytes[2] = -5;
-    need_write_serial_5bytes[3] = 0x0;
+    need_write_serial_5bytes[3] = 0x00;
     need_write_serial_5bytes[4] = 0xac;
     need_write_serial_5bytes[0] = 'M';
     
