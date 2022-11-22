@@ -784,6 +784,16 @@ void PROGRAM::execute_next_step() {
         next_step = line[n].next_idx;
         return;
     }
+    if(line[n].cmd == CMD::MouseMove) {
+        exec_MouseMove(line[n].s2, line[n].s3);
+        next_step = line[n].next_idx;
+        return;
+    }
+    if(line[n].cmd == CMD::KeyPressRaw) {
+        exec_KeyPressRaw(line[n].s2, line[n].s3);
+        next_step = line[n].next_idx;
+        return;
+    }
     int rr;
     rr = 11;
 }
@@ -1050,6 +1060,63 @@ void PROGRAM::exec_MousePress(std::string v1, std::string v2, int mk) {
         int x = -1, y = -1, double_click = -1;
         if(get_XY_from_sprite_by_name(v1, x, y, double_click)) {
             global.MousePress(x, y, mk, double_click, 300, 540);
+            return;
+        }
+        
+        /*x1 = get_var(v1);
+        if(it_is_sprite(x1)) {
+            int x = -1, y = -1, double_click = -1;
+            if(get_XY_from_sprite(x1, x, y, double_click)) {
+                global.MousePress(x, y, mk, double_click, 300, 540);
+                return;
+            }
+        }*/        
+    }
+    
+}
+
+void PROGRAM::exec_KeyPressRaw(std::string v1, std::string v2) {
+    std::string x1, x2;
+    if(v1.length() > 0 && v2.length() > 0) {
+        
+        x1 = calc_value(v1);
+        x2 = calc_value(v2);
+        if(it_is_integer(x1) && it_is_integer(x2)) {
+            global.KeyPressRaw(my_atoi(x1.c_str()), my_atoi(x2.c_str()));
+            return;
+        }
+    }
+}
+
+void PROGRAM::exec_MouseMove(std::string v1, std::string v2) {
+    std::string x1, x2;
+    if(v1.length() > 0 && v2.length() > 0) {
+        
+        x1 = calc_value(v1);
+        x2 = calc_value(v2);
+        if(it_is_integer(x1) && it_is_integer(x2)) {
+            global.MouseMove(my_atoi(x1.c_str()), my_atoi(x2.c_str()), 300, 540);
+            return;
+        }
+    }
+       
+    if(v1.length() > 0 && v2.length() == 0 && it_is_var(v1)) {
+        x1 = get_var(v1);
+        if(it_is_sprite(x1)) {
+            int x = -1, y = -1, double_click = -1;
+            if(get_XY_from_sprite_by_idx(x1, x, y, double_click)) {
+                global.MouseMove(x, y, 300, 540);
+                return;
+            }
+        }        
+    }
+    
+    if(v1.length() > 0 && v2.length() == 0 && it_is_sprite_name(v1)) {
+        printf("ssssss\n");
+        
+        int x = -1, y = -1, double_click = -1;
+        if(get_XY_from_sprite_by_name(v1, x, y, double_click)) {
+            global.MouseMove(x, y, 300, 540);
             return;
         }
         

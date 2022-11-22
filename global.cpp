@@ -367,6 +367,7 @@ void GLOBAL::serial_io() {
         if (f_serial == -1) f_serial = open("/dev/ttyUSB1", O_RDWR | O_NOCTTY | O_NDELAY);
         if (f_serial == -1) {
             printf("serial open error\n");
+            usleep(2000);
             return;
         }
         
@@ -436,292 +437,54 @@ bool GLOBAL::MousePress(int mx_, int my_, int mk, int double_click_, int scr_w, 
         return mouse_move_from_right_bottom(mx_, my_, mk, double_click_);
     }
     
-    /*
-    unsigned char move_prepare_dx = 0, move_prepare_dy = 0, k_x = 1, k_y = 1;
-    
-    if(mx_ <= scr_w/2 && my_ <= scr_h/2) { // left top
-        move_prepare_dx = -90;
-        move_prepare_dy = -90;
-    } else 
-    if(mx_ > scr_w/2 && my_ <= scr_h/2) { // right top
-        move_prepare_dx = 90;
-        move_prepare_dy = -90;
-        mx_ = scr_w - mx_;
-        k_x = -1;
-    } else
-    if(mx_ <= scr_w/2 && my_ > scr_h/2) { // left bottom
-        move_prepare_dx = -90;
-        move_prepare_dy = 90;
-    } else
-    if(mx_ > scr_w/2 && my_ > scr_h/2) { // right bottom
-        move_prepare_dx = 90;
-        move_prepare_dy = 90;
-    } 
-        
-    uint64_t t;
-    t = GetTickCount();
-    while(need_write_serial_5bytes[0] != 0 && GLOBAL_STOP == false) {
-        if(t + 5000 < GetTickCount()) return false;
-        usleep(1);
-    }
-    
-    for(int i=0;i<10;i++) {
-        need_write_serial_5bytes[1] = move_prepare_dx;
-        need_write_serial_5bytes[2] = move_prepare_dy;
-        need_write_serial_5bytes[3] = 0x0;
-        need_write_serial_5bytes[4] = 0xac;
-        need_write_serial_5bytes[0] = 'M';
-
-        t = GetTickCount();      
-        while(need_write_serial_5bytes[0] != 0 && GLOBAL_STOP == false) {           
-            if(t + 5000 < GetTickCount()) return false;
-            usleep(1);
-        }
-        t = GetTickCount();
-        while(need_write_serial_5bytes[6] != 0xac && GLOBAL_STOP == false) {
-            if(t+5000 < GetTickCount()) return false;
-            usleep(1);
-        }
-        usleep(10);
-    }    
-    
-    usleep(3000);
-    
-    int mx, my;
-    mx = (float)mx_ * (float)1.21;
-    my = (float)my_ * (float)1.39;
-    
-    int dx, dy, i;
-    
-    i = 10;
-    
-    while((mx > 0 || my > 0) && GLOBAL_STOP == false) {
-        if(mx > 15) dx = 15; else dx = mx;
-        if(my > 15) dy = 15; else dy = my;
-        
-        printf("---->> %d %d\n", dx, dy);
-        
-        need_write_serial_5bytes[6] = 0;
-        
-        need_write_serial_5bytes[1] = dx * k_x;
-        need_write_serial_5bytes[2] = dy * k_y;
-        need_write_serial_5bytes[3] = 0x0;
-        need_write_serial_5bytes[4] = i + 1;
-        need_write_serial_5bytes[0] = 'M';
-        
-        t = GetTickCount();
-        while(need_write_serial_5bytes[0] != 0 && GLOBAL_STOP == false) {
-            if(t+2000 < GetTickCount()) return false;
-            usleep(1);
-        }
-        t = GetTickCount();
-        while(need_write_serial_5bytes[6] != i+1 && GLOBAL_STOP == false) {
-            if(t+2000 < GetTickCount()) return false;
-            usleep(1);
-        }
-        usleep(200);
-        mx -= dx;
-        my -= dy;
-        i += 1;
-    }
-    */
     return false;
-    
-    /*
-    
-    int mx, my;
-    mx = (float)mx_ * (float)1.4;
-    my = (float)my_ * (float)1.4;
-    
-    int x, y, dx, dy;
-    int timeout = 30;
-    uint64_t t;
-    t = GetTickCount();
-    while(need_write_serial_5bytes[0] != 0 && GLOBAL_STOP == false) {
-        timeout--;
-        if(timeout <= 0) {
-            printf("MouseMove timeout 1\n");
-            return false;
-        }
-        usleep(100);
-    }
- 
-    
-    for(int i=0;i<10;i++) {
-        need_write_serial_5bytes[1] = -90;
-        need_write_serial_5bytes[2] = -90;
-        need_write_serial_5bytes[3] = 0x0;
-        need_write_serial_5bytes[4] = 0xac;
-        need_write_serial_5bytes[0] = 'M';
-
-        t = GetTickCount();
-        
-        while(need_write_serial_5bytes[0] != 0 && GLOBAL_STOP == false) {
-            
-            if(t + 2000 < GetTickCount()) {
-                return false;
-            }
-            usleep(1);
-        }
-        t = GetTickCount();
-        while(need_write_serial_5bytes[6] != 0xac && GLOBAL_STOP == false) {
-            if(t+2000 < GetTickCount()) {
-                return false;
-            }
-            usleep(1);
-        }
-
-        usleep(10);
-    }    
-    
-    x = 0;
-    y = 0;
-    int i = 1;
-    while(mx - x > 0 || my - y > 0 && GLOBAL_STOP == false) {
-    
-        dx = mx - x; if(dx > 15) dx = 15;
-        dy = my - y; if(dy > 15) dy = 15;
-        
-        need_write_serial_5bytes[6] = 0;
-        
-        need_write_serial_5bytes[1] = dx;
-        need_write_serial_5bytes[2] = dy;
-        need_write_serial_5bytes[3] = 0x0;
-        need_write_serial_5bytes[4] = i + 1;
-        need_write_serial_5bytes[0] = 'M';
-
-        t = GetTickCount();
-        while(need_write_serial_5bytes[0] != 0 && GLOBAL_STOP == false) {
-            if(t+2000 < GetTickCount()) return false;
-            usleep(1);
-        }
-        t = GetTickCount();
-        while(need_write_serial_5bytes[6] != i+1 && GLOBAL_STOP == false) {
-            if(t+2000 < GetTickCount()) return false;
-            usleep(1);
-        }
-        i++;
-        x += dx;
-        y += dy;
-        
-        usleep(20);
-
-    }
-    usleep(500);
-    if(mk == 1) {
-        need_write_serial_5bytes[6] = 0;
-        
-        need_write_serial_5bytes[1] = 1;
-        need_write_serial_5bytes[2] = 1;
-        need_write_serial_5bytes[3] = 0x01;
-        need_write_serial_5bytes[4] = 0xad;
-        need_write_serial_5bytes[0] = 'M';
-
-        t = GetTickCount();
-        while(need_write_serial_5bytes[0] != 0 && GLOBAL_STOP == false) {
-            if(t+2000 < GetTickCount()) return false;
-            usleep(1);
-        }
-        t = GetTickCount();
-        while(need_write_serial_5bytes[6] != 0xad && GLOBAL_STOP == false) {
-            if(t+2000 < GetTickCount()) return false;
-            usleep(1);
-        }
-        usleep(500);
-        if(double_click_ == 1) {
-            need_write_serial_5bytes[6] = 0;
-        
-            need_write_serial_5bytes[1] = 1;
-            need_write_serial_5bytes[2] = 1;
-            need_write_serial_5bytes[3] = 0x01;
-            need_write_serial_5bytes[4] = 0xad;
-            need_write_serial_5bytes[0] = 'M';
-
-            t = GetTickCount();
-            while(need_write_serial_5bytes[0] != 0 && GLOBAL_STOP == false) {
-                if(t+2000 < GetTickCount()) return false;
-                usleep(1);
-            }
-            t = GetTickCount();
-            while(need_write_serial_5bytes[6] != 0xad && GLOBAL_STOP == false) {
-                if(t+2000 < GetTickCount()) return false;
-                usleep(1);
-            }
-
-            usleep(500);    
-        }
-        need_write_serial_5bytes[6] = 0;
-        
-        need_write_serial_5bytes[1] = 0;
-        need_write_serial_5bytes[2] = 0;
-        need_write_serial_5bytes[3] = 0x00;
-        need_write_serial_5bytes[4] = 0xad;
-        need_write_serial_5bytes[0] = 'M';
-
-        t = GetTickCount();
-        while(need_write_serial_5bytes[0] != 0 && GLOBAL_STOP == false) {
-            if(t+2000 < GetTickCount()) return false;
-            usleep(1);
-        }
-        t = GetTickCount();
-        while(need_write_serial_5bytes[6] != 0xad && GLOBAL_STOP == false) {
-            if(t+2000 < GetTickCount()) return false;
-            usleep(1);
-        }
-
-    }
-    usleep(500);
-    
-        for(int i=0;i<10;i++) {
-        need_write_serial_5bytes[1] = -90;
-        need_write_serial_5bytes[2] = -90;
-        need_write_serial_5bytes[3] = 0x0;
-        need_write_serial_5bytes[4] = 0xac;
-        need_write_serial_5bytes[0] = 'M';
-
-        t = GetTickCount();
-        while(need_write_serial_5bytes[0] != 0 && GLOBAL_STOP == false) {
-            if(t+2000 < GetTickCount()) return false;
-            usleep(1);
-        }
-        t = GetTickCount();
-        while(need_write_serial_5bytes[6] != 0xac && GLOBAL_STOP == false) {
-            if(t+2000 < GetTickCount()) return false;
-            usleep(1);
-        }
-
-        usleep(10);
-    }   
-    usleep(500);
-    
-    return true;
-    */
 }
 
-/*while(xx > 0 || yy > 0)
-    {
-        int dx, dy;
-        dx = xx; if(dx > 15) dx = 15;
-        dy = yy; if(dy > 15) dy = 15;
+bool GLOBAL::KeyPressRaw(int k1, int k2) {
+
+    need_write_serial_5bytes[6] = 0;
         
-        need_write_serial_5bytes[6] = 0;
-        
-        need_write_serial_5bytes[1] = dx;
-        need_write_serial_5bytes[2] = dy;
-        need_write_serial_5bytes[3] = 0x00;
-        need_write_serial_5bytes[4] = i+1;
-        need_write_serial_5bytes[0] = 'M';
-        while(need_write_serial_5bytes[0] != 0) {
-            usleep(1);
+    need_write_serial_5bytes[1] = k1;
+    need_write_serial_5bytes[2] = k2;
+    need_write_serial_5bytes[3] = 0x0;
+    need_write_serial_5bytes[4] = 0xac;
+    need_write_serial_5bytes[0] = 'K';
+
+    uint64_t t;
+
+    t = GetTickCount();      
+    while(need_write_serial_5bytes[0] != 0 && GLOBAL_STOP == false) {           
+        if(t + 2000 < GetTickCount()) return false;
+        usleep(1);
+    }
+    t = GetTickCount();
+    while(need_write_serial_5bytes[6] != 0xac && GLOBAL_STOP == false) {
+        if(t+2000 < GetTickCount()) {
+            return false;
+        };
+        usleep(1);
+    }
+
+
+    usleep(50);
+    
+    return true;
+}
+
+bool GLOBAL::MouseMove(int mx_, int my_, int scr_w, int scr_h) {
+
+    if(my_ <= scr_h/2) {
+        if(mx_<= scr_w/2) {
+            return mouse_move_from_left_top(mx_, my_, 0, 0);
+        } else {
+            return mouse_move_from_right_top(mx_, my_, 0, 0);
         }
-        while(need_write_serial_5bytes[6] != i+1) {
-            usleep(1);
-        }
-        xx -= dx;
-        yy -= dy;
-        usleep(10);
-        //printf("i\n");
-    };*/
+    } else {
+        return mouse_move_from_right_bottom(mx_, my_, 0, 0);
+    }
+    
+    return false;
+}
 
 bool GLOBAL::mouse_to_left_top() {
     uint64_t t;
@@ -814,6 +577,15 @@ bool GLOBAL::mouse_to_left_bottom() {
 
 bool GLOBAL::mouse_to_right_bottom() {
     uint64_t t;
+
+    need_write_serial_5bytes[1] = -90;
+    need_write_serial_5bytes[2] = -90;
+    need_write_serial_5bytes[3] = 0x0;
+    need_write_serial_5bytes[4] = 0xac;
+    need_write_serial_5bytes[0] = 'M';
+
+    usleep(1000);
+
     for(int i=0;i<10;i++) 
     {
         need_write_serial_5bytes[1] = 90;
@@ -1040,8 +812,9 @@ bool GLOBAL::mouse_move_from_right_top(int x, int y, int k, int double_click) {
             mouse_press();
             usleep(500);
         }
+        mouse_to_right_top();
     }
-    mouse_to_right_top();
+    
     return true;
     
 }
@@ -1120,8 +893,9 @@ bool GLOBAL::mouse_move_from_left_top(int x, int y, int k, int double_click) {
             mouse_press();
             usleep(500);
         }
+        mouse_to_left_top();
     }
-    mouse_to_left_top();
+   
     return true;
 }
 
@@ -1201,8 +975,9 @@ bool GLOBAL::mouse_move_from_right_bottom(int x, int y, int k, int double_click)
             mouse_press();
             usleep(500);
         }
+        mouse_to_right_bottom();
     }
-    mouse_to_right_bottom();
+    
     return true;
 }
 

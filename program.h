@@ -66,7 +66,7 @@ public:
 };
 
 enum CMD {
-    Undef, Label, Goto, If, Else, Endif, Print, Set, Stop, Comment, MousePress
+    Undef, Label, Goto, If, Else, Endif, Print, Set, Stop, Comment, MousePress, MouseMove, KeyPressRaw
 };
 
 class PROGRAM_line {
@@ -119,6 +119,16 @@ public:
                 return;
             }
             
+            if(s1 == "mouse_move" || s1 == "mousemove") {
+                cmd = CMD::MouseMove;
+                return;
+            }
+
+            if(s1 == "key_press_raw") {
+                cmd = CMD::KeyPressRaw;
+                return;
+            }
+
             cmd = CMD::Undef;
         }
     }
@@ -185,6 +195,8 @@ public:
     void exec_set(std::string v1, std::string v2, std::string v3);
     void exec_print(std::string v1, std::string v2, std::string v3);
     void exec_MousePress(std::string v1, std::string v2, int mk);
+    void exec_MouseMove(std::string v1, std::string v2);
+    void exec_KeyPressRaw(std::string v1, std::string v2);
     
     bool calc_boolean(std::string s);
     

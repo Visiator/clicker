@@ -1,7 +1,11 @@
 
-#mouse_press 245 418
+mouse_move 245 418
 
-#stop
+key_press_raw 35 0
+
+#key_press_raw 0 0
+
+stop
 
 set spr = sprite$1
 print spr
@@ -22,7 +26,7 @@ print spr
 
 mouse_press spr
 
-#stop
+stop
 
 if timer0 > 10
 
