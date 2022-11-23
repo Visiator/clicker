@@ -15,6 +15,8 @@ extern bool GLOBAL_STOP;
 extern GLOBAL global;
 extern GUI gui;
 
+bool it_is_function(std::string s);
+
 void SPRITE::load_from_bmp(std::string& file_name_) {
     file__name = file_name_;
     FILE *f;
@@ -231,7 +233,7 @@ int PROGRAM::get_else_idx(int v) {
         if(line[i].cmd == CMD::If) {
             lvl++;
         } else if(line[i].cmd == CMD::Else && lvl == 0) {
-            return line[i].idx;
+            return line[i+1].idx;
         } else if(line[i].cmd == CMD::Endif && lvl == 0) {
             return line[i].idx;
         } else if(line[i].cmd == CMD::Endif && lvl > 0){
@@ -320,7 +322,7 @@ void PROGRAM::compile() {
     
     i = 0;
     while(i < line.size()) {
-        s = std::to_string(line[i].idx);
+        s = "idx="+std::to_string(line[i].idx);
         while(s.length() < 3) s = "0" + s;
         if(line[i].cmd == CMD::Undef) {
             line[i].info = s + " - ??? " + line[i].raw ;
@@ -663,7 +665,6 @@ bool SPRITE::eq(SCREEN *src, int p_x, int p_y) {
         y++;
     }
     if(p2 < delta || p2 == 0) {
-        is_detected = true;
         is_detected_x = p_x;
         is_detected_y = p_y;
         return true;
@@ -679,41 +680,23 @@ bool SPRITE::detect_sprite(SCREEN *src) {
     
     
     if(eq(src, is_detected_x, is_detected_y)) {
+        
+        if(is_detected == false) {
+            is_detected = true;
+            is_detected_time = GetTickCount();
+        };
+        
         is_detected = true;
         //is_detected_x = is_detected_x;
         //is_detected_y = is_detected_y;
     } else {
-        is_detected = false;
+        if(is_detected == true) {
+            is_detected = false;
+            is_detected_time = 0;
+        }
     }
     return is_detected;
-    /*int x, y, xx, yy;
-    
-    y = 0;
-    yy = src->h - h;
-    while( y < yy ) {
-    
-        x = 0;
-        xx = src->w - w;
-        while(x < xx) {
-            
-            if(eq(src, x, y)) {
-                
-                is_detected = true;
-                is_detected_x = x;
-                is_detected_y = y;
-                return true;
-            }
-            x++;
-        }
-        y++;
-    };
-    
-    if(is_detected == true) {
-        is_detected = false;
-        is_detected_x = -1;
-        is_detected_y = -1;
-        return false;
-    }*/
+
 }
 
 void PROGRAM::print(char *s) {
@@ -721,6 +704,7 @@ void PROGRAM::print(char *s) {
 }
 
 void PROGRAM::execute_next_step() {
+    
     if(next_step == 0) next_step = 1;
     if(next_step > line.size()) {
         print((char *)"next_step >= line.size() - STOP");
@@ -734,6 +718,7 @@ void PROGRAM::execute_next_step() {
         stop();
         return;
     }
+    printf("execute_next_step [%d]\n", line[n].idx);
     if(line[n].cmd == CMD::Set) {
         exec_set(line[n].s2, line[n].s3, line[n].s4);
         next_step = line[n].next_idx;
@@ -763,7 +748,7 @@ void PROGRAM::execute_next_step() {
         return;
     }
     if(line[n].cmd == CMD::Else) {
-        next_step = line[n].next_idx;
+        next_step = line[n].else_idx;
         return;
     }
     if(line[n].cmd == CMD::Stop) {
@@ -884,6 +869,13 @@ std::string PROGRAM::calc_value(std::string s) {
     if(s == "getDetectedSprite()") {
         
         return getDetectedSprite();
+    }
+
+    if(it_is_function(s)) {
+
+        s = calc_value_function(s);
+        
+        return s;
     }
     
     /**/
@@ -1310,6 +1302,20 @@ bool it_is_function(std::string s) {
     return false;
 }
 
+std::string PROGRAM::calc_value_function_sprite_by_nic_is_detected_time(std::string p) {
+    
+    int i = 0;
+    while(i<sprite.size()) {
+        if(sprite[i].nic == p) {
+            if(sprite[i].is_detected_time == 0) return "-1";
+            uint64_t v = (GetTickCount() - sprite[i].is_detected_time)/1000;
+            return std::to_string(v);
+        }
+        i++;
+    }
+    return "";
+}
+
 std::string PROGRAM::calc_value_function_sprite_by_nic_is_detected(std::string p) {
     int i = 0;
     while(i<sprite.size()) {
@@ -1333,6 +1339,10 @@ std::string PROGRAM::calc_value_function(std::string e) {
     if(fn == "sprite_by_nic_is_detected") {
         return calc_value_function_sprite_by_nic_is_detected(p1);
     }
+    if(fn == "sprite_by_nic_is_detected_time") {
+        return calc_value_function_sprite_by_nic_is_detected_time(p1);
+    }
+    
     
     return "";
 }
@@ -1356,9 +1366,17 @@ bool PROGRAM::calc_boolean(std::string s) {
        z == "=" 
       )
     {
-        val1 = calc_value(l);
-        val3 = calc_value(r);
+        
+        
     
+        if(it_is_function(l)) {
+            val1 = calc_value_function(l);
+        } else {
+            val1 = calc_value(l);
+        }
+        
+        val3 = calc_value(r);
+        
         if(it_is_integer(val1) && it_is_integer(val3)) {
             int i1, i3;
             i1 = my_atoi(val1.c_str());

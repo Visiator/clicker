@@ -1,6 +1,6 @@
 
 #include <algorithm>
-#include "pcap.h"
+#include "../pcap.h"
 #include "GUI_Element.h"
 #include "GUI_Primitives.h"
 #include "../program.h"

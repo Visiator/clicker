@@ -1,11 +1,24 @@
 
-mouse_move 245 418
 
-key_press_raw 35 0
+if 10 < 5
+    print "1111111111"
+    print "11111111112"
+    print "11111111113"
+else
+    print "2222222222"
+    print "22222222223"
+    print "22222222224"
+endif
+
+#stop
+
+#mouse_move 245 418
+
+#key_press_raw 35 0
 
 #key_press_raw 0 0
 
-stop
+#stop
 
 set spr = sprite$1
 print spr
@@ -20,13 +33,27 @@ set timer1= 5
 
   :start  
 
+#print sprite_by_nic_is_detected_time(connectinprogress)
+
+if sprite_by_nic_is_detected(connectinprogress)
+    if sprite_by_nic_is_detected_time(connectinprogress) < 20
+	print "5-"
+	goto start
+    else
+	print "force"
+
+	mouse_press close_btn
+
+    endif
+endif
+
 set spr = getDetectedSprite()
 
 print spr
 
 mouse_press spr
 
-stop
+#stop
 
 if timer0 > 10
 

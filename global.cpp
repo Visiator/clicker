@@ -578,6 +578,7 @@ bool GLOBAL::mouse_to_left_bottom() {
 bool GLOBAL::mouse_to_right_bottom() {
     uint64_t t;
 
+    need_write_serial_5bytes[6] = 0;
     need_write_serial_5bytes[1] = -90;
     need_write_serial_5bytes[2] = -90;
     need_write_serial_5bytes[3] = 0x0;
@@ -588,6 +589,7 @@ bool GLOBAL::mouse_to_right_bottom() {
 
     for(int i=0;i<10;i++) 
     {
+        need_write_serial_5bytes[6] = 0;
         need_write_serial_5bytes[1] = 90;
         need_write_serial_5bytes[2] = 90;
         need_write_serial_5bytes[3] = 0x0;
@@ -901,7 +903,7 @@ bool GLOBAL::mouse_move_from_left_top(int x, int y, int k, int double_click) {
 
 bool GLOBAL::mouse_move_from_right_bottom(int x, int y, int k, int double_click) {
     
-    /*need_write_serial_5bytes[1] = 5;
+    need_write_serial_5bytes[1] = 5;
     need_write_serial_5bytes[2] = 5;
     need_write_serial_5bytes[3] = 0x0;
     need_write_serial_5bytes[4] = 0xac;
@@ -915,7 +917,7 @@ bool GLOBAL::mouse_move_from_right_bottom(int x, int y, int k, int double_click)
     need_write_serial_5bytes[4] = 0xac;
     need_write_serial_5bytes[0] = 'M';
     
-    usleep(50);*/
+    usleep(50);
     
     int mx, my, dx, dy;
     float kx = 1.4;

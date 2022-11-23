@@ -33,6 +33,7 @@ public:
     std::string nic;
     std::vector<unsigned int> bitmap;
     bool is_detected = false;
+    uint64_t is_detected_time = 0;
     int is_detected_x = 0, is_detected_y = 0;
     int mouse_press_target_percent_w = 50, mouse_press_target_percent_h = 50;
     int double_click = 0, nopress = 0;
@@ -183,6 +184,8 @@ public:
     
     int get_label_idx(std::string s);
     int get_else_idx(int v);
+    
+    
     std::string getDetectedSprite();
     void init() {
         for(int i=0;i<10;i++) ttimer[i] = 0;        
@@ -201,6 +204,7 @@ public:
     bool calc_boolean(std::string s);
     
     std::string calc_value_function_sprite_by_nic_is_detected(std::string p);
+    std::string calc_value_function_sprite_by_nic_is_detected_time(std::string p);
     std::string calc_value_function(std::string e);
     std::string calc_value(std::string e);
     std::string calc_value(std::string v1, std::string v2, std::string v3);
