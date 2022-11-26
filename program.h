@@ -77,6 +77,14 @@ public:
     CMD cmd = CMD::Undef;
     
     void decode_CMD() {
+        
+        if(s1.length() == 1) {
+            if(s1[0] == '#') {
+                cmd = CMD::Comment;
+                return;
+            }
+        }
+        
         if(s1.length() > 1) {
             if(s1[0] == '#') {
                 cmd = CMD::Comment;
