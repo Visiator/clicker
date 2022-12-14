@@ -33,7 +33,7 @@ public:
     std::string nic;
     std::vector<unsigned int> bitmap;
     bool is_detected = false;
-    uint64_t is_detected_time = 0;
+    uint64_t is_detected_time_ = 0;
     int is_detected_x = 0, is_detected_y = 0;
     int mouse_press_target_percent_w = 50, mouse_press_target_percent_h = 50;
     int double_click = 0, nopress = 0;
@@ -41,6 +41,8 @@ public:
     void load_from_bmp(std::string& file_name_);
     bool eq(SCREEN *src, int x, int y);
     bool detect_sprite(SCREEN *src);
+    
+    int get_detected_time();
     
     std::string print() {
         std::string s;
@@ -67,7 +69,7 @@ public:
 };
 
 enum CMD {
-    Undef, Label, Goto, If, Else, Endif, Print, Set, Stop, Comment, MousePress, MouseMove, KeyPressRaw
+    Undef, Label, Goto, If, Else, Endif, Print, Set, Stop, Comment, MousePress, MouseMove, KeyPressRaw, KeyPressIosHome
 };
 
 class PROGRAM_line {
@@ -138,6 +140,12 @@ public:
                 return;
             }
 
+            if(s1 == "key_press_ios_home") {
+                cmd = CMD::KeyPressIosHome;
+                return;
+            }
+
+            
             cmd = CMD::Undef;
         }
     }
@@ -208,10 +216,12 @@ public:
     void exec_MousePress(std::string v1, std::string v2, int mk);
     void exec_MouseMove(std::string v1, std::string v2);
     void exec_KeyPressRaw(std::string v1, std::string v2);
+    void exec_KeyPressIosHome();
     
     bool calc_boolean(std::string s);
     
     std::string calc_value_function_sprite_by_nic_is_detected(std::string p);
+    void set_value_function_sprite_by_nic_is_detected_time(std::string p, std::string val);
     std::string calc_value_function_sprite_by_nic_is_detected_time(std::string p);
     std::string calc_value_function(std::string e);
     std::string calc_value(std::string e);

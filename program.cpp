@@ -16,6 +16,13 @@ extern GLOBAL global;
 extern GUI gui;
 
 bool it_is_function(std::string s);
+void split_function_name_and_param(std::string s, std::string &fn, std::string &p1);
+
+int SPRITE::get_detected_time() {
+        if(is_detected_time_ == 0) return 0;
+        
+        return (GetTickCount() - is_detected_time_)/1000;
+}
 
 void SPRITE::load_from_bmp(std::string& file_name_) {
     file__name = file_name_;
@@ -568,7 +575,7 @@ void PROGRAM::detect_sprites(SCREEN *src) {
     if(is_mouse_pointer_detect) {
         printf("MOUSE detect %d %d\n", src->mouse_pointer_detect_x, src->mouse_pointer_detect_y);
     } else {
-        printf("MOUSE not detect\n");
+        //printf("MOUSE not detect\n");
     }
     
     //sprite[2].detect_sprite(src);
@@ -683,7 +690,7 @@ bool SPRITE::detect_sprite(SCREEN *src) {
         
         if(is_detected == false) {
             is_detected = true;
-            is_detected_time = GetTickCount();
+            is_detected_time_ = GetTickCount();
         };
         
         is_detected = true;
@@ -692,7 +699,7 @@ bool SPRITE::detect_sprite(SCREEN *src) {
     } else {
         if(is_detected == true) {
             is_detected = false;
-            is_detected_time = 0;
+            is_detected_time_ = 0;
         }
     }
     return is_detected;
@@ -779,6 +786,12 @@ void PROGRAM::execute_next_step() {
         next_step = line[n].next_idx;
         return;
     }
+    if(line[n].cmd == CMD::KeyPressIosHome) {
+        exec_KeyPressIosHome();
+        next_step = line[n].next_idx;
+        return;
+    }
+    
     int rr;
     rr = 11;
 }
@@ -971,6 +984,22 @@ void PROGRAM::exec_set(std::string v1, std::string v2, std::string v3) {
         return;
     }
     
+    if(it_is_function(v1)) {
+        
+        std::string fn, p1;
+    
+        split_function_name_and_param(v1, fn, p1);
+    
+        
+        if(fn == "sprite_by_nic_is_detected_time") {
+            if(v2 == "=") {
+                set_value_function_sprite_by_nic_is_detected_time(p1, v3);
+            }
+        }
+                
+        return;
+    }
+    
     if(it_is_timer(v1)) {
         set_timer(v1, v3);
         return;
@@ -1065,6 +1094,10 @@ void PROGRAM::exec_MousePress(std::string v1, std::string v2, int mk) {
         }*/        
     }
     
+}
+
+void PROGRAM::exec_KeyPressIosHome() {
+    global.KeyPressIosHome();
 }
 
 void PROGRAM::exec_KeyPressRaw(std::string v1, std::string v2) {
@@ -1262,7 +1295,8 @@ void split_by_znak(std::string s, std::string &l, std::string &z, std::string &r
             }
             if(s[i] == '=' || 
                s[i] == '<' ||
-               s[i] == '>' 
+               s[i] == '>' ||
+               s[i] == '.'
               ) 
             {
                 z = s[i];
@@ -1304,19 +1338,44 @@ bool it_is_function(std::string s) {
 
 std::string PROGRAM::calc_value_function_sprite_by_nic_is_detected_time(std::string p) {
     
+    if(p.length() > 7 && p.substr(0, 7) == "sprite$") {
+        p = p.substr(7, 255);
+    }
+
+    
     int i = 0;
     while(i<sprite.size()) {
         if(sprite[i].nic == p) {
-            if(sprite[i].is_detected_time == 0) return "-1";
-            uint64_t v = (GetTickCount() - sprite[i].is_detected_time)/1000;
+            if(sprite[i].is_detected_time_ == 0) return "-1";
+            uint64_t v = (GetTickCount() - sprite[i].is_detected_time_)/1000;
             return std::to_string(v);
         }
         i++;
     }
     return "";
 }
+void PROGRAM::set_value_function_sprite_by_nic_is_detected_time(std::string p, std::string val) {
+   
+    int i = 0;
+    while(i<sprite.size()) {
+        if(sprite[i].nic == p) {
+            sprite[i].is_detected_time_ = GetTickCount() - my_atoi(val.c_str())*1000;
+            /*if(sprite[i].is_detected_time == 0) return "-1";
+            uint64_t v = (GetTickCount() - sprite[i].is_detected_time)/1000;
+            return std::to_string(v);*/
+            return;
+        }
+        i++;
+    }
+    return;
+}
 
 std::string PROGRAM::calc_value_function_sprite_by_nic_is_detected(std::string p) {
+
+    if(p.length() > 7 && p.substr(0, 7) == "sprite$") {
+        p = p.substr(7, 255);
+    }
+
     int i = 0;
     while(i<sprite.size()) {
         if(sprite[i].nic == p) {
@@ -1350,8 +1409,45 @@ std::string PROGRAM::calc_value_function(std::string e) {
 bool PROGRAM::calc_boolean(std::string s) {
  
     std::string val1, val3;
-    std::string l, z, r;
+    std::string l, z, r, sprr, val, ll, zz, rr;
     split_by_znak(s, l, z, r);
+    
+    if(z == ".") {
+        if(r == "is_detected" ||
+           r.substr(0,16) == "is_detected_time"
+          )
+        {
+            if(it_is_var(l)) {
+                sprr = get_var(l);
+                if(r == "is_detected") {
+                    val = calc_value_function_sprite_by_nic_is_detected(sprr);
+                    if(val == "true") {
+                        return true;
+                    }
+                }
+                if(r.substr(0,16) == "is_detected_time") {
+                    val = calc_value_function_sprite_by_nic_is_detected_time(sprr);
+                    split_by_znak(r, ll, zz, rr);
+                    rr = rl_trim(rr);
+                    
+                    int i1, i3;
+                    i1 = my_atoi(val.c_str());
+                    i3 = my_atoi(rr.c_str());
+                    
+                    if(zz == ">")  return i1 >  i3;
+                    if(zz == ">=") return i1 >= i3;
+                    if(zz == "<")  return i1 <  i3;
+                    if(zz == "<=") return i1 <= i3;
+                    if(zz == "==") return i1 == i3;
+                    if(zz == "=")  return i1 == i3;
+                    
+                    return false;
+                }
+            }
+            return false;
+        }
+        return false;
+    }
     
     if(z == "" && it_is_function(l)) {
         val1 = calc_value_function(l);

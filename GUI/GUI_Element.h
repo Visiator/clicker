@@ -141,6 +141,9 @@ public:
     unsigned int info1, info2;
     PROGRAM *program = nullptr;
     
+    int SpriteList_cursor = 0;
+    void SpriteList_cursor_scroll(int key);
+    
     std::vector<ELEMENT_item> item;
     void get_parent_xy(int *px, int *py);
     void paint(SCREEN_BUFFER *screen);

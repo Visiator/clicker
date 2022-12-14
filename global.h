@@ -71,6 +71,7 @@ public:
     bool MousePress(int mx_, int my_, int mk_, int double_click_, int scr_w, int scr_h);
     bool MouseMove(int mx_, int my_, int scr_w, int scr_h);
     bool KeyPressRaw(int k1, int k2);
+    bool KeyPressIosHome();        
     
     bool mouse_to_left_top();
     bool mouse_to_right_top();

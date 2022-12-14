@@ -325,9 +325,269 @@ void custom_analiz_turbo_vpn(SESSION *s, FRAME *frame) {
                 
 }
 
+void custom_analiz_xvpn(SESSION *s, FRAME *frame) {
+    
+    if(s->ip_proto == 17 && s->packet_count == 8) {
+        for(int i=0;i<30;i++) {
+                printf("%d - %d\n",s->frames[i].direction, s->frames[i].payload_size);
+            }
+        if(s->frames[0].direction == 2 && s->frames[0].payload_size == 74 &&
+           s->frames[1].direction == 1 && s->frames[1].payload_size == 71 &&
+           s->frames[2].direction == 2 && s->frames[2].payload_size == 74 &&
+           s->frames[3].direction == 1 && s->frames[3].payload_size == 71 &&
+           s->frames[4].direction == 2 && s->frames[4].payload_size == 74 &&
+           s->frames[5].direction == 1 && s->frames[5].payload_size == 71 &&
+           s->frames[6].direction == 2 && s->frames[6].payload_size == 74 &&
+           s->frames[7].direction == 1 && s->frames[7].payload_size == 71 )
+        {
+            global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_src_ip);
+            return;
+        }
+
+        if(s->frames[0].direction == 2 && s->frames[0].payload_size == 74 &&
+           s->frames[1].direction == 1 && s->frames[1].payload_size == 55 &&
+           s->frames[2].direction == 2 && s->frames[2].payload_size == 74 &&
+           s->frames[3].direction == 1 && s->frames[3].payload_size == 55 &&
+           s->frames[4].direction == 2 && s->frames[4].payload_size == 74 &&
+           s->frames[5].direction == 1 && s->frames[5].payload_size == 55 &&
+           s->frames[6].direction == 2 && s->frames[6].payload_size == 74 &&
+           s->frames[7].direction == 1 && s->frames[7].payload_size == 55 )
+        {
+            global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_src_ip);
+            return;
+        }
+
+        if(s->frames[0].direction == 2 && s->frames[0].payload_size == 74 &&
+           s->frames[1].direction == 1 && s->frames[1].payload_size == 61 &&
+           s->frames[2].direction == 2 && s->frames[2].payload_size == 74 &&
+           s->frames[3].direction == 1 && s->frames[3].payload_size == 61 &&
+           s->frames[4].direction == 2 && s->frames[4].payload_size == 74 &&
+           s->frames[5].direction == 1 && s->frames[5].payload_size == 61 &&
+           s->frames[6].direction == 2 && s->frames[6].payload_size == 74 &&
+           s->frames[7].direction == 1 && s->frames[7].payload_size == 61 )
+        {
+            global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_src_ip);
+            return;
+        }
+        
+        if(s->frames[0].direction == 2 && s->frames[0].payload_size == 74 &&
+           s->frames[1].direction == 1 && s->frames[1].payload_size == 61 &&
+           s->frames[2].direction == 2 && s->frames[2].payload_size == 74 &&
+           s->frames[3].direction == 1 && s->frames[3].payload_size == 61 &&
+           s->frames[4].direction == 2 && s->frames[4].payload_size == 74 &&
+           s->frames[5].direction == 1 && s->frames[5].payload_size == 61 &&
+           s->frames[6].direction == 2 && s->frames[6].payload_size == 74 &&
+           s->frames[7].direction == 1 && s->frames[7].payload_size == 61 )
+        {
+            global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_src_ip);
+            return;
+        }
+        
+        if(s->frames[0].direction == 2 && s->frames[0].payload_size == 74 &&
+           s->frames[1].direction == 1 && s->frames[1].payload_size == 62 &&
+           s->frames[2].direction == 2 && s->frames[2].payload_size == 74 &&
+           s->frames[3].direction == 1 && s->frames[3].payload_size == 62 &&
+           s->frames[4].direction == 2 && s->frames[4].payload_size == 74 &&
+           s->frames[5].direction == 1 && s->frames[5].payload_size == 62 &&
+           s->frames[6].direction == 2 && s->frames[6].payload_size == 74 &&
+           s->frames[7].direction == 1 && s->frames[7].payload_size == 62 )
+        {
+            global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_src_ip);
+            return;
+        }
+        
+    }
+    
+    if(frame->tcp_flags_fin != 0) {
+        if(s->ipv4_dst_port == 29914) {
+            for(int i=0;i<30;i++) {
+                printf("%d - %d\n",s->frames[i].direction, s->frames[i].payload_size);
+            }
+            if( s->frames[3].direction == 2 && s->frames[3].payload_size == 163 &&
+                s->frames[4].direction == 1 && s->frames[4].payload_size == 0 &&
+                s->frames[5].direction == 1 && s->frames[5].payload_size == 236 &&
+                s->frames[6].direction == 2 && s->frames[6].payload_size == 0 &&
+                s->frames[7].direction == 2 && s->frames[7].payload_size == 67 &&
+                s->frames[8].direction == 1 && s->frames[8].payload_size == 62 )
+            {
+                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+                return;
+            }
+        }
+        
+    }
+    
+    if(s->packet_count == 100) {
+        if( (s->direction == DIRECTION::egress && s->ipv4_dst_port == 29914) ||
+            (s->direction == DIRECTION::ingress && s->ipv4_src_port == 29914) )
+        {   
+            unsigned int pp;
+            for(int i=0;i<100;i++) {
+                printf("%d - %d\n",s->frames[i].direction, s->frames[i].payload_size);
+            }
+            int i_104 = 0;
+            for(int i=0;i<100-6;i++) {
+                if(  
+                    s->frames[i+0].direction == 2 && s->frames[i+0].payload_size == 104 && 
+                    s->frames[i+1].direction == 2 && s->frames[i+1].payload_size == 104 &&                         
+                    s->frames[i+2].direction == 2 && s->frames[i+2].payload_size == 104 &&                         
+                    s->frames[i+3].direction == 2 && s->frames[i+3].payload_size == 104 &&                         
+                    s->frames[i+4].direction == 2 && s->frames[i+4].payload_size == 104 &&                         
+                    s->frames[i+5].direction == 2 && s->frames[i+5].payload_size == 104 )
+                {
+                    i_104++;
+                }
+            }
+            if(i_104 > 0) {
+                if(s->direction == DIRECTION::egress) {
+                    pp = s->ipv4_dst_ip;
+                } else {
+                    pp = s->ipv4_src_ip;
+                }
+                global.add_ip_to_queue_to_send_mikrotik(pp);
+                return;
+            }
+        }
+    };
+    
+    if(s->packet_count == 30) {
+        if( (s->direction == DIRECTION::egress && s->ipv4_dst_port == 29914) ||
+            (s->direction == DIRECTION::ingress && s->ipv4_src_port == 29914) )
+        {   
+            unsigned int pp;
+            for(int i=0;i<30;i++) {
+                printf("%d - %d\n",s->frames[i].direction, s->frames[i].payload_size);
+            }
+            int i_104 = 0;
+            for(int i=0;i<30-6;i++) {
+                if(  
+                    s->frames[i+0].direction == 2 && s->frames[i+0].payload_size == 104 && 
+                    s->frames[i+1].direction == 2 && s->frames[i+1].payload_size == 104 &&                         
+                    s->frames[i+2].direction == 2 && s->frames[i+2].payload_size == 104 &&                         
+                    s->frames[i+3].direction == 2 && s->frames[i+3].payload_size == 104 &&                         
+                    s->frames[i+4].direction == 2 && s->frames[i+4].payload_size == 104 &&                         
+                    s->frames[i+5].direction == 2 && s->frames[i+5].payload_size == 104 )
+                {
+                    i_104++;
+                }
+            }
+            if(i_104 > 0) {
+                if(s->direction == DIRECTION::egress) {
+                    pp = s->ipv4_dst_ip;
+                } else {
+                    pp = s->ipv4_src_ip;
+                }
+                global.add_ip_to_queue_to_send_mikrotik(pp);
+                return;
+            }
+            
+            
+            
+            int i_73_62 = 0;
+            for(int i=0;i<30-4;i++) {
+                if(  s->frames[i].payload_size == 0 &&
+                     s->frames[i+1].direction == 2 && s->frames[i+1].payload_size == 73 && 
+                     s->frames[i+2].direction == 1 && s->frames[i+2].payload_size <= 72 && s->frames[i+2].payload_size >= 54 &&
+                     s->frames[i+3].payload_size == 0 )
+                {
+                    i_73_62++;
+                }
+            }
+            if(i_73_62 >= 2) {
+                if(s->direction == DIRECTION::egress) {
+                    pp = s->ipv4_dst_ip;
+                } else {
+                    pp = s->ipv4_src_ip;
+                }
+                global.add_ip_to_queue_to_send_mikrotik(pp);
+                return;
+            }
+            
+        }
+    }
+    
+    if(s->packet_count == 30) {
+        
+        bool f_92_5 = false, f_104_2 = false;
+        
+        for(int i=0;i<30;i++) {
+            printf("%d - %d\n",s->frames[i].direction, s->frames[i].payload_size);
+        }
+        
+        for(int i=0;i<30-5;i++) {
+            if(s->frames[i].direction == 1 && s->frames[i].payload_size == 92 &&
+               s->frames[i+1].direction == 1 && s->frames[i+1].payload_size == 92 &&
+               s->frames[i+2].direction == 1 && s->frames[i+2].payload_size == 92 &&
+               s->frames[i+3].direction == 1 && s->frames[i+3].payload_size == 92 &&
+               s->frames[i+4].direction == 1 && s->frames[i+4].payload_size == 92 )
+            {
+              f_92_5 = true;  
+            };
+        }
+        for(int i=0;i<30-2;i++) {
+            if(s->frames[i].direction == 2 && s->frames[i].payload_size == 104 &&
+               s->frames[i+1].direction == 2 && s->frames[i+1].payload_size == 104)
+            {
+              f_104_2 = true;  
+            };
+        }
+        
+        if(f_92_5 == true && f_104_2 == true) {
+            global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+            return;
+        }
+        
+        
+        bool f_92_2 = false, f_104_5 = false;
+        for(int i=0;i<30-5;i++) {
+            if(s->frames[i].direction == 2 && s->frames[i].payload_size == 104 &&
+               s->frames[i+1].direction == 2 && s->frames[i+1].payload_size == 104 &&
+               s->frames[i+2].direction == 2 && s->frames[i+2].payload_size == 104 &&
+               s->frames[i+3].direction == 2 && s->frames[i+3].payload_size == 104 &&
+               s->frames[i+4].direction == 2 && s->frames[i+4].payload_size == 104 )
+            {
+              f_104_5 = true;  
+            };
+        }
+        for(int i=0;i<30-2;i++) {
+            if(s->frames[i].direction == 1 && s->frames[i].payload_size == 92 &&
+               s->frames[i+1].direction == 1 && s->frames[i+1].payload_size == 92)
+            {
+              f_92_2 = true;  
+            };
+            
+            if(s->frames[i].direction == 2 && s->frames[i].payload_size == 92 &&
+               s->frames[i+1].direction == 2 && s->frames[i+1].payload_size == 92)
+            {
+              f_92_2 = true;  
+            };
+            
+        }
+        if(f_92_2 == true && f_104_5 == true) {
+            global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+            return;
+        }        
+    }
+}
+
 void custom_analiz(SESSION *s, FRAME *frame) {
 
-    custom_analiz_turbo_vpn(s, frame);
+    //custom_analiz_turbo_vpn(s, frame);
+
+    //custom_analiz_xvpn(s, frame);
+    /*uint64_t z;
+    
+    
+    
+    if(frame->payload_size > 20) {
+    
+        
+        
+
+        
+        z = data64(frame->payload, 15);
+        printf("%X\n", z);
+    }*/
     
     return;
     

@@ -531,7 +531,7 @@ void PCAP::analiz_ipv4_tcp_payload(int frame_no, unsigned char *buf, int buf_siz
     int i = 0;
     
     if(frame_no == 6) {
-        analiz_c1(frame_no, buf, buf_size, frame);
+        //analiz_c1(frame_no, buf, buf_size, frame);
     }
     
     if(buf[0] == 0x16) {
@@ -823,7 +823,7 @@ void PCAP::read_dns_name(int lvl, int frame_no, unsigned char *buf, int buf_size
     int k;
 
     if(lvl > 20) {
-        wtf("lvl > 20");
+         wtf("lvl > 20");
         return;
     }
     
@@ -855,6 +855,24 @@ void PCAP::read_dns_name(int lvl, int frame_no, unsigned char *buf, int buf_size
         {
             
             if(i >= buf_size) { wtf("read_dns_name i > buf_size"); return; };
+            if(jj>=1000-10) {
+                return;
+            }
+            
+            int vv;
+            vv = buf[i];
+            
+            if( (buf[i] >= 'a' && buf[i] <= 'z') ||
+                (buf[i] >= '0' && buf[i] <= '9') ||
+                 buf[i] == '-' || buf[i] == '.' ) 
+            {
+            
+            } else {
+                printf("----\n");
+                if(vv > 127 || vv < 32) {
+                    return;
+                }
+            }
             rr[jj++] = buf[i++]; 
         };
         

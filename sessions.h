@@ -47,7 +47,7 @@ public:
 class SESSION {
 public:
     unsigned long last_active;
-    SESSION_FRAME frames[10];
+    SESSION_FRAME frames[130];
     unsigned int size, payload_size, packet_count, packet_with_payload_count;
     unsigned char mac_src[6], mac_dst[6];
     unsigned char ip_proto; 
@@ -67,7 +67,7 @@ public:
     
     void clean() {
         last_active = 0;
-        for(int i=0;i<10;i++) {
+        for(int i=0;i<130;i++) {
             frames[i].clean();
         }
         for(int i=0;i<6;i++) {
@@ -104,7 +104,7 @@ public:
             // 2022 dns = find_dns(direction == ingress ? ipv4_dst_port : ipv4_src_port);
         }
         
-        if(packet_count < 10) frames[packet_count].fill(frame);;
+        if(packet_count < 130) frames[packet_count].fill(frame);;
         
         ip_proto = frame->ip_proto;
         ipv4_src_ip = frame->ipv4_src_ip;

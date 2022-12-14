@@ -265,7 +265,41 @@ unsigned int GLOBAL::get_ip_to_queue_to_send_mikrotik() {
 void colibrate_mouse();
 
 bool GLOBAL::test1() {
-    colibrate_mouse();
+    //colibrate_mouse();
+    
+    /*
+     2 - Shift
+     * 
+     11 - H h
+     12 - i
+     13 - J j
+     15 - L l
+     */
+    
+    need_write_serial_5bytes[6] = 0;
+        
+    need_write_serial_5bytes[1] = 11;
+    need_write_serial_5bytes[2] = 8;
+    need_write_serial_5bytes[3] = 0x0;
+    need_write_serial_5bytes[4] = 0x55;
+    need_write_serial_5bytes[0] = 'K';
+
+    uint64_t t;
+
+    t = GetTickCount();      
+    while(need_write_serial_5bytes[0] != 0 && GLOBAL_STOP == false) {           
+        if(t + 2000 < GetTickCount()) return false;
+        usleep(1);
+    }
+    t = GetTickCount();
+    while(need_write_serial_5bytes[6] != 0x55 && GLOBAL_STOP == false) {
+        if(t+2000 < GetTickCount()) {
+            return false;
+        };
+        usleep(1);
+    }
+    
+    
     return true;
     /*
     int xx = 0, yy = 0, i, j, k=0;
@@ -438,6 +472,36 @@ bool GLOBAL::MousePress(int mx_, int my_, int mk, int double_click_, int scr_w, 
     }
     
     return false;
+}
+
+bool GLOBAL::KeyPressIosHome() {
+    
+    need_write_serial_5bytes[6] = 0;
+        
+    need_write_serial_5bytes[1] = 11;
+    need_write_serial_5bytes[2] = 8;
+    need_write_serial_5bytes[3] = 0x0;
+    need_write_serial_5bytes[4] = 0xac;
+    need_write_serial_5bytes[0] = 'K';
+
+    uint64_t t;
+
+    t = GetTickCount();      
+    while(need_write_serial_5bytes[0] != 0 && GLOBAL_STOP == false) {           
+        if(t + 2000 < GetTickCount()) return false;
+        usleep(1);
+    }
+    t = GetTickCount();
+    while(need_write_serial_5bytes[6] != 0xac && GLOBAL_STOP == false) {
+        if(t+2000 < GetTickCount()) {
+            return false;
+        };
+        usleep(1);
+    }
+
+    usleep(50);
+    
+    return true;
 }
 
 bool GLOBAL::KeyPressRaw(int k1, int k2) {

@@ -134,6 +134,17 @@ void ELEMENT::paint_green_rec_x2(SCREEN_BUFFER *screen, int px, int py) {
 
 }
 
+void ELEMENT::SpriteList_cursor_scroll(int key) {
+    if(key == 34) {
+        if(SpriteList_cursor > 0) SpriteList_cursor--;
+    }
+    if(key == 35) {
+        if(SpriteList_cursor + 1 < program->sprite.size()) {
+            SpriteList_cursor++;
+        }
+    }
+}
+
 void ELEMENT::paint(SCREEN_BUFFER *screen) {
     if(is_visible == false) return;
     ELEMENT *q;
@@ -231,6 +242,17 @@ void ELEMENT::paint(SCREEN_BUFFER *screen) {
                 //screen->rectangle(px+program->sprite[i].is_detected_x, py+program->sprite[i].is_detected_y, program->sprite[i].w, program->sprite[i].h, clr);
             } else {
                 clr = bg_color;
+            }
+            
+            if(i == SpriteList_cursor) {
+                clr = 0xaa0000;
+                char vv[500];
+                sprintf(vv, "nic:%s dc:%d nc:%d time:%d file:%s ", program->sprite[i].nic.c_str(), program->sprite[i].double_click, program->sprite[i].nopress
+                        , program->sprite[i].get_detected_time() 
+                        , program->sprite[i].file__name.c_str()
+                        );
+                screen->fonts.print(10 , 860, "arial", 12, vv, 0x0000ff);
+        
             }
             
             screen->rectangle(px + x-1, py + y-1, program->sprite[i].w+2, program->sprite[i].h+2, clr);

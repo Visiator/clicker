@@ -1,16 +1,20 @@
 
+key_press_ios_home
 
-if 10 < 5
-    print "1111111111"
-    print "11111111112"
-    print "11111111113"
-else
-    print "2222222222"
-    print "22222222223"
-    print "22222222224"
+stop
+
+set spr = sprite$podklucheniye1
+set sconnect = sprite$connect
+print spr
+
+if sconnect.is_detected
+    print "detect+"
+    if sconnect.is_detected_time > 10
+	print "detect+2"
+    endif
 endif
 
-#stop
+stop
 
 #mouse_move 245 418
 
@@ -20,32 +24,53 @@ endif
 
 #stop
 
-set spr = sprite$1
-print spr
-set v=100+233
-set z= v
-print "z=" + z
-
-
-
-set timer0 = 3
-set timer1= 5
+#set spr = sprite$1
+#print spr
 
   :start  
 
-#print sprite_by_nic_is_detected_time(connectinprogress)
+set spr = getDetectedSprite()
 
-if sprite_by_nic_is_detected(connectinprogress)
-    if sprite_by_nic_is_detected_time(connectinprogress) < 20
-	print "5-"
-	goto start
-    else
-	print "force"
+print spr
 
-	mouse_press close_btn
-
+if sprite_by_nic_is_detected(reconnect1)
+    if sprite_by_nic_is_detected_time(reconnect1) > 3
+      print "r+++"
+      mouse_press connect
+      set sprite_by_nic_is_detected_time(reconnect1) = 0
     endif
 endif
+
+if sprite_by_nic_is_detected(connectplus)
+    if sprite_by_nic_is_detected_time(connectplus) > 3
+      print "r+++"
+      mouse_press connect
+      set sprite_by_nic_is_detected_time(connectplus) = 0
+    endif
+endif
+
+
+#goto start
+
+#print sprite_by_nic_is_detected_time(connectinprogress)
+
+if sprite_by_nic_is_detected(connectedok)
+    print "connectedok"
+    goto start
+endif
+
+if sprite_by_nic_is_detected(connect)
+    if sprite_by_nic_is_detected_time(connect) > 3
+	print "5++"
+        mouse_press connect
+	set sprite_by_nic_is_detected_time(connect) = 0
+    else
+#	mouse_press close_btn
+    endif
+    goto start
+endif
+
+
 
 set spr = getDetectedSprite()
 
@@ -54,20 +79,6 @@ print spr
 mouse_press spr
 
 #stop
-
-if timer0 > 10
-
-    #print 10
-    if timer1 = 5
-	print 555
-    endif
-    set timer0 = 0
-
-else
-
-    print timer0
-
-endif
 
 
 goto start

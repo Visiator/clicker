@@ -40,6 +40,7 @@ void Load_Folders(ELEMENT* list) {
     list->item.push_back({&gui, ELEMENT_item::ListItem, "Downloads"});
     list->item.push_back({&gui, ELEMENT_item::ListItem, "Pictures"});
     list->item.push_back({&gui, ELEMENT_item::ListItem, "Music"});
+    list->item.push_back({&gui, ELEMENT_item::ListItem, "Videos"});
     list->item.push_back({&gui, ELEMENT_item::ListItem, "tmp"});
 }
 
@@ -71,11 +72,24 @@ void Load_NetIfList(ELEMENT* list){
    std::sort( list->item.begin(), list->item.end() );
 }
 
-void testtt();
+void testtt() {
+    
+        
+}
 
 int main(int argc, char** argv) {
+  /*  
+    printf("start\n");
     
+    pid_t p;
+    int i;
+    for(i = 0; i < 5; i++) {
+        printf(".%d[%d]\n", i, getpid());
+        p = fork();
+    }
     
+    return 0;
+*/    
     std::vector<std::string> list;
 
     mikrotik.set_ip_login_pass("192.168.5.5", "admin", "Qq1233!!");

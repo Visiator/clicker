@@ -210,6 +210,9 @@ void GUI::wait_run() {
                             printf("tab %d:%d\n", View->green_rec.x, View->green_rec.y );
                             global.MousePress(View->green_rec.x, View->green_rec.y,1,0, 300,540);
                         }
+                        if(a._data_ == 34 || a._data_ == 35) { // [
+                            SpriteList->SpriteList_cursor_scroll(a._data_);
+                        }
                     }
                 }
                 if(a.id == Mikrotik_to_txt_id) {
@@ -309,7 +312,7 @@ void GUI::create_elements() {
     q = elements.add(this, PanelIf_id, ELEMENT::Type::Button ,  5, 460, 50, 25, COLOR::ListBG, COLOR::MemoBorder, "test 1");
     test1_id = q->id;
     
-    q = elements.add(this, PanelPcap_id, ELEMENT::Type::List,  5, 25, 150, 100, COLOR::ListBG, COLOR::ListBorder, "Folders");
+    q = elements.add(this, PanelPcap_id, ELEMENT::Type::List,  5, 25, 150, 200, COLOR::ListBG, COLOR::ListBorder, "Folders");
     FoldersList_id = q->id;
 
     q = elements.add(this, PanelPcap_id, ELEMENT::Type::List,  165, 25, 450, 640, COLOR::ListBG, COLOR::ListBorder, "Files");
