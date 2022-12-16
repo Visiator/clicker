@@ -105,7 +105,7 @@ public:
     void serial_io();
     unsigned char need_write_serial_5bytes[6];
     
-    void colibrate_mouse();
+    //void colibrate_mouse();
     
     GLOBAL() {
         for(int i=0;i<6;i++) need_write_serial_5bytes[i] = 0;

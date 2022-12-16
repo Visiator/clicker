@@ -10,6 +10,11 @@
 #include "../tools.h"
 
 extern TEXTURA tt;
+extern PROGRAMS programs_;
+
+PROGRAM *ELEMENT::program_() {
+    return &programs_.item_[program_idx];
+}
 
 ELEMENT* ELEMENTS::add(GUI *gui, unsigned int parent_id, ELEMENT::Type type, unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int bg_color, unsigned int border_color, std::string caption) {
     
@@ -121,6 +126,7 @@ void ELEMENT::paint_green_rec_x2(SCREEN_BUFFER *screen, int px, int py) {
                 save_textura_info(f, green_rec.x, green_rec.y, (char *)"");
                 fclose(f);
             };
+            PROGRAM *program = program_();
             int z = program->get_sprite_max_id() + 1;
             program->sprite.push_back({file_name, z});
             
@@ -139,7 +145,7 @@ void ELEMENT::SpriteList_cursor_scroll(int key) {
         if(SpriteList_cursor > 0) SpriteList_cursor--;
     }
     if(key == 35) {
-        if(SpriteList_cursor + 1 < program->sprite.size()) {
+        if(SpriteList_cursor + 1 < program_()->sprite.size()) {
             SpriteList_cursor++;
         }
     }
@@ -156,6 +162,8 @@ void ELEMENT::paint(SCREEN_BUFFER *screen) {
     int dx = 0, dy = 0, i, x, y;
     int px = getx(), py = gety(), ww;
     if(parent != nullptr) parent->get_parent_xy(&px, &py);
+    
+    PROGRAM *program = program_();
     
     if(type == Type::Print) {
         px = getx(), py = gety();

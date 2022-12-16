@@ -162,7 +162,7 @@ public:
 
 class PROGRAM {
 public:
-    SCREEN grab_screen_buffer;
+    SCREEN *grab_screen_buffer = nullptr;
     int sprite_detected_idx = 0;
     int ttimer[10];
     void timers_increase();
@@ -281,6 +281,7 @@ public:
     
     std::vector<PROGRAM> item_;
     
+    void detect_sprites(SCREEN *src);
     
     void init();
     

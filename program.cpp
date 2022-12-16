@@ -347,6 +347,8 @@ void PROGRAM::compile() {
 
 void PROGRAMS::init() {
     item_.emplace_back(PROGRAM(0));
+    item_.emplace_back(PROGRAM(1));
+    item_.emplace_back(PROGRAM(2));
     //item_[0].load();
     
     execute_is_run = true;
@@ -1515,3 +1517,9 @@ int PROGRAM::get_sprite_max_id() {
     }
     return x;
 }
+
+void PROGRAMS::detect_sprites(SCREEN *src) {
+    for(auto& p : item_) {
+        p.detect_sprites(src);
+    }
+};

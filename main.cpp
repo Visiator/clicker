@@ -32,8 +32,9 @@ GUI gui;
 PCAP pcap;
 SNIFFER sniffer;
 CLICKER clicker;
-PROGRAMS programs;
+PROGRAMS programs_;
 MIKROTIK mikrotik;
+SCREEN grab_screen_buffer;
 WEBCAMS webcams;
 
 void Load_Folders(ELEMENT* list) {
@@ -94,7 +95,7 @@ int main(int argc, char** argv) {
 
     mikrotik.set_ip_login_pass("192.168.5.5", "admin", "Qq1233!!");
     
-    programs.init();
+    programs_.init();
     
     gui.create_elements();
     global.set_gui(&gui);
@@ -107,7 +108,7 @@ int main(int argc, char** argv) {
     
     std::vector<std::string> lst;
     
-    webcams.init(&lst, &programs.item_[0].grab_screen_buffer, &programs.item_[0]);
+    webcams.init(&lst, &grab_screen_buffer);
     
     clicker.init();
     
@@ -117,7 +118,7 @@ int main(int argc, char** argv) {
     gui.wait_run();
     
     set_GLOBAL_STOP(L"main");
-    programs.wait_execute_close();   
+    programs_.wait_execute_close();   
     gui.wait_execute_close();
     global.wait_execute_close();
     webcams.wait_execute_close();

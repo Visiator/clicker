@@ -18,7 +18,7 @@ extern PCAP pcap;
 extern bool GLOBAL_STOP;
 extern SNIFFER sniffer;
 extern MIKROTIK mikrotik;
-extern PROGRAMS programs;
+extern PROGRAMS programs_;
 
 void GLOBAL::init() {
     execute_is_run = true;
@@ -262,7 +262,6 @@ unsigned int GLOBAL::get_ip_to_queue_to_send_mikrotik() {
     return u;
 }
 
-void colibrate_mouse();
 
 bool GLOBAL::test1() {
     //colibrate_mouse();
@@ -678,146 +677,6 @@ bool GLOBAL::mouse_to_right_bottom() {
     return true;
 }
 
-void GLOBAL::colibrate_mouse() {
- 
-    PROGRAM *p;
-    p = &(programs.item_[0]);
-    SCREEN *src;
-    src = &p->grab_screen_buffer;
-    unsigned int k, a;
-    uint64_t t;
-    
-    //goto l1;
-    
-    need_write_serial_5bytes[1] = 5;
-    need_write_serial_5bytes[2] = 5;
-    need_write_serial_5bytes[3] = 0x03;
-    need_write_serial_5bytes[4] = 0xac;
-    need_write_serial_5bytes[0] = 'M';
-    
-    usleep(200);
-    return;
-    need_write_serial_5bytes[1] = -5;
-    need_write_serial_5bytes[2] = -5;
-    need_write_serial_5bytes[3] = 0x00;
-    need_write_serial_5bytes[4] = 0xac;
-    need_write_serial_5bytes[0] = 'M';
-    
-    usleep(200);
-
-    
-    
-    //**************************************************************************//
-    // detect left top
-    
-    mouse_to_left_top();
-    
-    src->mouse_pointer_detect = 0;
-    t = GetTickCount();
-    while(src->mouse_pointer_detect == 0) {
-        if(t+5000 < GetTickCount()) return ;
-        usleep(1);
-    }
-
-    if(src->mouse_pointer_detect_x >= 0 && src->mouse_pointer_detect_x <= 1 &&
-       src->mouse_pointer_detect_y >= 0 && src->mouse_pointer_detect_y <= 1)
-    {
-        printf("DETECT left top\n");
-    } else {
-        return;
-    }
-    
-    //**************************************************************************//
-    // detect right top
-    
-    mouse_to_right_top();
-    
-    src->mouse_pointer_detect = 0;
-    t = GetTickCount();
-    while(src->mouse_pointer_detect == 0) {
-        if(t+5000 < GetTickCount()) return ;
-        usleep(1);
-    }
-    
-    if(src->mouse_pointer_detect_x >= 294 && src->mouse_pointer_detect_x <= 300 &&
-       src->mouse_pointer_detect_y >= 0 && src->mouse_pointer_detect_y <= 1)
-    {
-        printf("DETECT right top\n");
-    } else {
-        return;
-    }
-    
-    //**************************************************************************//
-    // detect left bottom
-    
-    mouse_to_left_bottom();
-    
-    src->mouse_pointer_detect = 0;
-    t = GetTickCount();
-    while(src->mouse_pointer_detect == 0) {
-        if(t+5000 < GetTickCount()) return ;
-        usleep(1);
-    }
-    
-    if(src->mouse_pointer_detect_x >= 0 && src->mouse_pointer_detect_x <= 1 &&
-       src->mouse_pointer_detect_y >= 538 && src->mouse_pointer_detect_y <= 540)
-    {
-        printf("DETECT left bottom\n");
-    } else {
-        return;
-    }
- 
-    //**************************************************************************//
-    // detect right bottom    
-   
-    mouse_to_right_bottom();
-    
-    src->mouse_pointer_detect = 0;
-    t = GetTickCount();
-    while(src->mouse_pointer_detect == 0) {
-        if(t+5000 < GetTickCount()) return ;
-        usleep(1);
-    }
-    
-    if(src->mouse_pointer_detect_x >= 294 && src->mouse_pointer_detect_x <= 300 &&
-       src->mouse_pointer_detect_y >= 538 && src->mouse_pointer_detect_y <= 540)
-    {
-        printf("DETECT right bottom\n");
-    } else {
-        return;
-    }
-    
-    //************************************************************************//
-    // DETECT finish
-    //************************************************************************//
-    
-    /*
-    need_write_serial_5bytes[1] = 90;
-    need_write_serial_5bytes[2] = 90;
-    need_write_serial_5bytes[3] = 0x0;
-    need_write_serial_5bytes[4] = 0xac;
-    need_write_serial_5bytes[0] = 'M';
-    
-    usleep(200);
-    */
-    
-    
-    
-    
-    
-    k = p->grab_screen_buffer.detect_sprite_end;
-    
-    a = 0;
-    while(k == p->grab_screen_buffer.detect_sprite_end) {
-        a++;
-        usleep(1);
-    }
-    
-    l1:
-    
-    //mouse_move_from_left_top(250, 520, 0, 0);
-    mouse_move_from_right_bottom(250, 520, 0, 0);
-}
 
 bool GLOBAL::mouse_move_from_right_top(int x, int y, int k, int double_click) {
     int mx, my, dx, dy;

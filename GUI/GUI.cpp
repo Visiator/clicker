@@ -20,8 +20,9 @@
 extern bool GLOBAL_STOP;
 extern GLOBAL global;
 extern PCAP pcap;
-extern PROGRAMS programs;
+extern PROGRAMS programs_;
 extern MIKROTIK mikrotik;
+extern SCREEN grab_screen_buffer;
 
 GUI::GUI() {
 }
@@ -231,13 +232,13 @@ void GUI::wait_run() {
                 }
                 if(a.id == BtnProgRun_id) {
                     if(BtnProgRun->is_pressed == true) {
-                        programs.item_[0].run();
+                        programs_.item_[0].run();
                     } else {
-                        programs.item_[0].stop();
+                        programs_.item_[0].stop();
                     }
                 }
                 if(a.id == BtnProgLoad_id) {
-                    programs.item_[0].load();
+                    programs_.item_[0].load();
                     BtnProgLoad->is_pressed = false;
                 }
             }
@@ -358,9 +359,9 @@ void GUI::create_elements() {
     TabProg = elements.get_element_by_id(TabProg_id);
     
     ProgText = elements.get_element_by_id(ProgText_id);
-    ProgText->program = &(programs.item_[0]);
+    ProgText->program_idx = 0;// = &(programs.item_[0]);
     Print = elements.get_element_by_id(Print_id);
-    Print->program = &(programs.item_[0]);
+    Print->program_idx = 0;// = &(programs.item_[0]);
     
     PanelIf = elements.get_element_by_id(PanelIf_id);
     PanelPcap = elements.get_element_by_id(PanelPcap_id);
@@ -368,11 +369,11 @@ void GUI::create_elements() {
     PanelProg = elements.get_element_by_id(PanelProg_id);
     
     View = elements.get_element_by_id(View_id);
-    View->grab_screen = &programs.item_[0].grab_screen_buffer;
-    View->program = &(programs.item_[0]);
+    View->grab_screen = &grab_screen_buffer;
+    View->program_idx = 0;// = &(programs.item_[0]);
     
     SpriteList = elements.get_element_by_id(SpriteList_id);
-    SpriteList->program = &(programs.item_[0]);
+    SpriteList->program_idx = 0;// = &(programs.item_[0]);
     
     ProgramList = elements.get_element_by_id(ProgramList_id);
     WindowList = elements.get_element_by_id(WindowList_id);
@@ -399,9 +400,9 @@ void GUI::create_elements() {
     Memo1->item.push_back({this, ELEMENT_item::String, "str3"});
     
     
+    ProgramList->item.push_back({this, ELEMENT_item::ListItem, "prg0"});
     ProgramList->item.push_back({this, ELEMENT_item::ListItem, "prg1"});
     ProgramList->item.push_back({this, ELEMENT_item::ListItem, "prg2"});
-    ProgramList->item.push_back({this, ELEMENT_item::ListItem, "prg3"});
     
     
     

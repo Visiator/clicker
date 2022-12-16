@@ -137,10 +137,12 @@ public:
     Type type = Type::Undefine;
     std::string caption;
     SCREEN *grab_screen = nullptr;
+    
     bool need_save_bmp = false;
     unsigned int info1, info2;
-    PROGRAM *program = nullptr;
-    
+    //PROGRAM *_program_ = nullptr;
+    PROGRAM *program_();
+    int program_idx = 0;
     int SpriteList_cursor = 0;
     void SpriteList_cursor_scroll(int key);
     
@@ -157,6 +159,7 @@ public:
         info2 = src.info2;
         need_save_bmp = src.need_save_bmp;
         grab_screen = src.grab_screen;
+        
         green_rec = src.green_rec;
         gui = src.gui;
         is_visible = src.is_visible;
@@ -168,7 +171,7 @@ public:
         type = src.type;
         caption = src.caption;
         item = src.item;            
-        program = src.program;
+        program_idx = src.program_idx;
         RECTANGLE::copy_from_src(src); 
     }
     

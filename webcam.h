@@ -54,11 +54,11 @@ class WEBCAMS {
 public:
     SCREEN *src = nullptr;
     buffer* devbuffer = nullptr;
-    PROGRAM *program = nullptr;
+    //PROGRAM *program = nullptr;
     
     
     std::vector<WEBCAM> item;
-    void init(std::vector<std::string> *list, SCREEN *scr_, PROGRAM *program_);
+    void init(std::vector<std::string> *list, SCREEN *scr_);
     
     bool execute_is_run = false;
     std::thread* execute_thread = nullptr;

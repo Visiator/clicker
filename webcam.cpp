@@ -16,13 +16,14 @@
 #include "GUI/GUI_Primitives.h"
 
 extern bool GLOBAL_STOP;
+extern PROGRAMS programs_;
 
 //TEXTURA tt;
 
-void WEBCAMS::init(std::vector<std::string> *list, SCREEN *src_, PROGRAM *program_) {
+void WEBCAMS::init(std::vector<std::string> *list, SCREEN *src_) {
     
     src = src_;
-    program = program_;
+    //program = program_;
     
     struct v4l2_capability device_params;
     
@@ -158,9 +159,9 @@ void WEBCAMS::execute() {
     
     while(GLOBAL_STOP == false) {
         getFrame(fd, "111");
-        if(program != nullptr) {
-            program->detect_sprites(src);
-        }
+        
+        programs_.detect_sprites(src);
+        
         usleep(100);
     }
     closeDevice(fd);
