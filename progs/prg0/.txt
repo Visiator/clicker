@@ -1,5 +1,9 @@
 
-key_press "\nHello #\\!\t"
+key_press "Hello #!"
+pause 1
+key_press capslock
+pause 1
+key_press "Hello #!"
 
 stop
 
