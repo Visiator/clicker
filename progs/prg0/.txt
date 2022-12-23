@@ -1,5 +1,5 @@
 
-key_press_ios_home
+key_press "\nHello #\\!\t"
 
 stop
 

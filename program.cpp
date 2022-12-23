@@ -788,6 +788,11 @@ void PROGRAM::execute_next_step() {
         next_step = line[n].next_idx;
         return;
     }
+    if(line[n].cmd == CMD::KeyPress_) {
+        exec_KeyPress(line[n].s2, line[n].s3);
+        next_step = line[n].next_idx;
+        return;
+    }
     if(line[n].cmd == CMD::KeyPressIosHome) {
         exec_KeyPressIosHome();
         next_step = line[n].next_idx;
@@ -1100,6 +1105,156 @@ void PROGRAM::exec_MousePress(std::string v1, std::string v2, int mk) {
 
 void PROGRAM::exec_KeyPressIosHome() {
     global.KeyPressIosHome();
+}
+
+void KeyPress_decode_raw(char v1, unsigned int &k1, unsigned int &k2) {
+    /*
+    11 - H h
+     12 - i
+     13 - J j
+     15 - L l
+     * 
+     *  	#define HID_KEYBOARD_SC_A 0x04
+	#define HID_KEYBOARD_SC_B 0x05
+	#define HID_KEYBOARD_SC_C 0x06
+	#define HID_KEYBOARD_SC_D 0x07
+	#define HID_KEYBOARD_SC_E 0x08
+	#define HID_KEYBOARD_SC_F 0x09
+	#define HID_KEYBOARD_SC_G 0x0A
+	#define HID_KEYBOARD_SC_H 0x0B
+	#define HID_KEYBOARD_SC_I 0x0C
+	#define HID_KEYBOARD_SC_J 0x0D
+	#define HID_KEYBOARD_SC_K 0x0E
+	#define HID_KEYBOARD_SC_L 0x0F
+	#define HID_KEYBOARD_SC_M 0x10
+	#define HID_KEYBOARD_SC_N 0x11
+	#define HID_KEYBOARD_SC_O 0x12
+	#define HID_KEYBOARD_SC_P 0x13
+	#define HID_KEYBOARD_SC_Q 0x14
+	#define HID_KEYBOARD_SC_R 0x15
+	#define HID_KEYBOARD_SC_S 0x16
+	#define HID_KEYBOARD_SC_T 0x17
+	#define HID_KEYBOARD_SC_U 0x18
+	#define HID_KEYBOARD_SC_V 0x19
+	#define HID_KEYBOARD_SC_W 0x1A
+	#define HID_KEYBOARD_SC_X 0x1B
+	#define HID_KEYBOARD_SC_Y 0x1C
+	#define HID_KEYBOARD_SC_Z 0x1D
+     * 
+            */
+    
+    
+    
+    if(v1 == 9)  { k1 = 0x2B; k2 = 0; return;};
+    if(v1 == 13) { k1 = 0x28; k2 = 0; return;};
+
+    if(v1 == 'a') { k1 = 0x04; k2 = 0; return;};
+    if(v1 == 'b') { k1 = 0x05; k2 = 0; return;};
+    if(v1 == 'c') { k1 = 0x06; k2 = 0; return;};
+    if(v1 == 'd') { k1 = 0x07; k2 = 0; return;};
+    if(v1 == 'e') { k1 = 0x08; k2 = 0; return;};
+    if(v1 == 'f') { k1 = 0x09; k2 = 0; return;};
+    if(v1 == 'g') { k1 = 0x0A; k2 = 0; return;};
+    if(v1 == 'h') { k1 = 0x0B; k2 = 0; return;};
+    if(v1 == 'i') { k1 = 0x0C; k2 = 0; return;};
+    if(v1 == 'j') { k1 = 0x0D; k2 = 0; return;};    
+    if(v1 == 'k') { k1 = 0x0E; k2 = 0; return;};
+    if(v1 == 'l') { k1 = 0x0F; k2 = 0; return;};
+    if(v1 == 'm') { k1 = 0x10; k2 = 0; return;};
+    if(v1 == 'n') { k1 = 0x11; k2 = 0; return;};
+    if(v1 == 'o') { k1 = 0x12; k2 = 0; return;};
+    if(v1 == 'p') { k1 = 0x13; k2 = 0; return;};
+    if(v1 == 'q') { k1 = 0x14; k2 = 0; return;};
+    if(v1 == 'r') { k1 = 0x15; k2 = 0; return;};
+    if(v1 == 's') { k1 = 0x16; k2 = 0; return;};
+    if(v1 == 't') { k1 = 0x17; k2 = 0; return;};
+    if(v1 == 'u') { k1 = 0x18; k2 = 0; return;};
+    if(v1 == 'v') { k1 = 0x19; k2 = 0; return;};
+    if(v1 == 'w') { k1 = 0x1A; k2 = 0; return;};
+    if(v1 == 'x') { k1 = 0x1B; k2 = 0; return;};
+    if(v1 == 'y') { k1 = 0x1C; k2 = 0; return;};
+    if(v1 == 'z') { k1 = 0x1D; k2 = 0; return;};
+
+    if(v1 == '1') { k1 = 0x1E; k2 = 0; return;};
+    if(v1 == '2') { k1 = 0x1F; k2 = 0; return;};
+    if(v1 == '3') { k1 = 0x20; k2 = 0; return;};
+    if(v1 == '4') { k1 = 0x21; k2 = 0; return;};
+    if(v1 == '5') { k1 = 0x22; k2 = 0; return;};
+    if(v1 == '6') { k1 = 0x23; k2 = 0; return;};
+    if(v1 == '7') { k1 = 0x24; k2 = 0; return;};
+    if(v1 == '8') { k1 = 0x25; k2 = 0; return;};
+    if(v1 == '9') { k1 = 0x26; k2 = 0; return;};
+    if(v1 == '0') { k1 = 0x27; k2 = 0; return;};
+    
+    if(v1 == ' ') { k1 = 0x2C; k2 = 0; return;};
+
+    
+    k1 = 0;
+    k2 = 0;
+    return;
+}
+
+std::string decode_enter_and_tab(std::string v) {
+    std::string r;
+    int i, j;
+    i = 0;
+    j = v.length();
+    while(i < j) {
+        if(i+1 < j) {
+            if(v[i] == '\\') {
+                if(v[i+1] == 'n') {
+                    r += (char)13;
+                    i++;
+                } else
+                if(v[i+1] == 't') {
+                    r += (char)9;
+                    i++;
+                } else 
+                if(v[i+1] == '\\')
+                {
+                    r += (char)'\\';
+                    i++;
+                } else {
+                    r += v[i];
+                }
+            } else {
+                r += v[i];
+            }
+        } else {
+            r += v[i];
+        }
+        i++;
+    }
+    return r;
+}
+
+void PROGRAM::exec_KeyPress(std::string v1, std::string v2) {
+
+    if(v1.length() >= 2) {
+        if(v1[0] == '\"') {
+            if(v1[v1.length()-1] == '\"') {
+                v1 = v1.substr(1,v1.length()-2);
+                v1 = decode_enter_and_tab(v1);
+            }
+        }
+    }
+    
+    printf("%s\n", v1.c_str());
+    
+    unsigned int k1, k2;
+    int i;
+    i = 0;
+    while(i < v1.length())
+    {
+        KeyPress_decode_raw(v1[i], k1, k2);
+        if(k1 != 0 || k2 != 0) {
+            if( global.KeyPressRaw(k1, k2) == false ) {
+                return;
+            }
+        }
+        i++;
+    }
+    
 }
 
 void PROGRAM::exec_KeyPressRaw(std::string v1, std::string v2) {
