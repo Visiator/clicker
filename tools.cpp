@@ -382,8 +382,10 @@ void save_textura_info(FILE *f, int x, int y, char *nic) {
     fprintf(f, "x:%d\n", x);
     fprintf(f, "y:%d\n", y);
     fprintf(f, "mouse_press_target_percent_w:50\n");
-    fprintf(f, "mouse_press_target_percent_w:50\n");
+    fprintf(f, "mouse_press_target_percent_h:50\n");
     fprintf(f, "nic:%s\n", nic);
+    fprintf(f, "nopress:0\n");
+    fprintf(f, "double_click:0\n");
 }
 
 void save_textura_to_BMP_file_(FILE *f, unsigned int *bitmap, int w, int h) {

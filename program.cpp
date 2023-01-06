@@ -222,7 +222,7 @@ std::string PROGRAM::getDetectedSprite() {
     int i;
     i = 0;
     while(i < sprite.size()) {
-        if(sprite[i].is_detected) {
+        if(sprite[i].is_detected && sprite[i].nopress == 0) {
             r = "sprite$" + std::to_string(sprite[i].idx);
             return r;
         }
@@ -1388,7 +1388,7 @@ bool PROGRAM::get_XY_from_sprite_by_name(std::string s,int &x, int &y, int &doub
     int i = 0;
     while(i < sprite.size()) {
         if(sprite[i].nic == s) {
-            if(sprite[i].nopress == 1) return true;
+            //if(sprite[i].nopress == 1) return true;
             x = sprite[i].is_detected_x + ((float)sprite[i].w/(float)100 * (float)sprite[i].mouse_press_target_percent_w);
             y = sprite[i].is_detected_y + ((float)sprite[i].h/(float)100 * (float)sprite[i].mouse_press_target_percent_h);
             double_click = sprite[i].double_click;
@@ -1427,7 +1427,7 @@ bool PROGRAM::get_XY_from_sprite_by_idx(std::string s,int &x, int &y, int &doubl
             }
             
             if(ss != nullptr) {
-                if(ss->nopress == 1) return true;
+                //if(ss->nopress == 1) return true;
                 x = ss->is_detected_x + ((float)ss->w/(float)100 * (float)ss->mouse_press_target_percent_w);
                 y = ss->is_detected_y + ((float)ss->h/(float)100 * (float)ss->mouse_press_target_percent_h);
                 double_click = ss->double_click;
