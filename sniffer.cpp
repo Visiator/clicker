@@ -8,6 +8,9 @@
 #include <string.h>
 #include <signal.h>
 #include <stdio.h>
+
+#ifdef __linux__
+
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <linux/if_ether.h>
@@ -23,12 +26,30 @@
 #include <sys/stat.h>
 #include <ifaddrs.h>  
 
+#endif
+
+#ifdef _WIN32
+
+#define _WINSOCKAPI_ 
+#include <windows.h>
+#undef _WINSOCKAPI_
+#include <winsock2.h>
+#include <stdlib.h>
+#include <iphlpapi.h>
+#include <stdio.h>
+#undef _WINSOCKAPI_
+
+#endif
+
 #include "pcap.h"
 
 extern bool GLOBAL_STOP;
 extern PCAP pcap;
 
 int getsock_recv(int index) {
+    
+#ifdef __linux__
+    
     int sd; // дескриптор сокета
 /*
  * При работе с пакетными сокетами для хранения адресной информации
@@ -67,11 +88,17 @@ int getsock_recv(int index) {
     }
 
     return sd;
+    
+#else
+    return 0;
+#endif
 }
 
 
 void SNIFFER::start_sniff(int InterfaceId,const char *InterfaceName ) {
 
+#ifdef __linux__
+    
     if(InterfaceId == 0) {
         return;
     }
@@ -104,5 +131,5 @@ void SNIFFER::start_sniff(int InterfaceId,const char *InterfaceName ) {
         printf("%d\n", rec);
         
     }
-    
+#endif
 }

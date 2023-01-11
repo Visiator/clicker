@@ -6,9 +6,12 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
+
+#ifdef __linux__
 #include <sys/ioctl.h>
 #include <linux/videodev2.h>
 #include <sys/mman.h>
+#endif
 
 #include "webcam.h"
 #include "tools.h"
@@ -22,9 +25,13 @@ extern PROGRAMS programs_;
 
 void WEBCAMS::init(std::vector<std::string> *list, SCREEN *src_) {
     
-    src = src_;
-    //program = program_;
+
     
+    src = src_;
+    
+#ifdef __linux__
+    
+    //program = program_;    
     struct v4l2_capability device_params;
     
     std::string s, a, driver, card, bus_info;
@@ -50,26 +57,9 @@ void WEBCAMS::init(std::vector<std::string> *list, SCREEN *src_) {
         
         idx++;
     };
-    /*
-    if(ioctl(fd, VIDIOCGCAP, &video_cap) == -1)
-        perror("cam_info: Can't get capabilities");
-    else {
-        printf("Name:\t\t '%s'\n", video_cap.name);
-        printf("Minimum size:\t%d x %d\n", video_cap.minwidth, video_cap.minheight);
-        printf("Maximum size:\t%d x %d\n", video_cap.maxwidth, video_cap.maxheight);
-    }
 
-    if(ioctl(fd, VIDIOCGWIN, &video_win) == -1)
-        perror("cam_info: Can't get window information");
-    else
-        printf("Current size:\t%d x %d\n", video_win.width, video_win.height);
-
-    if(ioctl(fd, VIDIOCGPICT, &video_pic) == -1)
-        perror("cam_info: Can't get picture information");
-    else
-        printf("Current depth:\t%d\n", video_pic.depth);
-*/
-  
+#endif    
+    
     execute_is_run = true;
     execute_thread = new std::thread(&WEBCAMS::execute, this);
     
@@ -78,6 +68,9 @@ void WEBCAMS::init(std::vector<std::string> *list, SCREEN *src_) {
 
 void WEBCAMS::startCapturing(int fd)
 {
+
+#ifdef __linux__
+    
     struct v4l2_buffer buf;
 
     memsetzero((unsigned char *)&buf, sizeof(buf));
@@ -91,80 +84,66 @@ void WEBCAMS::startCapturing(int fd)
     enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
     xioctl(fd, VIDIOC_STREAMON, &type);
+
+#endif
+    
 }
 
 void WEBCAMS::stopCapturing(int fd) {
+#ifdef __linux__
     enum v4l2_buf_type type;
-
     type=V4L2_BUF_TYPE_VIDEO_CAPTURE;
     xioctl(fd, VIDIOC_STREAMOFF, &type);
-
-    //cout<<"stop Capturing"<<endl;
+#endif
 }
 
 void WEBCAMS::freeMMAP() {
+#ifdef __linux__
     if(munmap(devbuffer->start, devbuffer->length)==-1)
         return;
     free(devbuffer);
-    //cout<<"free mmap"<<endl;
+#endif
 }
 
 int WEBCAMS::openDevice(std::string dev_name) {
-    return open(dev_name.c_str(), O_RDWR /* required */ | O_NONBLOCK, 0);
+#ifdef __linux__    
+    return open(dev_name.c_str(), O_RDWR /* required */ | O_NONBLOCK, 0);   
+#elif _WIN32
+    // TODO 2023
+    return -1;
+#else
+    return -1;
+#endif
 }
 
 void WEBCAMS::closeDevice(int& fd){
     if(close(fd)==-1) {
-        //errno_exit("close");
         return;
     };
     fd = -1;
-
-    //cout<<"Close device "<<fileDevicePath<<endl;
 }
 
 void WEBCAMS::execute() {
     
+    
+#ifdef __linux__
     int fd = openDevice("/dev/video2");
-    
     enumfmtCamera(fd);
-    
     setfmtCamera(fd);
-    
     getFrame(fd, "111");
-
-    
-    
-    /*
-    initMMAP(fd);
-
-    startCapturing(fd);
-
-    long int i = 0;
-
-    for (;;)
-    {
-        if(readFrame(fd, "file_name")) {
-           break;
-        }
-        i++;
-    }
-
-    //cout << "iter == " << i << endl;
-
-    stopCapturing(fd);
-
-    freeMMAP();
-    */
     
     while(GLOBAL_STOP == false) {
-        getFrame(fd, "111");
-        
-        programs_.detect_sprites(src);
-        
+        getFrame(fd, "111");        
+        programs_.detect_sprites(src);        
         usleep(100);
     }
     closeDevice(fd);
+#endif
+    
+#ifdef _WIN32
+    // TODO 2023
+#endif
+    
     execute_is_run = false;
 }
 
@@ -176,27 +155,27 @@ void WEBCAMS::wait_execute_close() {
 
 int WEBCAMS::xioctl(int fd, int request, void *arg)
 {
+#ifdef __linux__
        int r;
-
        r = ioctl (fd, request, arg);
-
        if(r == -1)
        {
            if (errno == EAGAIN)
                return EAGAIN;
-
-           /*stringstream ss;
-           ss << "ioctl code " << request << " ";
-           errno_exit(ss.str());*/
-           
            return -1;
        }
-
        return r;
+#elif _WIN32
+       // TODO 2023
+       return -1;
+#else
+       return -1;
+#endif
 }
 
 void WEBCAMS::getFrame(int fd, std::string file_name)
 {
+#ifdef __linux__    
     //setFormatcam(fd);
     
     initMMAP(fd);
@@ -216,10 +195,12 @@ void WEBCAMS::getFrame(int fd, std::string file_name)
     stopCapturing(fd);
 
     freeMMAP();
+#endif
 }
 
 int WEBCAMS::readFrame(int fd, std::string file_name)
 {
+#ifdef __linux__
     struct v4l2_buffer buf;
 
     buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -375,10 +356,12 @@ int WEBCAMS::readFrame(int fd, std::string file_name)
         ***/
     }
     src->grab_end++;
+#endif    
     return 1;
 }
 
 void WEBCAMS::setFormatcam(int fd){
+#ifdef __linux__
     struct v4l2_format fmt;
     fmt.type                = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     fmt.fmt.pix.width       = IMAGE_WIDTH;
@@ -388,10 +371,12 @@ void WEBCAMS::setFormatcam(int fd){
     if(-1==xioctl(fd, VIDIOC_S_FMT, &fmt)) {
         //errno_exit("VIDIOC_S_FMT");
     };
+#endif
 }
 
 void WEBCAMS::initMMAP(int fd)
 {
+#ifdef __linux__    
     struct v4l2_requestbuffers req;
 
     req.count = 1;
@@ -425,54 +410,58 @@ void WEBCAMS::initMMAP(int fd)
 
     if (devbuffer->start == MAP_FAILED)
         return;
-    
+#endif   
     
     
 }
 
 void WEBCAMS::enumfmtCamera(int fd)
 {
+#ifdef __linux__
     static struct v4l2_fmtdesc fmtdesc;
-	int ret;
-	int i;
-	memsetzero((unsigned char *)&fmtdesc, sizeof(fmtdesc));
-	fmtdesc.index = 0;
-	fmtdesc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	printf("-------------VIDIOC_ENUM_FMT--------------\n");
-	while((ioctl(fd, VIDIOC_ENUM_FMT, &fmtdesc)) != -1)
-	{
-		printf("index:%d   \npixelformat:%c%c%c%c  \ndescription:%s\n",fmtdesc.index, fmtdesc.pixelformat&0xff,(fmtdesc.pixelformat>>8)&0xff,(fmtdesc.pixelformat>>16)&0xff,
-		(fmtdesc.pixelformat>>24)&0xff,fmtdesc.description);
-		fmtdesc.index++;
-	}
+    int ret;
+    int i;
+    memsetzero((unsigned char *)&fmtdesc, sizeof(fmtdesc));
+    fmtdesc.index = 0;
+    fmtdesc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    printf("-------------VIDIOC_ENUM_FMT--------------\n");
+    while((ioctl(fd, VIDIOC_ENUM_FMT, &fmtdesc)) != -1)
+    {
+            printf("index:%d   \npixelformat:%c%c%c%c  \ndescription:%s\n",fmtdesc.index, fmtdesc.pixelformat&0xff,(fmtdesc.pixelformat>>8)&0xff,(fmtdesc.pixelformat>>16)&0xff,
+            (fmtdesc.pixelformat>>24)&0xff,fmtdesc.description);
+            fmtdesc.index++;
+    }
+#endif
 }
 
 int WEBCAMS::setfmtCamera(int fd)
 {
-	int ret;
-	struct v4l2_format format;
-	format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	format.fmt.pix.width = IMAGE_WIDTH;
-	format.fmt.pix.height = IMAGE_HEIGHT;
-	format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;  // 设置为yuyv格式数据
-	format.fmt.pix.field = V4L2_FIELD_INTERLACED;
-	ret = ioctl(fd, VIDIOC_S_FMT, &format);
-	if(ret < 0){
-		printf("VIDIOC_S_FMT fail\n");
-		return -1;
-	}
-	memsetzero((unsigned char *)&format, sizeof(format));
-	format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	ret = ioctl(fd, VIDIOC_G_FMT, &format);
-	if(ret < 0)
-	{
-		printf("VIDIOC_G_FMT fail\n");
-		return -1;
-	}
-	printf("-----------------VIDIOC_G_FMT----------------------\n");
-	printf("width:%d   \nheight:%d   \ntype:%x   pixelformat:%c%c%c%c\n",format.fmt.pix.width,format.fmt.pix.height,
-		format.type,format.fmt.pix.pixelformat&0xff,(format.fmt.pix.pixelformat>>8)&0xff,(format.fmt.pix.pixelformat>>16)&0xff,
-		(format.fmt.pix.pixelformat>>24)&0xff);
-	return 0;
+#ifdef __linux__    
+    int ret;
+    struct v4l2_format format;
+    format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    format.fmt.pix.width = IMAGE_WIDTH;
+    format.fmt.pix.height = IMAGE_HEIGHT;
+    format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;  // 设置为yuyv格式数据
+    format.fmt.pix.field = V4L2_FIELD_INTERLACED;
+    ret = ioctl(fd, VIDIOC_S_FMT, &format);
+    if(ret < 0){
+            printf("VIDIOC_S_FMT fail\n");
+            return -1;
+    }
+    memsetzero((unsigned char *)&format, sizeof(format));
+    format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    ret = ioctl(fd, VIDIOC_G_FMT, &format);
+    if(ret < 0)
+    {
+            printf("VIDIOC_G_FMT fail\n");
+            return -1;
+    }
+    printf("-----------------VIDIOC_G_FMT----------------------\n");
+    printf("width:%d   \nheight:%d   \ntype:%x   pixelformat:%c%c%c%c\n",format.fmt.pix.width,format.fmt.pix.height,
+            format.type,format.fmt.pix.pixelformat&0xff,(format.fmt.pix.pixelformat>>8)&0xff,(format.fmt.pix.pixelformat>>16)&0xff,
+            (format.fmt.pix.pixelformat>>24)&0xff);
+#endif    
+    return 0;
 }
 

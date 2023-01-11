@@ -18,13 +18,20 @@
 #include <string>
 #include <thread>
 
+
+
+#ifdef __linux__
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xos.h>
 #include <X11/Xatom.h>
+#endif
 
+#include <time.h>
 
 #include "GUI/GUI_Primitives.h"
+
+void usleep(int milliseconds);
 
 class SPRITE {
 public:  

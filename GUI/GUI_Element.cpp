@@ -65,15 +65,28 @@ void ELEMENT::paint_green_rec(SCREEN_BUFFER *screen, int px, int py) {
 }
 
 void generate_file_name(const char *dir, char *file_name) {
-    struct timeval tv;
-    gettimeofday(&tv,nullptr);
+    
     struct tm       *tm;
     char buf[100];
+    buf[0] = 0;
+    
+#ifdef __linux__
+    struct timeval tv;
+    gettimeofday(&tv,nullptr);   
     if((tm = localtime(&tv.tv_sec)) != NULL)
     {
         strftime(buf, 100, "%Y-%m-%d_%H-%M-%S", tm);
     };
+#endif
     
+#ifdef _WIN32
+    time_t tt;
+    time(&tt);
+    if((tm = localtime(&tt)) != NULL)
+    {
+        strftime(buf, 100, "%Y-%m-%d_%H-%M-%S", tm);
+    };
+#endif
     
     sprintf(file_name, "%s/%s.bmp", dir, buf);
     

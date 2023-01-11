@@ -243,8 +243,14 @@ void FRAME::save_pcap(int frame_no_, unsigned char *buf_, int buf_size_) {
     
     //bool r = DirectoryExists(fn);
     if(!DirectoryExists(fn)) {
+#ifdef __linux__
         mkdir(fn, 0777);
         chmod(fn, 0777);
+#endif
+        
+#ifdef _WIN32
+        mkdir(fn);
+#endif
     }
     
     sprintf(fn, "/var/www/html/sniffer_web/sess/%s/_sess.pcap", this->session_id.c_str());
@@ -291,16 +297,26 @@ void FRAME::save_sess(int frame_no_, unsigned char *buf_, int buf_size_) {
     
     bool r = DirectoryExists(dir);
     if(!DirectoryExists(dir)) {
+#ifdef __linux__        
         mkdir(dir, 0777);
         chmod(dir, 0777);
+#endif
+#ifdef _WIN32
+        mkdir(dir);
+#endif
     }
     
     FILE *f = NULL;
     char dd[1000];
     sprintf(dd, "%s/%s", dir, this->session_id.c_str());
     if(!DirectoryExists(dd)) {
+#ifdef __linux__        
         mkdir(dd, 0777);
         chmod(dd, 0777);
+#endif        
+#ifdef _WIN32
+        mkdir(dd);
+#endif
         //f = create_pcap_file(dd);
     } else {
         //f = open_pcap_file(dd);

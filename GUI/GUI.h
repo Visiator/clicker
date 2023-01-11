@@ -132,6 +132,7 @@ public:
     
     #ifdef __linux__
     Display* get_display() { return linux.display_; };
+    unsigned int find_window(Display *display, ELEMENT *_WindowList);
     #endif
     
     std::queue<UI_ACTION> ui_action;
@@ -177,7 +178,7 @@ public:
     
     
     
-    unsigned int find_window(Display *display, ELEMENT *_WindowList);
+    
     
     GUI(const GUI& orig);
     virtual ~GUI();

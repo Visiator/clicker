@@ -3,8 +3,10 @@
 #include <dirent.h>
 #include <algorithm> 
 
-
+#ifdef __linux__
 #include <termios.h>
+#endif
+
 #include "GUI/GUI.h"
 #include "GUI/GUI_Element.h"
 #include "global.h"
@@ -141,7 +143,7 @@ bool it_is_pcapng(char *v) {
 void GLOBAL::set_FoldersSelect(std::string val) {
 
     
-    
+#ifdef __linux__
     gui->FilesList->item.clear();
     
     std::string h = getenv("HOME");
@@ -161,7 +163,7 @@ void GLOBAL::set_FoldersSelect(std::string val) {
         c = entry->d_name;
         if(!((c[0] == '.' && c[1] == 0) ||
              (c[0] == '.' && c[1] == '.' && c[2] == 0) ||
-              entry->d_type == DT_DIR ||
+              entry->d_type == DT_DIR_ ||
               it_is_log(entry->d_name)
             )
           )
@@ -174,7 +176,14 @@ void GLOBAL::set_FoldersSelect(std::string val) {
     };
     
    closedir(dir);
-    
+   
+//  __linux__
+#endif
+
+#ifdef _WIN32
+   // TODO 2023
+#endif
+   
    std::sort(gui->FilesList->item.begin(), gui->FilesList->item.end());
 }
 
@@ -391,6 +400,7 @@ bool GLOBAL::test1() {
 
 
 void GLOBAL::serial_io() {
+#ifdef __linux__
     unsigned char c;
     struct termios tty;
     int s;
@@ -456,6 +466,12 @@ void GLOBAL::serial_io() {
         }
         usleep(1);
     }
+#endif
+    
+#ifdef _WIN32
+    // TODO 2023
+#endif
+    
 }
 
 bool GLOBAL::MousePress(int mx_, int my_, int mk, int double_click_, int scr_w, int scr_h) {

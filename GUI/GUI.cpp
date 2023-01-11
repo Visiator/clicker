@@ -429,6 +429,7 @@ void GUI::set_ui_action(UI_Action_Type type, int id, std::string val, unsigned i
     ui_action.push({type, id, val, window_id});
 }
 
+#ifdef __linux__
 unsigned int GUI::find_window(Display *display, ELEMENT *_WindowList) {
 
     return 0;
@@ -478,3 +479,4 @@ unsigned int GUI::find_window(Display *display, ELEMENT *_WindowList) {
     XFree((char*) children);
     return 0;
 }
+#endif

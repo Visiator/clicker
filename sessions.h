@@ -21,6 +21,20 @@
 #include "frame.h"
 #include "tools.h"
 
+#ifdef _WIN32
+
+#define _WINSOCKAPI_ 
+#include <windows.h>
+#undef _WINSOCKAPI_
+#include <winsock2.h>
+#include <stdlib.h>
+#include <iphlpapi.h>
+#include <stdio.h>
+#undef _WINSOCKAPI_
+
+#endif
+
+
 class SESSION;
 
 void analiz_to_block(SESSION* session);

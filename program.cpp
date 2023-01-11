@@ -125,10 +125,14 @@ void PROGRAM::load() {
     detail = "load...";
 
     clear();
-    
+
     std::string FolderName, fn;
     
     FolderName = "progs/prg" + std::to_string(idx);
+    
+#ifdef __linux__
+    
+    
     
     DIR *dir;
     int k, sprite_idx;
@@ -143,7 +147,7 @@ void PROGRAM::load() {
         c = entry->d_name;
         if(!((c[0] == '.' && c[1] == 0) ||
              (c[0] == '.' && c[1] == '.' && c[2] == 0)) &&
-              entry->d_type != DT_DIR &&
+              entry->d_type != DT_DIR_ &&
               it_is_bmp(entry->d_name)
             )
           
@@ -159,6 +163,11 @@ void PROGRAM::load() {
     };
     
    closedir(dir);
+
+#elif _WIN32
+   // TODO 2023
+   
+#endif
    
    std::sort(sprite.begin(), sprite.end());
    
@@ -361,7 +370,7 @@ void PROGRAMS::init() {
 }
 
 void PROGRAMS::execute() {
-    Window w = 0;
+    //Window w = 0;
     while(GLOBAL_STOP == false) {
         
         if(global.WindowListBtnStart) {
@@ -1042,16 +1051,24 @@ void PROGRAM::print_out_add(std::string s) {
     if(s == "") return;
     
     std::string tt;
+    char buf[100];
+    buf[0] = 0;
     
+#ifdef __linux__
     struct timeval tv;
     gettimeofday(&tv,nullptr);
     struct tm       *tm;
-    char buf[100];
-    buf[0] = 0;
     if((tm = localtime(&tv.tv_sec)) != NULL)
     {
         strftime(buf, 100, "[%H:%M:%S] ", tm);
     };
+#elif _WIN32
+    struct timespec tv;
+    clock_gettime (CLOCK_REALTIME, &tv);
+    //sprintf(buf, "[] ", tv.tv_sec)
+    
+#endif
+    
     tt += buf;
     tt += s;
     if(print_out.size() < 20) {

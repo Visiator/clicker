@@ -8,6 +8,19 @@
 #include "tools.h"
 #include "GUI/GUI_Element.h"
 
+#ifdef _WIN32
+
+#define _WINSOCKAPI_ 
+#include <windows.h>
+#undef _WINSOCKAPI_
+#include <winsock2.h>
+#include <stdlib.h>
+#include <iphlpapi.h>
+#include <stdio.h>
+#undef _WINSOCKAPI_
+
+#endif
+
 MIKROTIK::MIKROTIK() {
 
 }
@@ -20,6 +33,8 @@ void MIKROTIK::set_ip_login_pass(const char *ip, const char *login, const char *
 
 bool MIKROTIK::_connect() {
 
+#ifdef __linux__
+    
     sock = socket(AF_INET, SOCK_STREAM, 0);
 
     s_address.sin_family = AF_INET;
@@ -37,12 +52,22 @@ bool MIKROTIK::_connect() {
     fcntl(sock , F_SETFL, flags|O_NONBLOCK);
     int imode = 1;
     ioctl(sock , FIONBIO, &imode);
-
     return true;
+#elif _WIN32    
+    // TODO 2023
+    return false;
+#endif    
 }
 
 void MIKROTIK::_disconnect() {
+#ifdef __linux__    
     close(sock);
+#endif
+    
+#ifdef _W32    
+    // TODO 2023
+#endif    
+    
 }
 
 bool MIKROTIK::send_login() {
@@ -50,7 +75,7 @@ bool MIKROTIK::send_login() {
 
     sprintf(cc, "%c/login%c=name=%s%c=password=%s%c", 6, (int)_login.length() +6, _login.c_str(), (int)_pass.length()+10, _pass.c_str(), 0);
     int k = 1 + 6 + 1 + (int)_login.length()+6 + 1 + (int)_pass.length()+10 + 1;
-    int j = send(sock, cc, k, 0);
+    int j = my_send(sock, cc, k);
     if(j != k) return false;
 
     return true;
@@ -61,7 +86,8 @@ bool MIKROTIK::read_responce(std::vector<std::string> &v) {
     unsigned long t0, t1, t2, t3;
     t0 = GetTickCount();
     t1 = 0;
-    unsigned char c, b[1000];
+    char c;
+    unsigned char b[1000];
     int sz, i, k, s1, s2, s3;
 
     while(true) {

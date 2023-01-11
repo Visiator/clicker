@@ -1,3 +1,6 @@
 #!/bin/sh
 
-g++ -std=c++14 analiz.cpp clicker.cpp GUI/font.cpp global.cpp main.cpp mikrotik.cpp program.cpp tools.cpp sessions.cpp sniffer.cpp pcap.cpp frame.cpp fragments_queue.cpp webcam.cpp GUI/GUI.cpp GUI/GUI_Element.cpp GUI/GUI_Linux.cpp GUI/GUI_Primitives.cpp -o sniffer -pthread -lX11 -lXtst
+#g++ -std=c++14 analiz.cpp clicker.cpp GUI/font.cpp global.cpp main.cpp mikrotik.cpp program.cpp tools.cpp sessions.cpp sniffer.cpp pcap.cpp frame.cpp fragments_queue.cpp webcam.cpp GUI/GUI.cpp GUI/GUI_Element.cpp GUI/GUI_Linux.cpp GUI/GUI_Primitives.cpp -o sniffer -pthread -lX11 -lXtst
+#/usr/bin/i686-w64-mingw32-g++-posix
+x86_64-w64-mingw32-g++-posix -std=c++17 analiz.cpp clicker.cpp GUI/font.cpp global.cpp main.cpp mikrotik.cpp program.cpp tools.cpp sessions.cpp sniffer.cpp pcap.cpp frame.cpp fragments_queue.cpp webcam.cpp GUI/GUI.cpp GUI/GUI_Element.cpp GUI/GUI_Linux.cpp GUI/GUI_Windows.cpp GUI/GUI_Primitives.cpp -o sniffer.exe -pthread -lwsock32 -lws2_32 -static-libgcc -static-libstdc++ -lwinpthread -DZMQ_STATIC -static -pthread -lws2_32
+

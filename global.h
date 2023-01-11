@@ -21,7 +21,7 @@
 #include <set>
 #include <mutex>
 
-
+#define DT_DIR_ 4
 
 class GUI;
 class ELEMENT;

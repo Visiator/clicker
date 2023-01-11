@@ -6,7 +6,9 @@
 #include <vector>
 #include <thread>
 
+#ifdef __linux__
 #include <linux/videodev2.h>
+#endif
 
 #include "GUI/GUI_Primitives.h"
 

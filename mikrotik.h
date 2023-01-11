@@ -18,11 +18,28 @@
 #include <set>
 #include <mutex>
 
+#ifdef __linux__
+
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+
+#endif
+
+#ifdef _WIN32
+
+#define _WINSOCKAPI_ 
+#include <windows.h>
+#undef _WINSOCKAPI_
+#include <winsock2.h>
+#include <stdlib.h>
+#include <iphlpapi.h>
+#include <stdio.h>
+#undef _WINSOCKAPI_
+
+#endif
 
 class ELEMENT;
 
@@ -31,7 +48,13 @@ private:
     ELEMENT *mikrotik_info = nullptr;
     std::set<unsigned int> ip_in_mikrotik;
     
+#ifdef __linux__
     int sock;
+#endif
+#ifdef _WIN32
+    SOCKET sock;
+#endif
+    
     sockaddr_in s_address{};
 
     std::string _ip, _login, _pass;

@@ -9,7 +9,42 @@
 #include "tools.h"
 #include "frame.h"
 
+#ifdef __linux__
+
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+
+#endif
+
+
+#ifdef _WIN32
+
+#define _WINSOCKAPI_ 
+#include <windows.h>
+#undef _WINSOCKAPI_
+#include <winsock2.h>
+#include <stdlib.h>
+#include <iphlpapi.h>
+#include <stdio.h>
+#undef _WINSOCKAPI_
+
+#endif
+
 extern bool GLOBAL_STOP;
+
+#ifdef __linux__
+unsigned long GetTickCount()
+{
+    struct timeval tv;
+    gettimeofday(&tv,nullptr);
+    return (tv.tv_sec*1000+tv.tv_usec/1000);
+}
+#endif
+
+
 
 unsigned int char_to_ipv4(char *buf) {
 
@@ -131,13 +166,6 @@ void memsetzero(unsigned char *destination, int n) {
     }
 }
 
-
-unsigned long GetTickCount()
-{
-    struct timeval tv;
-    gettimeofday(&tv,nullptr);
-    return (tv.tv_sec*1000+tv.tv_usec/1000);
-}
 
 bool DirectoryExists( const char* pzPath )
 {
@@ -689,3 +717,24 @@ bool is_local_ip(unsigned int ip) {
     };
     return false;
 }
+
+#ifdef __linux__
+int my_send(int sock, char *c, int len) {
+    return send(sock, c, len, 0);
+}
+
+int my_recv(int sock, char *c, int len) {
+    return recv(sock, c, len, 0);
+}
+#endif
+
+#ifdef _WIN32
+int my_send(SOCKET sock, char *c, int len) {
+    return send(sock, c, len, 0);
+}
+
+int my_recv(SOCKET sock, char *c, int len) {
+    return recv(sock, c, len, 0);
+}
+#endif
+
