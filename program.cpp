@@ -408,17 +408,20 @@ void PROGRAMS::execute_timers() {
     
         usleep(100);
     }
-    execute_is_run = false;
+    execute_timers_is_run = false;
 }
 
 
 void PROGRAMS::wait_execute_close() {
+    printf("PROGRAMS::wait_execute_close... 1\n");
     while(execute_is_run == true) {
         usleep(10);
     }
+    printf("PROGRAMS::wait_execute_close... 2\n");
     while(execute_timers_is_run == true) {
         usleep(10);
     }
+    printf("PROGRAMS::wait_execute_close... end\n");
 }
 
 unsigned int avg(unsigned int v1, unsigned int v2, unsigned int v3, unsigned int v4) {

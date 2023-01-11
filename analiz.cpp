@@ -572,7 +572,7 @@ void custom_analiz_xvpn(SESSION *s, FRAME *frame) {
 
 void custom_analiz(SESSION *s, FRAME *frame) {
 
-    //custom_analiz_turbo_vpn(s, frame);
+    custom_analiz_turbo_vpn(s, frame);
 
     //custom_analiz_xvpn(s, frame);
     /*uint64_t z;

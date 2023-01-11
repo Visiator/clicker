@@ -147,7 +147,9 @@ bool my_strcmp(const char *s1, int s1_max_size, const char *s2) {
 }
 
 void set_GLOBAL_STOP(const wchar_t *str) {
+    printf("set_GLOBAL_STOP\n");
     GLOBAL_STOP = true;
+    
 }
 
 void wtf(const char *info, int frame_no, unsigned char *buf, int buf_size) {
@@ -716,6 +718,10 @@ bool is_local_ip(unsigned int ip) {
         return true;
     };
     return false;
+}
+
+void fatal_error(const char *v) {
+    printf("fatal_error [%s]\n", v);
 }
 
 #ifdef __linux__

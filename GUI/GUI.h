@@ -33,6 +33,8 @@
 #include "GUI_Primitives.h"
 #include "GUI_Element.h"
 
+//#define _WIN32
+
 class ELEMENT;
 
 enum COLOR {
@@ -122,17 +124,65 @@ public:
 };
 #endif
 
+#ifdef _WIN32
+class WIN32_PARAM {
+private:
+    unsigned int window_w = 0, window_h = 0;
+public:
+    BITMAPINFO *bmInfo = NULL;
+    HWND hw = 0;
+    //unsigned int *buf = nullptr;
+    
+    void change_size(HWND hw_, int w_, int h_) {
+        
+	if (w_ < 50) w_ = 50;
+	if (h_ < 50) h_ = 50;
+
+        if(w_ == window_w && h_ == window_h) {
+            return;
+        }
+        
+        hw = hw_;
+        
+        //if(buf != nullptr) delete[] buf;
+        //buf = new unsigned int[w_ * h_];
+        
+        window_w = w_;
+        window_h = h_;
+
+	if (bmInfo != NULL) delete bmInfo;
+
+	bmInfo = new BITMAPINFO(); //neew(sizeof(BITMAPINFO), bmInfo, "BITMAPINFO()");
+	bmInfo->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	bmInfo->bmiHeader.biBitCount = 32;
+	bmInfo->bmiHeader.biClrUsed = 0;
+	bmInfo->bmiHeader.biClrImportant = 0;
+	bmInfo->bmiHeader.biPlanes = 1;
+	bmInfo->bmiHeader.biCompression = BI_RGB;
+	bmInfo->bmiHeader.biSizeImage = 0;
+	bmInfo->bmiHeader.biHeight = window_h * -1;
+	bmInfo->bmiHeader.biWidth = window_w;
+    };
+};
+#endif
+
 class GUI {
 private:
     #ifdef __linux__
     LINUX_PARAM linux;
     Atom  atom1, atom2;
     #endif    
+    
 public:
     
     #ifdef __linux__
     Display* get_display() { return linux.display_; };
     unsigned int find_window(Display *display, ELEMENT *_WindowList);
+    #endif
+    
+    #ifdef _WIN32
+    WIN32_PARAM win32;
+    void invalidate();
     #endif
     
     std::queue<UI_ACTION> ui_action;

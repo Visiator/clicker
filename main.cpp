@@ -77,11 +77,40 @@ void testtt() {
     
         
 }
+#ifdef _WIN32
+HINSTANCE _hInstance_ = 0;
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
+{
+    printf("start WinMain\n");
+ 
+    _hInstance_ = hInstance;
+    
+    programs_.init();
+    
+    gui.create_elements();
+    global.set_gui(&gui);
+    global.init();
+    
+    if(gui.low_level_init()==false) return -1;
+    
+    gui.wait_run();
+    
+    set_GLOBAL_STOP(L"main");
+    programs_.wait_execute_close();   
+    gui.wait_execute_close();
+    global.wait_execute_close();
+    webcams.wait_execute_close();
+    
+    gui.finish();
+    
+    return 0;
+}
+#endif
 
 int main(int argc, char** argv) {
-  /*  
+  
     printf("start\n");
-    
+  /*  
     pid_t p;
     int i;
     for(i = 0; i < 5; i++) {

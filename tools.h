@@ -69,6 +69,8 @@ int my_atoi(const char *v);
 
 bool is_local_ip(unsigned int ip);
 
+void fatal_error(const char *v);
+
 #ifdef __linux__
 int my_send(int sock, char *c, int len);
 int my_recv(int sock, char *c, int len);

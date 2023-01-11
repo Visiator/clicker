@@ -34,15 +34,20 @@ GUI::~GUI() {
 }
    
 void GUI::wait_execute_close() {
+    printf("GUI::wait_execute_close... \n");
     while(execute_is_run == true) {
         usleep(100);
     }
+    printf("GUI::wait_execute_close... end\n");
 };    
 
 
 
 
 void GUI::wait_run() {
+    
+    printf("GUI::wait_run...\n");
+    
     UI_ACTION a;
     
     while(GLOBAL_STOP == false) {
@@ -50,6 +55,9 @@ void GUI::wait_run() {
        
         
         if(ui_action.empty() == false) {
+            
+            printf("GUI::wait_run detect\n");
+            
             a = ui_action.front();
             ui_action.pop();
             if(a.id != 0) {
@@ -249,8 +257,12 @@ void GUI::wait_run() {
             }
         }
         this->screen.need_update = true;
+        #ifdef _WIN32
+        invalidate();
+        #endif
         usleep(10);
     }
+    printf("GUI::wait_run end\n");
 };  
 
 void GUI::create_elements() {
@@ -421,7 +433,7 @@ void GUI::KeyPressEvent(unsigned int key) {
     }
 }
 
-void GUI::MouseButtonEvent(MOUSE_BUTTON_TYPE MouseButtonType, int mouse_x,int mouse_y ) {
+void GUI::MouseButtonEvent(MOUSE_BUTTON_TYPE MouseButtonType, int mouse_x, int mouse_y ) {
         elements.MouseButtonEvent(MouseButtonType, mouse_x, mouse_y);
 }
 
@@ -479,4 +491,17 @@ unsigned int GUI::find_window(Display *display, ELEMENT *_WindowList) {
     XFree((char*) children);
     return 0;
 }
+#endif
+
+#ifdef _WIN32
+    void GUI::invalidate() {
+
+	RECT r;
+	r.left = 0;
+	r.top = 0;
+	r.right = 5000;
+	r.bottom = 5000;
+	InvalidateRect(win32.hw, nullptr, FALSE);
+
+    }
 #endif
