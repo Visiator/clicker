@@ -22,6 +22,8 @@ struct buffer {
         size_t  length;
 };
 
+// CLSID_VideoInputDeviceCategory
+
 class WEBCAM {
 public:
     std::string name, driver, card, bus_info;
