@@ -45,6 +45,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/GUI/GUI_Element.o \
 	${OBJECTDIR}/GUI/GUI_Linux.o \
 	${OBJECTDIR}/GUI/GUI_Primitives.o \
+	${OBJECTDIR}/GUI/GUI_Windows.o \
 	${OBJECTDIR}/GUI/font.o \
 	${OBJECTDIR}/clicker.o \
 	${OBJECTDIR}/global.o \
@@ -128,6 +129,11 @@ ${OBJECTDIR}/GUI/GUI_Primitives.o: GUI/GUI_Primitives.cpp
 	${MKDIR} -p ${OBJECTDIR}/GUI
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/GUI/GUI_Primitives.o GUI/GUI_Primitives.cpp
+
+${OBJECTDIR}/GUI/GUI_Windows.o: GUI/GUI_Windows.cpp
+	${MKDIR} -p ${OBJECTDIR}/GUI
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/GUI/GUI_Windows.o GUI/GUI_Windows.cpp
 
 ${OBJECTDIR}/GUI/font.o: GUI/font.cpp
 	${MKDIR} -p ${OBJECTDIR}/GUI

@@ -31,6 +31,7 @@
       <itemPath>GUI/GUI_Element.cpp</itemPath>
       <itemPath>GUI/GUI_Linux.cpp</itemPath>
       <itemPath>GUI/GUI_Primitives.cpp</itemPath>
+      <itemPath>GUI/GUI_Windows.cpp</itemPath>
       <itemPath>/prj/clicker/analiz.cpp</itemPath>
       <itemPath>clicker.cpp</itemPath>
       <itemPath>GUI/font.cpp</itemPath>
@@ -65,7 +66,7 @@
   <confs>
     <conf name="Debug" type="1">
       <toolsSet>
-        <compilerSet>default</compilerSet>
+        <compilerSet>GNU|GNU</compilerSet>
         <dependencyChecking>true</dependencyChecking>
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
@@ -114,6 +115,8 @@
       <item path="GUI/GUI_Primitives.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="GUI/GUI_Primitives.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="GUI/GUI_Windows.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="GUI/font.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -202,6 +205,8 @@
       <item path="GUI/GUI_Primitives.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="GUI/GUI_Primitives.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="GUI/GUI_Windows.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="GUI/font.cpp" ex="false" tool="1" flavor2="0">
       </item>
