@@ -724,6 +724,34 @@ void fatal_error(const char *v) {
     printf("fatal_error [%s]\n", v);
 }
 
+char wchar_to_ascii_(wchar_t p) {
+
+	if (p == 0x401) return (char)168;
+	if (p == 0x451) return (char)184;
+	if (p >= 0x410 && p <= 0x44f) {
+		return (0xC0 + (char)((int)p - (int)0x410));
+	};
+	if (p >= 0x20 && p <= 0x7f)
+	{
+		return (char)p;
+	};
+	if (p == 8226) return (char)150;
+	return (char)'?';
+}
+
+void wchar_to_char(wchar_t *src, char *dst, int dst_len) {
+    if(dst == nullptr || dst_len <= 0 || dst_len > 2000) return;
+    dst[0] = 0;
+    if(src == nullptr) return;
+    int i;
+    i = 0;
+    while(i < dst_len-1 && src[i] != 0) {
+        dst[i] = wchar_to_ascii_(src[i]);
+        i++;
+    }
+    dst[i] = 0;
+}
+
 #ifdef __linux__
 int my_send(int sock, char *c, int len) {
     return send(sock, c, len, 0);

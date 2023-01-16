@@ -15,6 +15,10 @@
 #include <dirent.h>
 #include <algorithm> 
 
+#ifdef _WIN32
+#include <dshow.h>
+#endif
+
 #include "GUI/GUI.h"
 #include "pcap.h"
 #include "global.h"
@@ -24,6 +28,9 @@
 #include "clicker.h"
 #include "program.h"
 #include "mikrotik.h"
+
+
+
 
 bool GLOBAL_STOP = false;
 
@@ -77,12 +84,100 @@ void testtt() {
     
         
 }
+
+#define _WIN32
+
 #ifdef _WIN32
 HINSTANCE _hInstance_ = 0;
+
+int test_web_cam() {
+
+    printf("test_web_cam()...");
+    
+        ICreateDevEnum *pSysDevEnum = NULL;
+	HRESULT hr = CoInitialize(NULL);
+	hr = CoCreateInstance(CLSID_SystemDeviceEnum,NULL, CLSCTX_INPROC_SERVER,
+		IID_ICreateDevEnum, (void **)&pSysDevEnum);
+	if(FAILED(hr)){
+		printf("failed to init CoCreateInstance\n");
+		//getchar();
+		return hr;
+	} else {
+            printf("init CoCreateInstance ok\n");
+        }
+        
+	IEnumMoniker * pEnumCat = NULL;
+	//Obtain a class enumerator for the video input category.
+	hr = pSysDevEnum->CreateClassEnumerator(CLSID_VideoInputDeviceCategory,
+		&pEnumCat, 0);
+	if( hr == S_OK){
+            printf("CreateClassEnumerator ok\n");
+		//Enumerate the moniker
+		IMoniker *pMoniker = NULL;
+		ULONG cFetched;
+                int ii = 0;
+		while(pEnumCat->Next(1,&pMoniker,&cFetched) == S_OK){
+                    
+                    printf("111 [%d]\n", ii++);
+                    
+			IPropertyBag *pPropBag;
+			hr = pMoniker->BindToStorage(0,0, IID_IPropertyBag,
+				(void**)&pPropBag);
+			if(SUCCEEDED(hr))
+			{
+                                printf("222 ok\n");
+                            
+				//Retrieve the filter`s friendly name.
+				VARIANT varName,varDesc,varPath;
+				VariantInit(&varName);
+				VariantInit(&varDesc);
+				VariantInit(&varPath);
+				hr = pPropBag->Read(L"FriendlyName", &varName, 0);
+				
+				if(SUCCEEDED(hr)){
+                                    char nn[2000];
+                                    wchar_to_char(varName.bstrVal, nn, 2000);
+                                    printf("the dev name is: [%s]\n", nn);
+				} else { 
+                                    printf("fail 1\n"); 
+                                };
+				hr = pPropBag->Read(L"Description", &varDesc, 0);
+				if(SUCCEEDED(hr)){
+					printf("the dev desc is:\t[%s]\n",
+						varDesc.bstrVal);
+				} else { 
+                                    printf("fail 2\n"); 
+                                };
+				hr = pPropBag->Read(L"DevicePath", &varPath, 0);
+				if(SUCCEEDED(hr)){
+					printf("the dev path is:\t[%s]\n",
+						varPath.bstrVal);
+				} else { 
+                                    printf("fail 3\n"); 
+                                }
+				VariantClear(&varName);
+				VariantClear(&varDesc);
+				VariantClear(&varPath);
+			} else {
+                            printf("222 fail\n");
+                        }
+			pPropBag->Release();
+		}
+		pEnumCat->Release();
+	} else {
+            printf("CreateClassEnumerator fail\n");
+        }
+	pSysDevEnum->Release();
+        
+        return 0;
+}
+
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
     printf("start WinMain\n");
  
+    int rr = test_web_cam();
+    
     _hInstance_ = hInstance;
     
     programs_.init();

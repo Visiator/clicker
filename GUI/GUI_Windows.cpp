@@ -145,7 +145,7 @@ extern GUI gui;
         
         printf("WIN low_level_init...\n");
         
-        start_position.set_xywh(50, 50, 1000, 900);
+        start_position.set_xywh(50, 50, 1000, 930);
         screen.set_size(start_position.getw(), start_position.geth());
         
         /*

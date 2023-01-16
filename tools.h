@@ -71,6 +71,8 @@ bool is_local_ip(unsigned int ip);
 
 void fatal_error(const char *v);
 
+void wchar_to_char(wchar_t *src, char *dst, int dst_len);
+
 #ifdef __linux__
 int my_send(int sock, char *c, int len);
 int my_recv(int sock, char *c, int len);
