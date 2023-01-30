@@ -809,6 +809,11 @@ void PCAP::analiz_tls_160303(int frame_no, unsigned char *buf, int buf_size, FRA
             if(tls_handshake_version == 0x0303) {
                 decode_tls2_handshake_version_0303(frame_no, buf+i+6, tls_handshake_length, frame);
             }
+        } else if(tls_handshake_type == 1) {
+            tls_handshake_version = get_i16(buf[i+4], buf[i+5]);
+            if(tls_handshake_version == 0x0303) {
+                decode_tls1_handshake_version_0303(frame_no, buf+i+6, tls_handshake_length, frame);
+            }
         } else {
             wtf("tls_handshake_type");
         }
@@ -940,8 +945,72 @@ void PCAP::decode_sertificates(int frame_no, unsigned char *buf, int buf_size, F
     };
 }
 
+void decode_sni_extension_sni(int frame_no, unsigned char *buf, int buf_size, FRAME *frame) {
+    char b[100];
+    b[0] = 0;
+    int i = 0;
+    uint16_t len = get_i16(buf[1], buf[0]);
+    if(len+2 != buf_size) return;
+    while(i < len) {
+        b[i] = buf[i+2];
+        b[i+1] = 0;
+        i++;
+    }
+    frame->SNI.push_back(b);
+}
+
+void decode_sni_extension(int frame_no, unsigned char *buf, int buf_size, FRAME *frame) {
+    if(buf_size < 3) return;
+    uint16_t len = get_i16(buf[1], buf[0]); 
+    uint8_t type = buf[2];
+    if(len+2 == buf_size && type == 0) {
+        decode_sni_extension_sni(frame_no, buf+3, buf_size-3, frame);
+    }
+}
+
+void PCAP::decode_tls1_handshake_version_0303(int frame_no, unsigned char *buf, int buf_size, FRAME *frame) {
+    int i = 0;
+    i += 32;
+    if( i+3 >= buf_size) return;
+    uint8_t tls_handshake_session_id_length = buf[i++];
+    uint16_t tls_handshake_cipher_suites_length = get_i16(buf[i++], buf[i++]);
+    if(i + tls_handshake_cipher_suites_length + 1 >= buf_size) return;
+    
+    i += tls_handshake_cipher_suites_length;
+    
+    uint8_t tls_handshake_comp_methods_length = buf[i++];
+    if(tls_handshake_comp_methods_length != 1) return;
+    if(i >= buf_size) return;
+    uint8_t tls_handshake_comp_methods = buf[i++];
+    
+    if(i+1 >= buf_size) return;
+    uint16_t tls_handshake_extensions_length = get_i16(buf[i++], buf[i++]);
+
+    while(tls_handshake_extensions_length > 0) {
+    
+        if(i+4 >= buf_size) return;
+        uint16_t tls_handshake_extension_type = get_i16(buf[i++], buf[i++]);
+        uint16_t tls_handshake_extension_len = get_i16(buf[i++], buf[i++]);
+
+        printf("type=%X len=%d\r\n", tls_handshake_extension_type, tls_handshake_extension_len);
+        
+        if(tls_handshake_extension_len > tls_handshake_extensions_length) return;
+        
+        if(tls_handshake_extension_type == 0) { // server name
+            decode_sni_extension(frame_no, buf+i, tls_handshake_extension_len, frame);
+        }
+        
+        tls_handshake_extensions_length -= tls_handshake_extension_len;
+        i += tls_handshake_extension_len;
+    }
+    
+    
+}
+
+
 void PCAP::decode_tls2_handshake_version_0303(int frame_no, unsigned char *buf, int buf_size, FRAME *frame) {
     int i = 0;
+    
     
 }
 

@@ -8,14 +8,8 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/prj/clicker/main.cpp</file>
-            <file>file:/prj/clicker/GUI/GUI.h</file>
-            <file>file:/prj/clicker/clicker.h</file>
-            <file>file:/prj/clicker/GUI/GUI_Windows.cpp</file>
-            <file>file:/prj/clicker/GUI/GUI_Element.h</file>
-            <file>file:/prj/clicker/GUI/GUI_Primitives.h</file>
-            <file>file:/prj/clicker/GUI/GUI_Primitives.cpp</file>
-            <file>file:/prj/clicker/GUI/GUI_Element.cpp</file>
-            <file>file:/prj/clicker/GUI/GUI.cpp</file>
+            <file>file:/prj/clicker/webcam.cpp</file>
+            <file>file:/prj/clicker/tools.cpp</file>
         </group>
     </open-files>
 </project-private>

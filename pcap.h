@@ -112,6 +112,7 @@ public:
     void decode_tls_handshake_version_0301(int frame_no, unsigned char *buf, int buf_size, FRAME *frame);
     void decode_tls_handshake_version_0303(int frame_no, unsigned char *buf, int buf_size, FRAME *frame);
     void decode_sertificates(int frame_no, unsigned char *buf, int buf_size, FRAME *frame);
+    void decode_tls1_handshake_version_0303(int frame_no, unsigned char *buf, int buf_size, FRAME *frame);
     void decode_tls2_handshake_version_0303(int frame_no, unsigned char *buf, int buf_size, FRAME *frame);
     void decode_server_name(int frame_no, unsigned char *buf, int buf_size,char *nn);
     void decode_server_51(unsigned char *buf, int buf_size, char *nn, int *nn_len);
