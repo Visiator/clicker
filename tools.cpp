@@ -134,6 +134,13 @@ void usleep(int milliseconds) {
     std::this_thread::sleep_for (std::chrono::milliseconds(milliseconds));
 }
 
+int my_strlen(const char *s1) {
+    if(s1 == nullptr) return 0;
+    int i=0;
+    while(s1[i] != 0) {i++;};
+    return i;
+}
+
 bool my_strcmp(const char *s1, int s1_max_size, const char *s2) {
     if(s1 == nullptr || s2 == nullptr) return false;
     int i;
@@ -145,6 +152,23 @@ bool my_strcmp(const char *s1, int s1_max_size, const char *s2) {
     if(s1[i] == 0 && s2[i] == 0) return true;
     return false;
 }
+
+unsigned char _to_lower(unsigned char v) {
+    if(v >= 0x41 && v <= 0x5a) return v+0x20;
+    return v;
+}
+
+bool my_strcmp_lower(const char *s1, const char *s2) {
+    if(s1 == nullptr || s2 == nullptr) return false;
+    int i;
+    i = 0;
+    while(s1[i] != 0 && s2[i] != 0 && _to_lower(s1[i]) == _to_lower(s2[i])) {
+        i++;
+    }
+    if(s1[i] == 0 && s2[i] == 0) return true;
+    return false;
+}
+
 
 void set_GLOBAL_STOP(const wchar_t *str) {
     printf("set_GLOBAL_STOP\n");
@@ -772,3 +796,229 @@ int my_recv(SOCKET sock, char *c, int len) {
 }
 #endif
 
+
+
+    
+bool GETHTTP::connect(const char *ip, uint16_t port) {
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+
+    s_address.sin_family = AF_INET;
+    s_address.sin_addr.s_addr = inet_addr(ip);
+    s_address.sin_port = htons(port);
+
+    int r;
+
+    r = ::connect(sock, (struct sockaddr *)&s_address, sizeof(s_address));
+    if(r < 0) {
+        return false;
+    }
+
+    int flags = fcntl(sock , F_GETFL, 0);
+    fcntl(sock , F_SETFL, flags|O_NONBLOCK);
+    int imode = 1;
+    ioctl(sock , FIONBIO, &imode);
+    return true;
+}
+
+int  GETHTTP::send(uint8_t *buf, uint32_t buf_len) {
+    int r;
+    r = my_send(sock, (char *)buf, buf_len);
+    return r;
+}
+
+bool check_http_end(uint8_t *buf, uint32_t buf_len, uint8_t *&body, uint32_t &body_len) {
+    body = nullptr;
+    body_len = 0;
+    
+    uint8_t name[1000];uint8_t value[1000];
+    memsetzero(name, 1000);
+    memsetzero(value, 1000);
+    int i, j, mode, content_length = -1, start_body = -1;
+    i = 0;
+    j = 0;
+    mode = 0;
+    while(i < buf_len) {
+        if(buf[i] == '\n') {
+            
+            
+            if(i > 4) {
+                if(i+1 < buf_len && buf[i-3] == '\r' && buf[i-2] == '\n' && buf[i-1] == '\r' && buf[i-0] == '\n') {
+                    start_body = i+1;
+                    if(buf_len - start_body == content_length) {
+                        body = &(buf[start_body]);
+                        body_len = content_length;
+                        //printf("start_body = %d\n", start_body);
+                        return true;
+                    }
+                }
+            }
+
+            if(my_strcmp_lower((const char *)name, "content-length")) {
+                content_length = my_atoi((const char *)value);
+                //printf("++++\n");
+            } else {
+                //printf("----\n");
+            }
+            
+            memsetzero(name, 1000);
+            memsetzero(value, 1000);
+            j = 0;
+            mode = 0;
+        } else {
+            if(buf[i] != '\r') {
+                
+                    if(mode == 0 && buf[i] == ':') {
+                        mode++;
+                        j = 0;
+                    } else {
+                        if(mode == 0) { name[j]  = buf[i]; name[j+1]  = 0; };
+                        if(mode == 1) { value[j] = buf[i]; value[j+1] = 0; };
+                        if(j < 1000-5) j++;
+                    }
+                
+            } 
+            
+        }
+        i++;
+    }
+    return false;
+}
+
+int  GETHTTP::recv(uint8_t *buf, uint32_t buf_len, uint8_t *&body, uint32_t &body_len) {
+    int r = 0, rr = 0;
+    
+    bool read_ok = false;
+    while(!read_ok) {
+        if(rr >= buf_len) {
+            printf("rr >= buf_len\n");
+            return -1;
+        }
+        r = my_recv(sock, (char *)buf+rr, buf_len-rr);
+        if(r == 0) {
+            //printf("r == 0\n");
+            usleep(500);
+        } else if(r < 0) {
+            //printf("r < 0 %d\n", r);
+            usleep(500);
+        } else if(r > 0){
+            rr += r;
+            printf("#");
+            fflush(stdout);
+            if(check_http_end(buf, rr, body, body_len)) {
+                printf("\nrecv %d ok - http detected\n", rr);
+                return rr;
+            } else {
+                //printf("check_http_end fail\n");
+            }
+            
+        }
+    }
+    printf("\nrecv %d ok\n", rr);
+    return 0;
+}
+
+void GETHTTP::disconnect() {
+    
+}
+
+GETHTTP::GETHTTP() {
+    
+}
+
+GETHTTP::~GETHTTP() {
+    
+}
+
+
+
+static const std::string base64_chars =
+             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+             "abcdefghijklmnopqrstuvwxyz"
+             "0123456789+/";
+
+
+static inline bool is_base64(BYTE c) {
+  return (isalnum(c) || (c == '+') || (c == '/'));
+}
+
+std::string base64_encode(BYTE const* buf, unsigned int bufLen) {
+  std::string ret;
+  int i = 0;
+  int j = 0;
+  BYTE char_array_3[3];
+  BYTE char_array_4[4];
+
+  while (bufLen--) {
+    char_array_3[i++] = *(buf++);
+    if (i == 3) {
+      char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+      char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+      char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+      char_array_4[3] = char_array_3[2] & 0x3f;
+
+      for(i = 0; (i <4) ; i++)
+        ret += base64_chars[char_array_4[i]];
+      i = 0;
+    }
+  }
+
+  if (i)
+  {
+    for(j = i; j < 3; j++)
+      char_array_3[j] = '\0';
+
+    char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+    char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+    char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+    char_array_4[3] = char_array_3[2] & 0x3f;
+
+    for (j = 0; (j < i + 1); j++)
+      ret += base64_chars[char_array_4[j]];
+
+    while((i++ < 3))
+      ret += '=';
+  }
+
+  return ret;
+}
+
+std::vector<BYTE> base64_decode(std::string const& encoded_string) {
+  int in_len = encoded_string.size();
+  int i = 0;
+  int j = 0;
+  int in_ = 0;
+  BYTE char_array_4[4], char_array_3[3];
+  std::vector<BYTE> ret;
+
+  while (in_len-- && ( encoded_string[in_] != '=') && is_base64(encoded_string[in_])) {
+    char_array_4[i++] = encoded_string[in_]; in_++;
+    if (i ==4) {
+      for (i = 0; i <4; i++)
+        char_array_4[i] = base64_chars.find(char_array_4[i]);
+
+      char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
+      char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
+      char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
+
+      for (i = 0; (i < 3); i++)
+          ret.push_back(char_array_3[i]);
+      i = 0;
+    }
+  }
+
+  if (i) {
+    for (j = i; j <4; j++)
+      char_array_4[j] = 0;
+
+    for (j = 0; j <4; j++)
+      char_array_4[j] = base64_chars.find(char_array_4[j]);
+
+    char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
+    char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
+    char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
+
+    for (j = 0; (j < i - 1); j++) ret.push_back(char_array_3[j]);
+  }
+
+  return ret;
+}

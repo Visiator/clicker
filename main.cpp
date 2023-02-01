@@ -11,6 +11,9 @@
  */
 #define STRSAFE_NO_DEPRECATE
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include <cstdlib>
 #include <dirent.h>
 #include <algorithm> 
@@ -89,7 +92,7 @@ void testtt() {
         
 }
 
-#define _WIN32
+//#define _WIN32
 
 #ifdef _WIN32
 
@@ -470,6 +473,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 }
 #endif
 
+void test_http();
+void scan_dir_http();
+
+GETHTTP gethttp;
+
 int main(int argc, char** argv) {
   
     printf("start\n");
@@ -482,7 +490,13 @@ int main(int argc, char** argv) {
     }
     
     return 0;
-*/    
+*/   
+    
+    test_http();
+    scan_dir_http();
+    printf("finish\n");
+    return 0;
+    
     std::vector<std::string> list;
 
     mikrotik.set_ip_login_pass("192.168.5.5", "admin", "Qq1233!!");
@@ -520,4 +534,174 @@ int main(int argc, char** argv) {
     return 0;
 }
 
+void decode_vpngate_csv(uint8_t *body, uint32_t body_len) {
+    
+    FILE *f;
+    f = fopen("a0.txt", "wb");
+    fwrite((void *)body, 1, body_len, f);
+    fclose(f);
+    
+    uint8_t *m[20];
+    for(int i=0;i<20;i++) m[i] = new uint8_t[20000];
+    uint32_t i, j, k, kk;
+    std::string s1;
+    std::vector<BYTE> s2;
+    std::vector<std::string> columns_name;
+    
+    i = 0;
+    j = 0;
+    k = 0;
+    kk = 0;
+    while(i < body_len) {
+        if(i > 2 && body[i-1] == '\r' && body[i] == '\n') {
+            
+            if(kk == 1) {
+                int v;
+                v = 0;
+                while(v < 20 && m[v][0] != 0) {
+                    columns_name.push_back((char *)m[v]);
+                    v++;
+                };
+            }
+            
+            if(kk >= 2) {
+                
+                s1 = (char *)m[14];
+                
+                
+                s2 = base64_decode(s1);
+                
+                std::string ip_, fn_;
+                ip_ = "vpngate/";
+                ip_ += (char *)m[1];
+                
+                if(!DirectoryExists(ip_.c_str())) {
+                    mkdir(ip_.c_str(), 0777);
+                    chmod(ip_.c_str(), 0777);
+                }
 
+                fn_ = ip_ + "/info.txt";
+                
+                f = fopen(fn_.c_str(), "wb");
+                if(f == NULL) {
+                    printf("file err\n");
+                }
+                //fwrite(&s2[0], 1, s2.size(), f);
+                //fclose(f);
+                int v = 0;
+                for(auto const &c : columns_name) {
+                    fprintf(f, "%s: %s\r\n", c.c_str(), m[v++]);
+                }
+                fclose(f);
+                chmod(fn_.c_str(), 0777);
+                
+                fn_ = ip_ + "/client.conf";
+                f = fopen(fn_.c_str(), "wb");
+                if(f == NULL) {
+                    printf("file err\n");
+                }   
+                fwrite(&s2[0], 1, s2.size(), f);
+                fclose(f);
+                chmod(fn_.c_str(), 0777);
+            }
+            
+            
+            
+            j = 0;
+            k = 0;
+            kk++;
+        } else {
+            if(body[i] == ',') {
+                if(k < 20-1) k++;
+                j = 0;
+            } else {
+                if(body[i] != '\r' && body[i] != '\n') {
+                    m[k][j] = body[i];
+                    m[k][j+1] = 0;
+                    if(j < 20000-5) j++;
+                }
+            }
+        }
+        i++;
+    }
+    for(int i=0;i<20;i++) delete[] m[i];
+}
+
+void test_http() {
+
+    if(!DirectoryExists("vpngate")) {
+        mkdir("vpngate", 0777);
+        chmod("vpngate", 0777);
+    }
+    
+    char z[5000];
+    char *v;
+    v = new char[2000000];
+
+//    sprintf(z, "%s\r\n%s\r\n%s\r\n%s\r\n%s\r\n%s\r\n%s\r\n%s\r\n\r\n",
+//            "GET /5/index.php HTTP/1.1",
+//"Host: 85.30.217.17:888",
+//"User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/109.0",
+//"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+//"Accept-Language: en-US,en;q=0.5",
+//"Accept-Encoding: gzip, deflate",
+//"Connection: keep-alive",
+//"Upgrade-Insecure-Requests: 1");
+    
+
+    sprintf(z, "%s\r\n%s\r\n%s\r\n%s\r\n\r\n",
+"GET /api/iphone/ HTTP/1.1",
+"Host: www.vpngate.net",
+"User-Agent: curl/7.81.0",
+"Accept: */*");
+    int s, r;
+    uint8_t *body = nullptr; uint32_t body_len = 0;
+    
+    printf("connect...\n");
+    if(!gethttp.connect("130.158.75.38",80)) {
+        return;
+    }
+    printf("send HTTP request...\n");
+    s = gethttp.send((uint8_t *)z, my_strlen(z));
+    printf("recv HTTP responce...\n");
+    r = gethttp.recv((uint8_t *)v, 2000000, body, body_len);
+    if(r > 0) {
+        decode_vpngate_csv(body, body_len);
+    }
+    delete[] v;
+}
+
+void scan_dir_http() {
+    #ifdef __linux__
+    
+    
+    
+    std::string h = "vpngate";
+    std::string FolderName = h + "/";
+    
+    DIR *dir;
+    int k, dir_count = 0;
+    char *c;
+    dir = opendir(FolderName.c_str());
+    struct dirent *entry;
+    if(dir == 0) return;
+    while ( (entry = readdir(dir)) != NULL) {
+        //printf("{%d} - (%s) [%d] %d\n", entry->d_ino, entry->d_name, entry->d_type, entry->d_reclen);
+        c = entry->d_name;
+        if(entry->d_type == DT_DIR_)
+        {
+            if(!((c[0] == '.' && c[1] == '.' && c[2] == 0) || (c[0] == '.' && c[1] == 0))) {
+                
+                dir_count++;
+            }
+        }
+    };
+    
+   closedir(dir);
+   
+   printf("count = %d\n", dir_count);
+   
+    //  __linux__
+    #endif
+   
+}

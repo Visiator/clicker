@@ -30,6 +30,50 @@
 
 #endif
 
+#ifdef __linux__
+
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+
+#endif
+
+
+#ifndef _BASE64_H_
+#define _BASE64_H_
+
+#include <vector>
+#include <string>
+typedef unsigned char BYTE;
+
+std::string base64_encode(BYTE const* buf, unsigned int bufLen);
+std::vector<BYTE> base64_decode(std::string const&);
+
+#endif
+
+
+class GETHTTP {
+public:
+    
+    #ifdef __linux__
+        int sock;
+    #endif
+    #ifdef _WIN32
+        SOCKET sock;
+    #endif
+    
+    sockaddr_in s_address{};
+        
+    bool connect(const char *ip, uint16_t port);
+    int send(uint8_t *buf, uint32_t buf_len);
+    int recv(uint8_t *buf, uint32_t buf_len, uint8_t *&body, uint32_t &body_len);
+    void disconnect();
+    GETHTTP();
+    ~GETHTTP();
+};
+
 class FRAME;
 
 #ifdef __linux__
@@ -40,11 +84,15 @@ char *ipv4_to_char(unsigned int ip, char *buf);
 unsigned int char_to_ipv4(char *buf);
 
 bool my_strcmp(const char *s1, int s1_max_size, const char *s2);
+bool my_strcmp_lower(const char *s1, const char *s2);
+
+int my_strlen(const char *s1);
 void usleep(int milliseconds);
 void set_GLOBAL_STOP(const wchar_t *str);
 void wtf(const char *info, int frame_no, unsigned char *buf, int buf_size);
 void wtf(const char *str);
 void memsetzero(unsigned char *destination, int n);
+
 
 bool DirectoryExists( const char* pzPath );
 unsigned short get_i16(unsigned char v1, unsigned char v2);
