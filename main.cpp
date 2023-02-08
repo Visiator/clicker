@@ -492,10 +492,10 @@ int main(int argc, char** argv) {
     return 0;
 */   
     
-    test_http();
-    scan_dir_http();
-    printf("finish\n");
-    return 0;
+    //test_http();
+    //scan_dir_http();
+    //printf("finish\n");
+    //return 0;
     
     std::vector<std::string> list;
 

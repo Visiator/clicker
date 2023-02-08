@@ -503,12 +503,14 @@ bool GLOBAL::KeyPressIosHome() {
 
     t = GetTickCount();      
     while(need_write_serial_5bytes[0] != 0 && GLOBAL_STOP == false) {           
-        if(t + 2000 < GetTickCount()) return false;
+        if(t + 2000 < GetTickCount()) {
+            return false;
+        }
         usleep(1);
     }
     t = GetTickCount();
     while(need_write_serial_5bytes[6] != 0xac && GLOBAL_STOP == false) {
-        if(t+2000 < GetTickCount()) {
+        if(t+5000 < GetTickCount()) {
             return false;
         };
         usleep(1);

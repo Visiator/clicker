@@ -86,17 +86,26 @@ bool MIKROTIK::read_responce(std::vector<std::string> &v) {
     unsigned long t0, t1, t2, t3;
     t0 = GetTickCount();
     t1 = 0;
-    char c;
-    unsigned char b[1000];
-    int sz, i, k, s1, s2, s3;
+    unsigned char c;
+    unsigned char b[10000];
+    int sz = 0, i, k, kk, s1, s2, s3;
 
+    
+    kk = 0;
     while(true) {
         // read text len
         sz = 0;
         while(sz == 0)
         {
             k = recv(sock, &c, 1, 0);
+            for(int ii=0;ii<20;ii++) {
+                if(k == 0 || k == -1) {
+                    usleep(100);
+                    k = recv(sock, &c, 1, 0);    
+                }
+            }
             if(k == 1) {
+                kk++;
                 if(c == 0) {
                     /*if(buf_is(b, (char *)"!done")) {
                         return true;
@@ -104,7 +113,17 @@ bool MIKROTIK::read_responce(std::vector<std::string> &v) {
                     continue;*/
                     //return true;
                     k = recv(sock, &c, 1, 0);
-                    if(k == -1) return true;
+                    for(int ii=0;ii<20;ii++) {
+                        if(k == 0 || k == -1) {
+                            usleep(100);
+                            k = recv(sock, &c, 1, 0);    
+                        }
+                    }
+                    if(k == -1) {
+                        return true;
+                    } else if(k != 1) {
+                        printf("wtf?\n");
+                    }
                 }
                 if(c <= 127) {
                     if(c == 0) {
@@ -115,6 +134,8 @@ bool MIKROTIK::read_responce(std::vector<std::string> &v) {
                     printf("mikrotik c > 127\n");
                     return false;
                 }
+            } else {
+                printf("wtf? k=%d\n", k);
             }
             t1 = GetTickCount() - t0;
             if(t1 > 300000) {
@@ -130,14 +151,21 @@ bool MIKROTIK::read_responce(std::vector<std::string> &v) {
         b[0] = 0;
         while( i < sz) {
             k = recv(sock, &c, 1, 0);
+            for(int ii=0;ii<20;ii++) {
+                        if(k == 0 || k == -1) {
+                            usleep(100);
+                            k = recv(sock, &c, 1, 0);    
+                        }
+                    }
             if(k == -1) {
                 s1++;
             } else if (k == 0) {
                 s2++;
             } else if (k == 1) {
+                kk++;
                 s3++;
                 b[i] = c;
-                if(i < 1000-1) i++;
+                if(i < 10000-1) i++;
 
             } else {
                 printf("wtf? k");
@@ -188,21 +216,75 @@ bool MIKROTIK::get_firewall_ip_list() {
         unlock();
         return false;
     }
-    unsigned int iip;
+    
+    /*
+    unsigned char bb[10000];
+    int k, kk;
+    kk = 0;
+    do
+    {
+        k = recv(sock, bb, 10000, 0);
+        if(k == 0 || k == -1) {
+            usleep(100);
+            k = recv(sock, bb, 10000, 0);    
+        }
+        if(k == 0 || k == -1) {
+            usleep(100);
+            k = recv(sock, bb, 10000, 0);    
+        }
+        if(k == 0 || k == -1) {
+            usleep(100);
+            k = recv(sock, bb, 10000, 0);    
+        }
+        if(k == 0 || k == -1) {
+            usleep(100);
+            k = recv(sock, bb, 10000, 0);    
+        }
+        if(k == 0 || k == -1) {
+            usleep(100);
+            k = recv(sock, bb, 10000, 0);    
+        }
+        if(k == 0 || k == -1) {
+            usleep(100);
+            k = recv(sock, bb, 10000, 0);    
+        }
+        if(k > 0) {
+           kk += k; 
+        }
+    } while(k > 0);
+    */
+    
+    unsigned int iip, xxx = 0, iidd = 1, sz;
+    char iicc[50];
     bool r;
     std::vector<std::string> v;
     r = read_responce(v);
-
+    printf("v.size()=%d\n", v.size());
     if(v.size() > 0) {
         if(v[0] == "!re") {
             for(const auto& s : v) {
-                if(s.length() >= 13) {
+                if(s.length() >= 6) {
                     std::string a;
                     a = s.substr(0, 13);
                     if(a == "=dst-address=") {
                         a = s.substr(13);    
                         iip = char_to_ipv4((char *)a.c_str());
+                        sz = ip_in_mikrotik.size();
                         ip_in_mikrotik.insert(iip);
+                        if(sz == ip_in_mikrotik.size()) {
+                            printf("WTF? [%s]\n", (char *)a.c_str());
+                        }
+                        xxx++;
+                    }
+                    a = s.substr(0, 5);
+                    if(a == "=.id=") {
+                        a = s.substr(6);  
+                        
+                        sprintf(iicc, "%X", iidd++);
+                        if(a != iicc) {
+                            printf("wtf?\n");
+                        }
+                        //printf("id\n");
                     }
                 }
                 printf("%s\n", s.c_str());
@@ -213,7 +295,7 @@ bool MIKROTIK::get_firewall_ip_list() {
     if(mikrotik_info != nullptr) {
         mikrotik_info->info2 = ip_in_mikrotik.size();
     }
-    
+    printf("xxx=%d\n", xxx);
     unlock();
     return true;
 }
@@ -385,12 +467,14 @@ void MIKROTIK::ip_list_from_txt(char *file_name) {
     
     char cc[100];
     unsigned int ii;
-    int i, j;
+    int i, j, st = 0;
     i = fgetc(f);
     j = 0;
     while(i != EOF)
     {
         if(i == 13 || i == 10) {
+            
+            st = 0;
             
             printf("%s\n", cc);
 
@@ -439,9 +523,14 @@ void MIKROTIK::ip_list_from_txt(char *file_name) {
             cc[0];
         } else {
             if( i != 10 && i != 13) {
-                cc[j] = (char)i;
-                if(j < 100-5) j++;
-                cc[j] = 0;
+                if(i == ' ' || i == ',') {
+                    st = 1;
+                }
+                if(st == 0) {
+                    cc[j] = (char)i;
+                    if(j < 100-5) j++;
+                    cc[j] = 0;
+                }
             }
         }
                 
