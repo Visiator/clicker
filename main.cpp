@@ -476,6 +476,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 void test_http();
 void scan_dir_http();
 
+OPENVPN openvpn;
 GETHTTP gethttp;
 
 int main(int argc, char** argv) {
@@ -491,12 +492,27 @@ int main(int argc, char** argv) {
     
     return 0;
 */   
+    /***
+    openvpn.init();
+    
+    if(openvpn.run() == false) {
+        printf("openvpn start error\n");
+        return -1;
+    } else {
+        printf("openvpn.run() Ok");
+    }
+    
+    openvpn.stop();
+    
     
     //test_http();
-    //scan_dir_http();
-    //printf("finish\n");
-    //return 0;
     
+    openvpn.close();
+    
+    scan_dir_http();
+    printf("finish\n");
+    return 0;
+    ***/
     std::vector<std::string> list;
 
     mikrotik.set_ip_login_pass("192.168.5.5", "admin", "Qq1233!!");
@@ -659,12 +675,14 @@ void test_http() {
     
     printf("connect...\n");
     if(!gethttp.connect("130.158.75.38",80)) {
+        printf("connect fail\n");
         return;
     }
     printf("send HTTP request...\n");
     s = gethttp.send((uint8_t *)z, my_strlen(z));
     printf("recv HTTP responce...\n");
     r = gethttp.recv((uint8_t *)v, 2000000, body, body_len);
+    gethttp.disconnect();
     if(r > 0) {
         decode_vpngate_csv(body, body_len);
     }

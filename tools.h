@@ -44,6 +44,7 @@
 #ifndef _BASE64_H_
 #define _BASE64_H_
 
+#include <thread>
 #include <vector>
 #include <string>
 typedef unsigned char BYTE;
@@ -53,6 +54,30 @@ std::vector<BYTE> base64_decode(std::string const&);
 
 #endif
 
+class OPENVPN {
+public:
+    
+    enum NEEDSTATUS { NEEDRUN, NEEDSTOP, EMPTY };
+    enum CURRENTSTATUS { STARTS, RUNOK, STOPS, STOPOK, RUNERROR, STOPERROR, EMPTY_ };
+    
+    NEEDSTATUS needstatus = EMPTY;
+    CURRENTSTATUS currentstatus = EMPTY_;
+    
+    void init();
+    
+    bool need_stop = false;
+    bool execute_is_run = false;
+    std::thread* execute_thread = nullptr;
+    void execute();
+    
+    bool run();
+    bool stop();
+    
+    void close();
+    
+    OPENVPN();
+    ~OPENVPN();
+};
 
 class GETHTTP {
 public:
@@ -64,8 +89,18 @@ public:
         SOCKET sock;
     #endif
     
-    sockaddr_in s_address{};
+    enum CurrentCommand { Connect, Send, Recv, Empty };    
         
+    CurrentCommand current_comand = Empty;
+    unsigned long current_comand_start = 0;
+    
+    sockaddr_in s_address{};
+    
+    bool need_stop = false;
+    bool execute_is_run = false;
+    std::thread* execute_thread = nullptr;
+    void execute();
+    
     bool connect(const char *ip, uint16_t port);
     int send(uint8_t *buf, uint32_t buf_len);
     int recv(uint8_t *buf, uint32_t buf_len, uint8_t *&body, uint32_t &body_len);
@@ -82,6 +117,8 @@ unsigned long GetTickCount();
 
 char *ipv4_to_char(unsigned int ip, char *buf);
 unsigned int char_to_ipv4(char *buf);
+
+unsigned char _to_lower(unsigned char v);
 
 bool my_strcmp(const char *s1, int s1_max_size, const char *s2);
 bool my_strcmp_lower(const char *s1, const char *s2);

@@ -285,7 +285,7 @@ void detect_ip(FRAME *frame) {
     
     sprintf(ss, "/var/www/html/sniffer_web/ip3/%s:%d_%s:%d", ip1__, port1_, ip0__, port0_);
     
-    char tcp_e[1000], udp_e[1000], sni[1000], cert[1000];
+    char tcp_e[1000], udp_e[1000], sni[1000], cert[1000], dns_name[1000], http_get[1000];
     char tcp_i[1000], udp_i[1000];
     tcp_e[0] = 0;
     udp_e[0] = 0;
@@ -293,6 +293,8 @@ void detect_ip(FRAME *frame) {
     udp_i[0] = 0;
     sni[0] = 0;
     cert[0] = 0;
+    dns_name[0] = 0;
+    http_get[0] = 0;
     int i,j,jj,k,v;
     
     FILE *f;
@@ -308,7 +310,7 @@ void detect_ip(FRAME *frame) {
                 j = 0;
                 jj = 0;
                 v = 0;
-                if(k < 3) k++;
+                if(k < 5) k++;
                 
             } else {
                 if(i == ':') {
@@ -319,6 +321,11 @@ void detect_ip(FRAME *frame) {
                         if(k == 1) { udp_e[j] = i; udp_e[j+1] = 0; };
                         if(k == 2) { sni[j] = i; sni[j+1] = 0; };
                         if(k == 3) { cert[j] = i; cert[j+1] = 0; };
+                        if(k == 4) { dns_name[j] = i; dns_name[j+1] = 0; };
+                        if(k == 5) { 
+                            http_get[j] = i; 
+                            http_get[j+1] = 0; 
+                        };
                         if(j<1000-5) j++;
                     };
                     if(v==2) {
@@ -384,6 +391,14 @@ void detect_ip(FRAME *frame) {
         
     };
     
+
+    
+    if(http_get[0] == 0) {
+        if(frame->http.get.length() > 0) {
+            strcpy(http_get, frame->http.get.c_str());
+        }
+    }
+    
     if(sni[0] == 'd') {
         printf("d\n");
     }
@@ -394,6 +409,7 @@ void detect_ip(FRAME *frame) {
     fprintf(f, "sni:%s\n", sni);
     fprintf(f, "cert:%s\n", cert);
     fprintf(f, "dns_name:%s\n", frame->session_dns_name.c_str());
+    fprintf(f, "http_get:%s\n", http_get);
     
     fclose(f);
     
@@ -800,6 +816,12 @@ int my_recv(SOCKET sock, char *c, int len) {
 
     
 bool GETHTTP::connect(const char *ip, uint16_t port) {
+    
+    if(execute_is_run == false) {
+        execute_is_run = true;
+        execute_thread = new std::thread(&GETHTTP::execute, this);
+    };
+    
     sock = socket(AF_INET, SOCK_STREAM, 0);
 
     s_address.sin_family = AF_INET;
@@ -808,7 +830,10 @@ bool GETHTTP::connect(const char *ip, uint16_t port) {
 
     int r;
 
+    current_comand = Connect;
+    current_comand_start = GetTickCount();
     r = ::connect(sock, (struct sockaddr *)&s_address, sizeof(s_address));
+    current_comand = Empty;
     if(r < 0) {
         return false;
     }
@@ -822,7 +847,11 @@ bool GETHTTP::connect(const char *ip, uint16_t port) {
 
 int  GETHTTP::send(uint8_t *buf, uint32_t buf_len) {
     int r;
-    r = my_send(sock, (char *)buf, buf_len);
+    
+    current_comand = Send;
+    current_comand_start = GetTickCount();
+    r = ::send(sock, (char *)buf, buf_len, 0);
+    current_comand = Empty;
     return r;
 }
 
@@ -893,7 +922,11 @@ int  GETHTTP::recv(uint8_t *buf, uint32_t buf_len, uint8_t *&body, uint32_t &bod
             printf("rr >= buf_len\n");
             return -1;
         }
+        
+        current_comand = Send;
+        current_comand_start = GetTickCount();
         r = my_recv(sock, (char *)buf+rr, buf_len-rr);
+        current_comand = Empty;
         if(r == 0) {
             //printf("r == 0\n");
             usleep(500);
@@ -918,7 +951,10 @@ int  GETHTTP::recv(uint8_t *buf, uint32_t buf_len, uint8_t *&body, uint32_t &bod
 }
 
 void GETHTTP::disconnect() {
-    
+    need_stop = true;
+    while(execute_is_run) {
+        usleep(1);
+    }
 }
 
 GETHTTP::GETHTTP() {
@@ -1021,4 +1057,120 @@ std::vector<BYTE> base64_decode(std::string const& encoded_string) {
   }
 
   return ret;
+}
+
+void GETHTTP::execute() {
+    
+    while(need_stop == false) {
+
+        if(current_comand == Connect) {
+            if(current_comand_start + 5000 < GetTickCount()) {
+                printf("connect timeout\n");
+                shutdown(sock,SHUT_RDWR);
+                close(sock);
+
+                current_comand_start = GetTickCount();
+            }
+        }
+
+        if(current_comand == Send) {
+            if(current_comand_start + 5000 < GetTickCount()) {
+                printf("send timeout\n");
+                shutdown(sock,SHUT_RDWR);
+                close(sock);
+
+                current_comand_start = GetTickCount();
+            }
+        }
+
+        if(current_comand == Recv) {
+            if(current_comand_start + 5000 < GetTickCount()) {
+                printf("recv timeout\n");
+                shutdown(sock,SHUT_RDWR);
+                close(sock);
+
+                current_comand_start = GetTickCount();
+            }
+        }
+        
+        usleep(10);
+    }
+    execute_is_run = false;
+}
+
+
+OPENVPN::OPENVPN() {
+    
+}
+
+OPENVPN::~OPENVPN() {
+    
+}
+
+void OPENVPN::close() {
+    need_stop = true;
+    while(execute_is_run == true) {
+        usleep(1);
+    }
+}
+
+void OPENVPN::init() {
+    if(execute_is_run == false) {
+        execute_is_run = true;
+        execute_thread = new std::thread(&OPENVPN::execute, this);
+    };    
+}
+
+void OPENVPN::execute() {
+    
+    while(need_stop == false) {
+
+        if(needstatus == NEEDRUN) {
+            needstatus = EMPTY;
+            currentstatus = STARTS;
+            
+            pid_t child = fork();
+            if(child < 0) {
+                printf("OPENVPN::execute() error child = fork()\n");
+                currentstatus = RUNERROR;
+            } else if (child == 0) {
+                printf("im is child++\n");
+                execl("/usr/sbin", "openvpn", "/etc/openvpn/client/client.conf", (char *) 0);
+                usleep(1000);
+                printf("im is child exit(0)\n"); 
+                exit(0);
+            } else {
+                printf("im is owner\n");
+                currentstatus = RUNOK;
+            }
+            
+            currentstatus = RUNERROR;            
+        }
+        
+        usleep(10);
+    }
+    execute_is_run = false;
+}
+
+
+bool OPENVPN::run() {
+    needstatus = NEEDRUN;
+    while(currentstatus != RUNOK) {
+        if(currentstatus == RUNERROR) {
+            return false;
+        }
+        usleep(100);
+    }
+    return true;
+}
+   
+bool OPENVPN::stop() {
+    needstatus = NEEDSTOP;
+    while(currentstatus != STOPOK) {
+        if(currentstatus == STOPERROR) {
+            return false;
+        }
+        usleep(100);
+    }
+    return true;
 }

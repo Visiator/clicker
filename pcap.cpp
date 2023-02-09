@@ -522,6 +522,8 @@ void PCAP::analiz_ipv4_udp(int frame_no, unsigned char *buf, int buf_size, FRAME
 
 void analiz_c1(int frame_no, unsigned char *buf, int buf_size, FRAME *frame);
 
+void decode_http_GET(int frame_no, unsigned char *buf, int buf_size, FRAME *frame);
+
 void PCAP::analiz_ipv4_tcp_payload(int frame_no, unsigned char *buf, int buf_size, FRAME *frame) {
 
     //test_payload(1, buf, buf_size);
@@ -532,6 +534,13 @@ void PCAP::analiz_ipv4_tcp_payload(int frame_no, unsigned char *buf, int buf_siz
     
     if(frame_no == 6) {
         //analiz_c1(frame_no, buf, buf_size, frame);
+    }
+    
+    if(buf_size > 10) {
+        if(buf[0] == 'G' && buf[1] == 'E' && buf[2] == 'T' && buf[3] == ' ') {
+            printf("detect GET \n");
+            decode_http_GET(frame_no, buf, buf_size, frame);
+        }
     }
     
     if(buf[0] == 0x16) {
@@ -1652,4 +1661,45 @@ void analiz_c1(int frame_no, unsigned char *buf, int buf_size, FRAME *frame) {
         
     };
     
+}
+
+
+bool _my_left_strcmp(const char *s1, const char *s2) {
+    if(s1 == nullptr || s2 == nullptr) return false;
+    int i;
+    i = 0;
+    while(s1[i] != 0 && s2[i] != 0 && s1[i] == s2[i]) {
+        i++;
+    }
+    if(s1[i] == 0) return true;
+    return false;
+}
+
+void decode_http_GET(int frame_no, unsigned char *buf, int buf_size, FRAME *frame) {
+    char m[20][500];
+    int i,j,k;
+    for(int i=0;i<20;i++) m[i][0] = 0;
+    i = 0;
+    k = 0;
+    j = 0;
+    while(i < buf_size) {
+        if(buf[i] == '\r') {
+            if(j<20-2) j++;
+            k = 0;
+        } else {
+            if(buf[i] != '\n') {
+                m[j][k] = _to_lower(buf[i]);
+                if(k<500-2) k++;
+                m[j][k] = 0;
+            }
+        }
+        i++;
+    }
+    for(i=0;i<20;i++) {
+        if(_my_left_strcmp("host: ", m[i])) {
+            std::string s;
+            s = m[i]+6;
+            frame->http.get = s;
+        }
+    }
 }

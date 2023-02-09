@@ -131,6 +131,21 @@ public:
     }
 };
 
+class HTTP_ {
+public:
+    
+    std::string get;
+    
+    void clean() {
+        get = "";
+    }
+    
+    HTTP_() {
+        clean();
+    }
+    ~HTTP_() {};
+};
+
 class FRAME {
 public:
  
@@ -153,6 +168,8 @@ public:
     bool sess_is_saved;
     unsigned char *eth2_buf;
     int eth2_buf_size;
+    HTTP_ http;
+    
     
     unsigned char tcp_flags_cwr;
     unsigned char tcp_flags_ecn;
@@ -242,6 +259,7 @@ public:
         for(int i=0;i<32;i++) wg_ephemeral[i] = buf[i];
     }
     void clean() {
+        http.clean();
         is_ipv4_fragment = false;
         for(int i=0;i<130;i++) ClientHello_Key51[i] = 0;
         for(int i=0;i<4;i++) wg_sender[i] = 0;

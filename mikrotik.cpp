@@ -259,7 +259,7 @@ bool MIKROTIK::get_firewall_ip_list() {
     bool r;
     std::vector<std::string> v;
     r = read_responce(v);
-    printf("v.size()=%d\n", v.size());
+    //printf("v.size()=%d\n", v.size());
     if(v.size() > 0) {
         if(v[0] == "!re") {
             for(const auto& s : v) {

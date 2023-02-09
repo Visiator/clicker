@@ -74,6 +74,7 @@ public:
     
     
     std::string dns_name;
+    HTTP_ http;
     
     void ssave(FILE *f) {
         //fprintf(f, "", );
@@ -88,6 +89,7 @@ public:
                 mac_src[i] = 0;
                 mac_dst[i] = 0;
             }
+        http.clean();
         is_need_block_complete = false;
         is_need_block_show = false;
         ip_proto = 0;
@@ -133,7 +135,7 @@ public:
         packet_count++;
         if(frame->payload_size > 0) packet_with_payload_count++;
     
-    
+        http = frame->http;
         
         frame->stored_to_session();
         if(packet_count >= 4 && packet_count <= 10) {
