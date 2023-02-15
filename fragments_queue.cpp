@@ -77,8 +77,14 @@ TCP_QUEUE_ITEM* FRAGMENTS_QUEUE::add_to_tcp_queue(DIRECTION direction_, unsigned
     }
     unsigned int d1, d2;
     //if(direction_ == ingress) {
-        if(seq_ < q->seq_first) { wtf("seq_ < q->seq_first"); return nullptr; };
-        if(seq_ < q->seq_old) { wtf("seq_ < q->seq_old"); return nullptr; };
+        if(seq_ < q->seq_first) { 
+            wtf("seq_ < q->seq_first"); 
+            return nullptr; 
+        };
+        if(seq_ < q->seq_old) { 
+            wtf("seq_ < q->seq_old"); 
+            return nullptr; 
+        };
         d1 = seq_ - q->seq_first;
         d2 = seq_ - q->seq_old;
     //}

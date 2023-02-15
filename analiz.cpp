@@ -571,11 +571,32 @@ void custom_analiz_xvpn(SESSION *s, FRAME *frame) {
 }
 
 void custom_analiz_greennetvpn(SESSION *s, FRAME *frame) {
+
+    unsigned char *q;
+    
+    if(frame->ipv4_dst_port == 443) {
+        printf("aaaaaaaaaaa\n");
+         if(frame->SNI.size() > 0) {
+            
+            unsigned int *x;
+            
+            q = (unsigned char *)frame->SNI[0].c_str();
+            if(frame->SNI[0] == "ghees.pinwheel-galaxy.com") {
+                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+            }
+        }
+    }
+    if(frame->ipv4_dst_port == 1950) {
+        printf("aaaaaaaaaaa\n");
+    }
+    
     if(s->http.get != "" || frame->http.get != "") {
         printf("+++\n");
-        if(frame->ipv4_dst_port == 443) {
+        if(frame->ipv4_dst_port == 443 || frame->ipv4_dst_port == 1950) {
             if(frame->payload[0] == 'G') {
-                global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+                if(s->http.get == "www.baidu.com") {
+                    global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+                }
             }
         }
     }

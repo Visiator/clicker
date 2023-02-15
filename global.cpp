@@ -409,7 +409,7 @@ void GLOBAL::serial_io() {
         f_serial = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NDELAY);
         if (f_serial == -1) f_serial = open("/dev/ttyUSB1", O_RDWR | O_NOCTTY | O_NDELAY);
         if (f_serial == -1) {
-            printf("serial open error\n");
+            //printf("serial open error\n");
             usleep(2000);
             return;
         }

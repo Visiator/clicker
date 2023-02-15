@@ -220,7 +220,7 @@ char *decode_to_char_tcp_flag(unsigned char f, char *c) {
     unsigned char tcp_flags_reset = (f&0x04)>>2;
     unsigned char tcp_flags_syn = (f&0x02)>>1;
     unsigned char tcp_flags_fin = (f&0x01);
-    sprintf(c, "%c%c%c%c%c%c%c%c", tcp_flags_cwr == 0 ? '-' : 'c'
+    sprintf(c, "%c%c%c%c%c%c%c%c%X", tcp_flags_cwr == 0 ? '-' : 'c'
                          , tcp_flags_ecn == 0 ? '-' : 'e'
                          , tcp_flags_urg == 0 ? '-' : 'u'
                          , tcp_flags_ack == 0 ? '-' : 'A'
@@ -229,6 +229,7 @@ char *decode_to_char_tcp_flag(unsigned char f, char *c) {
                          , tcp_flags_reset == 0 ? '-' : 'r'
                          , tcp_flags_syn == 0 ? '-' : 'S'
                          , tcp_flags_fin == 0 ? '-' : 'f'
+                         , f
             );
     return c;
 }
