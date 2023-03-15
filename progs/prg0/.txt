@@ -1,24 +1,104 @@
 
-key_press "Hello #!"
-pause 1
-key_press capslock
-pause 1
-key_press "Hello #!"
 
-stop
+set btnstart1 = sprite$btnstart1
+set back1 = sprite$back1
+set btnround1 = sprite$btnround1
+set btndisconnect1 = sprite$btndisconnect1
+set btnreconnect1 = sprite$btnreconnect1
 
-set spr = sprite$podklucheniye1
-set sconnect = sprite$connect
-print spr
+set reclama1 = sprite$reclama1
+set reclama2 = sprite$reclama2
+set reclama3 = sprite$reclama3
+set reclama4 = sprite$reclama4
+set reclama5 = sprite$reclama5
 
-if sconnect.is_detected
-    print "detect+"
-    if sconnect.is_detected_time > 10
-	print "detect+2"
-    endif
+
+:start
+
+if btnstart1.is_detected
+    print "btnstart1+"
+    mouse_press btnstart1
+    goto start
 endif
 
-stop
+
+if back1.is_detected
+    print "back1+"
+    mouse_press back1
+    goto start
+endif
+
+if btnround1.is_detected
+    print "btnround1+"
+    mouse_press btnround1
+    goto start
+endif
+
+if btndisconnect1.is_detected
+    print "btndisconnect1+"
+    mouse_press btndisconnect1
+    goto start
+endif
+
+if btnreconnect1.is_detected
+    print "btnreconnect1+"
+    mouse_press btnreconnect1
+    goto start
+endif
+
+if reclama1.is_detected
+    print "reclama1+"
+    mouse_press reclama1
+    goto start
+endif
+
+if reclama2.is_detected
+    print "reclama2+"
+    mouse_press reclama2
+    goto start
+endif
+
+if reclama3.is_detected
+    print "reclama3+"
+    mouse_press reclama3
+    goto start
+endif
+
+if reclama4.is_detected
+    print "reclama4+"
+    mouse_press reclama4
+    goto start
+endif
+
+if reclama5.is_detected
+    print "reclama5+"
+    mouse_press reclama5
+    goto start
+endif
+
+goto start
+
+
+#key_press "Hello #!"
+#pause 1
+#key_press capslock
+#pause 1
+#key_press "Hello #!"
+
+#stop
+
+#set spr = sprite$podklucheniye1
+#set sconnect = sprite$connect
+#print spr
+
+#if sconnect.is_detected
+#    print "detect+"
+#    if sconnect.is_detected_time > 10
+#	print "detect+2"
+#    endif
+#endif
+
+#stop
 
 #mouse_move 245 418
 
@@ -31,7 +111,7 @@ stop
 #set spr = sprite$1
 #print spr
 
-  :start  
+#  :start  
 
 set spr = getDetectedSprite()
 

@@ -602,11 +602,31 @@ void custom_analiz_greennetvpn(SESSION *s, FRAME *frame) {
     }
 }
 
+void custom_analiz_quarkvpn(SESSION *s, FRAME *frame) {
+    //if(s->ip_proto == 6) { // TCP
+    if(s->ip_proto == 17) { // UDP
+        
+        
+        
+        if(frame->ipv4_dst_port == 60000 ||
+           (frame->ipv4_dst_port >= 59000 && frame->ipv4_dst_port <= 59009)
+          )
+        {
+            global.add_ip_to_queue_to_send_mikrotik(frame->ipv4_dst_ip);
+            printf("60000\n");
+        }
+
+    }
+}
+
 void custom_analiz(SESSION *s, FRAME *frame) {
 
     //custom_analiz_turbo_vpn(s, frame);
-    custom_analiz_greennetvpn(s, frame);
+    //custom_analiz_greennetvpn(s, frame);
     //custom_analiz_xvpn(s, frame);
+    
+    custom_analiz_quarkvpn(s, frame);
+    
     /*uint64_t z;
     
     
